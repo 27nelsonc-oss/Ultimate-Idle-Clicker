@@ -580,6 +580,7 @@ body {
     <!-- Public Chat Panel -->
     <div class="panel chat-panel" id="chat-panel">
         <h2 class="section-title" id="chat-title"><span id="chat-title-text">💬 Chat</span><span id="dm-unread-badge" class="dm-unread-badge"></span></h2>
+        <div id="dm-unread-list" style="display:none; margin-bottom:8px;"></div>
         <button type="button" id="chat-back-global-btn" class="btn-upgrade" style="display:none; margin-bottom:8px;">← Back to Global Chat</button>
         <div class="sub-stat" id="chat-login-status" style="margin-bottom:8px;">Sign in to chat with other players.</div>
         <div id="chat-messages" style="height:220px; overflow-y:auto; background:#111; border:1px solid #555; border-radius:8px; padding:8px; box-sizing:border-box; margin-bottom:8px;">
@@ -765,6 +766,7 @@ body {
         let dmTargetUserId = null;
         let dmTargetUsername = '';
         let dmUnreadCount = 0;
+        let dmUnreadSenders = [];
         const DM_READ_MARKER_PREFIX = 'ultimateIdleClicker_dm_read_at_';
 
         const CHAT_OWNER_EMAIL = '27nelsonc@student.harrisburg.k12.or.us';
@@ -927,6 +929,44 @@ body {
             return cloudUser ? DM_READ_MARKER_PREFIX + cloudUser.id : null;
         }
 
+        function getDmReadMarkers() {
+            if (!cloudUser) return {};
+            try {
+                return JSON.parse(localStorage.getItem(getDmReadMarkerKey()) || '{}');
+            } catch {
+                return {};
+            }
+        }
+
+        function saveDmReadMarkers(markers) {
+            const key = getDmReadMarkerKey();
+            if (key) localStorage.setItem(key, JSON.stringify(markers));
+        }
+
+        function renderDmUnreadSenders() {
+            const list = document.getElementById('dm-unread-list');
+            if (!list) return;
+            list.innerHTML = '';
+
+            if (!cloudUser || dmTargetUserId || dmUnreadSenders.length === 0) {
+                list.style.display = 'none';
+                return;
+            }
+
+            list.style.display = 'block';
+            dmUnreadSenders.forEach(sender => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.textContent = 'New DM from ' + (sender.username || 'Player');
+                button.className = 'btn-upgrade';
+                button.style.marginBottom = '4px';
+                button.style.width = 'auto';
+                button.title = 'Open DM with ' + (sender.username || 'Player');
+                button.addEventListener('click', () => openDirectMessage(sender.userId, sender.username || 'Player'));
+                list.appendChild(button);
+            });
+        }
+
         function updateDmUnreadBadge() {
             const badge = document.getElementById('dm-unread-badge');
             if (!badge) return;
@@ -937,60 +977,62 @@ body {
                 badge.innerText = '';
                 badge.style.display = 'none';
             }
+            renderDmUnreadSenders();
         }
 
         async function refreshDmUnreadCount() {
             if (!supabaseClient || !cloudUser) {
                 dmUnreadCount = 0;
+                dmUnreadSenders = [];
                 updateDmUnreadBadge();
                 return;
             }
 
-            const markerKey = getDmReadMarkerKey();
-            let marker = Number(localStorage.getItem(markerKey) || 0);
-
-            if (!marker) {
-                const { data, error } = await supabaseClient
-                    .from('game_direct_messages')
-                    .select('created_at')
-                    .eq('recipient_id', cloudUser.id)
-                    .order('created_at', { ascending: false })
-                    .limit(1);
-
-                if (error) {
-                    dmUnreadCount = 0;
-                    updateDmUnreadBadge();
-                    return;
-                }
-
-                marker = data?.[0]?.created_at ? Date.parse(data[0].created_at) : Date.now();
-                localStorage.setItem(markerKey, String(marker));
-                dmUnreadCount = 0;
-                updateDmUnreadBadge();
-                return;
-            }
-
+            const markers = getDmReadMarkers();
             const { data, error } = await supabaseClient
                 .from('game_direct_messages')
-                .select('id')
+                .select('id,sender_id,sender_username,created_at')
                 .eq('recipient_id', cloudUser.id)
-                .gt('created_at', new Date(marker).toISOString());
+                .order('created_at', { ascending: true })
+                .limit(100);
 
-            dmUnreadCount = error ? 0 : (data || []).length;
+            if (error) {
+                dmUnreadCount = 0;
+                dmUnreadSenders = [];
+                updateDmUnreadBadge();
+                return;
+            }
+
+            const unread = (data || []).filter(message => {
+                const marker = Number(markers[message.sender_id] || 0);
+                return Date.parse(message.created_at) > marker;
+            });
+
+            dmUnreadCount = unread.length;
+            const senderMap = new Map();
+            unread.forEach(message => {
+                senderMap.set(message.sender_id, {
+                    userId: message.sender_id,
+                    username: message.sender_username || 'Player'
+                });
+            });
+            dmUnreadSenders = Array.from(senderMap.values());
             updateDmUnreadBadge();
         }
 
         function markDirectMessagesRead(messages) {
-            if (!cloudUser || !Array.isArray(messages)) return;
+            if (!cloudUser || !dmTargetUserId || !Array.isArray(messages)) return;
             const incoming = messages.filter(message => message.recipient_id === cloudUser.id);
             if (!incoming.length) return;
 
             const latest = Math.max(...incoming.map(message => Date.parse(message.created_at) || 0));
             if (!latest) return;
 
-            const markerKey = getDmReadMarkerKey();
-            localStorage.setItem(markerKey, String(latest));
-            dmUnreadCount = 0;
+            const markers = getDmReadMarkers();
+            markers[dmTargetUserId] = latest;
+            saveDmReadMarkers(markers);
+            dmUnreadSenders = dmUnreadSenders.filter(sender => sender.userId !== dmTargetUserId);
+            dmUnreadCount = Math.max(0, dmUnreadCount - incoming.length);
             updateDmUnreadBadge();
         }
 
