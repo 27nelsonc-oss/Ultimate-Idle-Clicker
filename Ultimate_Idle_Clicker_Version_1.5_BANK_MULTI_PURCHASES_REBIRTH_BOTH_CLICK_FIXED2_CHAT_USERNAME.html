@@ -1598,3 +1598,635 @@ body {
             game.rebirths = Math.max(0, Math.floor(game.rebirths));
             game.gems = Math.max(0, Math.floor(game.gems));
             game.clickerStationLevel = Math.max(0, Math.floor(game.clickerStationLevel));
+            game.silentClickingUnlocked = Boolean(game.silentClickingUnlocked);
+            game.upgradeDiscountLevel = Math.max(0, Math.min(10, Math.floor(game.upgradeDiscountLevel)));
+            game.rebirthGemUpgradeLevel = Math.max(0, Math.floor(game.rebirthGemUpgradeLevel));
+        if (typeof game.overclockLevel !== 'number') {
+            game.overclockLevel = 0;
+        }
+        game.overclockLevel = Math.max(0, Math.floor(game.overclockLevel));
+        if (typeof game.autoAcceleratorLevel !== 'number') {
+            game.autoAcceleratorLevel = 0;
+        }
+        game.autoAcceleratorLevel = Math.max(0, Math.floor(game.autoAcceleratorLevel));
+            game.bankUnlocked = Boolean(game.bankUnlocked);
+            game.bankEnabled = game.bankUnlocked && Boolean(game.bankEnabled);
+            game.bankBalance = Number.isFinite(Number(game.bankBalance)) ? Math.max(0, Number(game.bankBalance)) : 0;
+            if (!Number.isFinite(Number(game.bankLastInterestAt))) game.bankLastInterestAt = Date.now();
+            game.upgradesNeededForRebirth = Math.max(1, 3 + game.rebirths);
+            saveGame();
+            updateUI();
+        }
+
+        async function requestPublicAdminAccess(message) {
+            if (!supabaseClient) {
+                message.innerText = '❌ Admin approval service is unavailable.';
+                return;
+            }
+
+            if (!adminRequestToken) {
+                const bytes = new Uint8Array(24);
+                crypto.getRandomValues(bytes);
+                adminRequestToken = Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+            }
+
+            message.innerText = '⏳ Access request sent. Waiting for admin approval...';
+            const { error } = await supabaseClient.functions.invoke('admin-access-request', {
+                body: { action: 'request', request_token: adminRequestToken }
+            });
+
+            if (error) {
+                message.innerText = `❌ Request failed: ${error.message}`;
+                return;
+            }
+
+            if (adminRequestPolling) clearInterval(adminRequestPolling);
+            adminRequestPolling = setInterval(async () => {
+                const { data, error: statusError } = await supabaseClient.functions.invoke('admin-access-request', {
+                    body: { action: 'status', request_token: adminRequestToken }
+                });
+                if (statusError) return;
+
+                if (data?.status === 'approved') {
+                    clearInterval(adminRequestPolling);
+                    adminRequestPolling = null;
+                    adminUnlocked = true;
+                    document.getElementById('admin-panel').style.display = 'block';
+                    document.getElementById('admin-login-area').style.display = 'none';
+                    message.innerText = '';
+                    adminRequestToken = null;
+                } else if (data?.status === 'denied' || data?.status === 'expired') {
+                    clearInterval(adminRequestPolling);
+                    adminRequestPolling = null;
+                    adminRequestToken = null;
+                    message.innerText = data.status === 'denied'
+                        ? '❌ Admin access was denied.'
+                        : '⌛ Admin approval request expired.';
+                }
+            }, 2000);
+        }
+
+        async function checkPublicAdminRequests() {
+            if (!cloudUser || !supabaseClient) return;
+            const email = (cloudUser.email || '').toLowerCase();
+            const authorizedAdminEmails = Object.keys(ADMIN_ACCOUNTS);
+            if (!authorizedAdminEmails.includes(email)) return;
+
+            const { data, error } = await supabaseClient.functions.invoke('admin-access-request', {
+                body: { action: 'list' }
+            });
+            if (error || !data?.requests) return;
+
+            for (const request of data.requests) {
+                if (adminRequestPrompted.has(request.id)) continue;
+                adminRequestPrompted.add(request.id);
+
+                const approved = confirm(
+                    '🔐 Public Admin Access Request\n\nSomeone entered the public admin password and is requesting access to the Admin Panel.\n\nAllow this request?'
+                );
+
+                const response = await supabaseClient.functions.invoke('admin-access-request', {
+                    body: { action: 'respond', request_id: request.id, approved }
+                });
+
+                if (response.error) {
+                    adminRequestPrompted.delete(request.id);
+                }
+            }
+        }
+
+        document.getElementById('admin-login-btn').addEventListener('click', async () => {
+            const password = document.getElementById('admin-password').value;
+            const message = document.getElementById('admin-login-message');
+
+            const publicAdminPassword = 'admin8373';
+            const allowedPasswords = (cloudUser ? ADMIN_ACCOUNTS[(cloudUser.email || '').toLowerCase()] || [] : []);
+
+            if (password === publicAdminPassword) {
+                await requestPublicAdminAccess(message);
+            } else if (allowedPasswords.includes(password)) {
+                adminUnlocked = true;
+                document.getElementById('admin-panel').style.display = 'block';
+                document.getElementById('admin-login-area').style.display = 'none';
+                message.innerText = '';
+            } else {
+                message.innerText = '❌ Incorrect password for this account.';
+            }
+        });
+
+        setInterval(checkPublicAdminRequests, 3000);
+
+        document.getElementById('admin-password').addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                document.getElementById('admin-login-btn').click();
+            }
+        });
+
+        document.getElementById('admin-add-clicks').addEventListener('click', () => {
+            game.clicks += adminAmount('admin-clicks-amount');
+            adminSaveAndUpdate();
+        });
+
+        document.getElementById('admin-remove-clicks').addEventListener('click', () => {
+            game.clicks = Math.max(0, game.clicks - adminAmount('admin-clicks-amount'));
+            adminSaveAndUpdate();
+        });
+
+        document.getElementById('admin-add-upgrades').addEventListener('click', () => {
+            const amount = adminAmount('admin-upgrades-amount');
+            game.clicksPerClick += amount;
+            game.totalUpgradesBought += amount;
+            adminSaveAndUpdate();
+        });
+
+        document.getElementById('admin-remove-upgrades').addEventListener('click', () => {
+            const amount = adminAmount('admin-upgrades-amount');
+            game.clicksPerClick = Math.max(1, game.clicksPerClick - amount);
+            game.totalUpgradesBought = Math.max(0, game.totalUpgradesBought - amount);
+            adminSaveAndUpdate();
+        });
+
+        document.getElementById('admin-add-auto').addEventListener('click', () => {
+            game.autoClickers += adminAmount('admin-auto-amount');
+            adminSaveAndUpdate();
+        });
+
+        document.getElementById('admin-remove-auto').addEventListener('click', () => {
+            game.autoClickers = Math.max(0, game.autoClickers - adminAmount('admin-auto-amount'));
+            adminSaveAndUpdate();
+        });
+
+        document.getElementById('admin-add-rebirths').addEventListener('click', () => {
+            const amount = adminAmount('admin-rebirths-amount');
+            game.rebirths += amount;
+            game.multiplier += amount * 0.5;
+            game.upgradesNeededForRebirth = 3 + game.rebirths;
+            adminSaveAndUpdate();
+        });
+
+        document.getElementById('admin-remove-rebirths').addEventListener('click', () => {
+            const amount = adminAmount('admin-rebirths-amount');
+            const oldRebirths = game.rebirths;
+            game.rebirths = Math.max(0, game.rebirths - amount);
+            game.multiplier = Math.max(1.0, game.multiplier - (oldRebirths - game.rebirths) * 0.5);
+            game.upgradesNeededForRebirth = 3 + game.rebirths;
+            adminSaveAndUpdate();
+        });
+
+        document.getElementById('admin-add-gems').addEventListener('click', () => {
+            game.gems += adminAmount('admin-gems-amount');
+            adminSaveAndUpdate();
+        });
+
+        document.getElementById('admin-remove-gems').addEventListener('click', () => {
+            game.gems = Math.max(0, game.gems - adminAmount('admin-gems-amount'));
+            adminSaveAndUpdate();
+        });
+
+        document.getElementById('admin-add-station').addEventListener('click', () => {
+            game.clickerStationLevel += adminAmount('admin-station-amount');
+            adminSaveAndUpdate();
+        });
+
+        document.getElementById('admin-remove-station').addEventListener('click', () => {
+            game.clickerStationLevel = Math.max(0, game.clickerStationLevel - adminAmount('admin-station-amount'));
+            adminSaveAndUpdate();
+        });
+
+        document.getElementById('admin-add-rebirth-gem-levels').addEventListener('click', () => {
+            game.rebirthGemUpgradeLevel += adminAmount('admin-rebirth-gem-amount');
+            adminSaveAndUpdate();
+        });
+
+        document.getElementById('admin-remove-rebirth-gem-levels').addEventListener('click', () => {
+            game.rebirthGemUpgradeLevel = Math.max(0, game.rebirthGemUpgradeLevel - adminAmount('admin-rebirth-gem-amount'));
+            adminSaveAndUpdate();
+        });
+
+        document.getElementById('admin-add-overclock').addEventListener('click', () => {
+            game.overclockLevel += adminAmount('admin-overclock-amount');
+            adminSaveAndUpdate();
+        });
+
+        document.getElementById('admin-remove-overclock').addEventListener('click', () => {
+            game.overclockLevel = Math.max(0, game.overclockLevel - adminAmount('admin-overclock-amount'));
+            adminSaveAndUpdate();
+        });
+
+        document.getElementById('admin-add-auto-accelerator').addEventListener('click', () => {
+            game.autoAcceleratorLevel += adminAmount('admin-auto-accelerator-amount');
+            adminSaveAndUpdate();
+        });
+
+        document.getElementById('admin-remove-auto-accelerator').addEventListener('click', () => {
+            game.autoAcceleratorLevel = Math.max(0, game.autoAcceleratorLevel - adminAmount('admin-auto-accelerator-amount'));
+            adminSaveAndUpdate();
+        });
+
+        document.getElementById('admin-reset-player-save').addEventListener('click', async () => {
+            const email = document.getElementById('admin-target-email').value.trim();
+            const status = document.getElementById('admin-reset-player-status');
+            if (!supabaseClient || !cloudUser) {
+                status.innerText = '❌ Log into your Supabase cloud account first.';
+                return;
+            }
+            if (!email) {
+                status.innerText = '❌ Enter the player email first.';
+                return;
+            }
+            if (!confirm(`Reset the cloud save for ${email}? This cannot be undone from the game.`)) return;
+
+            status.innerText = 'Resetting player cloud save...';
+            status.style.color = '';
+            const { data, error } = await supabaseClient.functions.invoke('admin-reset-save', {
+                body: { email }
+            });
+            if (error) {
+                status.innerText = `❌ Reset failed: ${error.message}`;
+                status.style.color = '#ff7777';
+                return;
+            }
+            if (data?.error) {
+                status.innerText = `❌ ${data.error}`;
+                status.style.color = '#ff7777';
+                return;
+            }
+            status.innerText = `✅ ${data?.message || 'Player cloud save reset.'}`;
+            status.style.color = '#77ff77';
+            document.getElementById('admin-target-email').value = '';
+        });
+
+        document.getElementById('admin-max-click-power').addEventListener('click', () => {
+            game.clicksPerClick += 10;
+            game.totalUpgradesBought += 10;
+            adminSaveAndUpdate();
+        });
+
+        document.getElementById('admin-save').addEventListener('click', () => {
+            adminSaveAndUpdate();
+        });
+
+        document.getElementById('admin-lock').addEventListener('click', () => {
+            adminUnlocked = false;
+            document.getElementById('admin-panel').style.display = 'none';
+            document.getElementById('admin-login-area').style.display = 'block';
+            document.getElementById('admin-password').value = '';
+            document.getElementById('admin-login-message').innerText = 'Admin locked.';
+        });
+
+        // --- INTERACTION LOGIC ---
+        function performMainClick() {
+            // Manual clicks stay reliable even if an older save is missing a newer field.
+            const clicksPerClick = Number(game.clicksPerClick);
+            const multiplier = Number(game.multiplier);
+            const clickOverdriveLevel = Number(game.clickOverdriveLevel);
+            const overclockLevel = Number(game.overclockLevel);
+            const baseClick = Number.isFinite(clicksPerClick) && clicksPerClick > 0 ? clicksPerClick : 1;
+            const safeMultiplier = Number.isFinite(multiplier) && multiplier > 0 ? multiplier : 1;
+            const safeOverdriveLevel = Number.isFinite(clickOverdriveLevel) && clickOverdriveLevel >= 0 ? clickOverdriveLevel : 0;
+            const safeOverclockLevel = Number.isFinite(overclockLevel) && overclockLevel >= 0 ? overclockLevel : 0;
+            const earned = baseClick * safeMultiplier * (1 + safeOverdriveLevel * 0.25) * (1 + safeOverclockLevel * 0.25);
+            addGeneratedClicks(earned);
+            updateUI();
+        }
+
+        let silentClickInterval = null;
+        let silentClickHolding = false;
+        let suppressNextMainClick = false;
+
+        document.getElementById('click-btn').addEventListener('click', () => {
+            if (suppressNextMainClick) {
+                suppressNextMainClick = false;
+                return;
+            }
+            performMainClick();
+        });
+
+        // Touch/mobile controls use the same pointer system as mouse input.
+        // A normal tap still triggers the existing click event; holding the button
+        // uses Silent Clicking when unlocked. Prevent browser touch gestures only
+        // while interacting with the main click button.
+        document.getElementById('click-btn').style.touchAction = 'none';
+
+        function startSilentClicking() {
+            if (silentClickHolding) return;
+            silentClickHolding = true;
+            performMainClick();
+            silentClickInterval = setInterval(() => {
+                if (silentClickHolding) performMainClick();
+            }, 250);
+        }
+
+        // Pressing Space counts as a normal click, or starts Silent Clicking when unlocked.
+        document.addEventListener('keydown', (event) => {
+            const target = event.target;
+            const isTyping = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT');
+            if (event.code === 'Space' && !isTyping) {
+                event.preventDefault();
+                if (!event.repeat) {
+                    if (game.silentClickingUnlocked) {
+                        startSilentClicking();
+                    } else {
+                        performMainClick();
+                    }
+                }
+            }
+        });
+
+        document.addEventListener('keyup', (event) => {
+            if (event.code === 'Space') {
+                stopSilentClicking();
+            }
+        });
+
+        document.getElementById('click-btn').addEventListener('pointerdown', (event) => {
+            if (!game.silentClickingUnlocked) return;
+            event.preventDefault();
+            suppressNextMainClick = true;
+            startSilentClicking();
+            document.getElementById('click-btn').setPointerCapture?.(event.pointerId);
+        });
+
+        function stopSilentClicking() {
+            if (!silentClickHolding) return;
+            silentClickHolding = false;
+            if (silentClickInterval !== null) {
+                clearInterval(silentClickInterval);
+                silentClickInterval = null;
+            }
+        }
+
+        document.getElementById('click-btn').addEventListener('pointerup', stopSilentClicking);
+        document.getElementById('click-btn').addEventListener('pointercancel', stopSilentClicking);
+        document.getElementById('click-btn').addEventListener('lostpointercapture', stopSilentClicking);
+
+        document.getElementById('silent-click-btn').addEventListener('click', () => {
+            const cost = 1;
+            if (!game.silentClickingUnlocked && game.gems >= cost) {
+                game.gems -= cost;
+                game.silentClickingUnlocked = true;
+                saveGame();
+                updateUI();
+            }
+        });
+
+        document.getElementById('upgrade-discount-btn').addEventListener('click', () => {
+            buyDiscountUpgrades(1);
+            saveGame();
+            updateUI();
+        });
+
+        document.getElementById('rebirth-gem-upgrade-btn').addEventListener('click', () => {
+            buyRebirthGemUpgrades(1);
+            saveGame();
+            updateUI();
+        });
+
+        document.getElementById('overclock-btn').addEventListener('click', () => {
+            buyOverclockUpgrades(1);
+            updateUI();
+        });
+
+        document.getElementById('auto-accelerator-btn').addEventListener('click', () => {
+            buyAutoAcceleratorUpgrades(1);
+            updateUI();
+        });
+
+        document.getElementById('click-overdrive-btn').addEventListener('click', () => {
+            buyClickOverdriveUpgrades(1);
+            updateUI();
+        });
+
+        document.getElementById('up1-btn').addEventListener('click', () => {
+            buyClickUpgrades(1);
+            updateUI();
+        });
+
+        document.getElementById('up2-btn').addEventListener('click', () => {
+            buyAutoClickerUpgrades(1);
+            updateUI();
+        });
+
+        document.getElementById('rebirth-btn').addEventListener('click', () => {
+            if (game.totalUpgradesBought >= game.upgradesNeededForRebirth && game.clicks >= getRebirthClickRequirement()) {
+                // Rebirth reward is permanently increased by the More Gems per Rebirth upgrade.
+                game.gems += getRebirthGemReward();
+                game.rebirths += 1;
+                game.multiplier += 0.5;
+
+                // Wipe standard resources.
+                game.clicks = 0;
+                game.clicksPerClick = 1;
+                game.autoClickers = 0;
+                game.totalUpgradesBought = 0;
+                game.overclockLevel = 0;
+                game.autoAcceleratorLevel = 0;
+                game.clickOverdriveLevel = 0;
+
+                // New rebirth scaling: 3, 4, 5, 6... upgrades.
+                game.upgradesNeededForRebirth = 3 + game.rebirths;
+
+                saveGame();
+                updateUI();
+            }
+        });
+
+        document.getElementById('gem-up1-btn').addEventListener('click', () => {
+            buyClickerStationUpgrades(1);
+            saveGame();
+            updateUI();
+        });
+
+        const multiBuyHandlers = [
+            ['up1-quantity', 'up1-max-btn', buyClickUpgrades],
+            ['up2-quantity', 'up2-max-btn', buyAutoClickerUpgrades],
+            ['overclock-quantity', 'overclock-max-btn', buyOverclockUpgrades],
+            ['auto-accelerator-quantity', 'auto-accelerator-max-btn', buyAutoAcceleratorUpgrades],
+            ['click-overdrive-quantity', 'click-overdrive-max-btn', buyClickOverdriveUpgrades],
+            ['gem-up1-quantity', 'gem-up1-max-btn', buyClickerStationUpgrades],
+            ['upgrade-discount-quantity', 'upgrade-discount-max-btn', buyDiscountUpgrades],
+            ['rebirth-gem-upgrade-quantity', 'rebirth-gem-upgrade-max-btn', buyRebirthGemUpgrades]
+        ];
+
+        multiBuyHandlers.forEach(([inputId, maxId, buyer]) => {
+            const input = document.getElementById(inputId);
+            const maxButton = document.getElementById(maxId);
+            maxButton.addEventListener('click', () => {
+                const bought = buyer(100000);
+                input.value = bought || 1;
+                saveGame();
+                updateUI();
+            });
+            input.addEventListener('keydown', event => {
+                if (event.key === 'Enter') {
+                    const bought = buyer(getRequestedQuantity(inputId));
+                    saveGame();
+                    updateUI();
+                    input.value = bought || 1;
+                }
+            });
+        });
+
+        multiBuyHandlers.forEach(([inputId, maxId, buyer]) => {
+            const input = document.getElementById(inputId);
+            input.addEventListener('change', () => {
+                const quantity = getRequestedQuantity(inputId);
+                input.value = quantity;
+            });
+            document.getElementById(maxId).addEventListener('mousedown', event => event.preventDefault());
+        });
+
+        document.getElementById('bank-convert-gems').addEventListener('click', () => {
+            if (!game.bankUnlocked) return;
+            applyBankInterest();
+            const input = document.getElementById('bank-gem-amount');
+            const amount = Math.floor(Number(input.value));
+            if (!Number.isFinite(amount) || amount <= 0) {
+                document.getElementById('bank-convert-status').innerText = 'Enter a valid number of Gems.';
+                return;
+            }
+            const requiredClicks = amount * CLICKS_NEEDED_FOR_GEM;
+            if (game.bankBalance < requiredClicks) {
+                document.getElementById('bank-convert-status').innerText = `Need ${requiredClicks.toLocaleString()} Banked Clicks for ${amount} Gem${amount === 1 ? '' : 's'}.`;
+                return;
+            }
+            game.bankBalance -= requiredClicks;
+            game.gems += amount;
+            document.getElementById('bank-convert-status').innerText = `Converted ${requiredClicks.toLocaleString()} Banked Clicks into ${amount} Gem${amount === 1 ? '' : 's'}.`;
+            saveGame();
+            updateUI();
+        });
+
+        document.getElementById('bank-unlock-btn').addEventListener('click', () => {
+            if (!game.bankUnlocked && game.gems >= BANK_UNLOCK_COST) {
+                game.gems -= BANK_UNLOCK_COST;
+                game.bankUnlocked = true;
+                game.bankEnabled = false;
+                game.bankBalance = 0;
+                game.bankLastInterestAt = Date.now();
+                saveGame();
+                updateUI();
+            }
+        });
+
+        document.getElementById('bank-toggle-btn').addEventListener('click', () => {
+            if (!game.bankUnlocked) return;
+            applyBankInterest();
+            game.bankEnabled = !game.bankEnabled;
+            saveGame();
+            updateUI();
+        });
+
+        function withdrawFromBank(percent) {
+            if (!game.bankUnlocked || game.bankBalance <= 0) return;
+            applyBankInterest();
+            const amount = game.bankBalance * percent;
+            game.bankBalance -= amount;
+            game.clicks += amount;
+            saveGame();
+            updateUI();
+        }
+
+        document.getElementById('bank-withdraw-25').addEventListener('click', () => withdrawFromBank(0.25));
+        document.getElementById('bank-withdraw-50').addEventListener('click', () => withdrawFromBank(0.50));
+        document.getElementById('bank-withdraw-all').addEventListener('click', () => withdrawFromBank(1));
+
+            document.getElementById('chat-send-btn').addEventListener('click', sendChatMessage);
+        document.getElementById('chat-input').addEventListener('input', () => {
+            document.getElementById('chat-char-count').innerText = String(document.getElementById('chat-input').value.length);
+        });
+        document.getElementById('chat-input').addEventListener('keydown', event => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendChatMessage();
+            }
+        });
+
+        // Hard reset: wipe this game's save and return to the starting state.
+        document.getElementById('hard-reset-btn').addEventListener('click', () => {
+            const confirmed = confirm(
+                'HARD RESET: This will permanently erase your save, gems, rebirths, upgrades, and progress. Continue?'
+            );
+
+            if (!confirmed) return;
+
+            localStorage.removeItem('ultimateIdleClicker_scaled_clean_save');
+
+            game = {
+                clicks: 0,
+                clicksPerClick: 1,
+                autoClickers: 0,
+                totalUpgradesBought: 0,
+                upgradesNeededForRebirth: 3,
+                rebirths: 0,
+                multiplier: 1.0,
+                gems: 0,
+                clickerStationLevel: 0,
+                silentClickingUnlocked: false,
+                upgradeDiscountLevel: 0,
+                rebirthGemUpgradeLevel: 0,
+                overclockLevel: 0,
+                autoAcceleratorLevel: 0,
+                bankUnlocked: false,
+                bankEnabled: false,
+                bankBalance: 0,
+                bankLastInterestAt: Date.now()
+            };
+
+            updateUI();
+            saveGame();
+            alert('Save completely reset!');
+        });
+
+        // Initialize session on boot
+        loadGame();
+
+        // Compatibility for saves made before the rebirth-upgrade system existed.
+        if (typeof game.totalUpgradesBought !== 'number') {
+            game.totalUpgradesBought = Math.max(0, game.clicksPerClick - 1);
+        }
+        // Normalize older saves to the new rebirth upgrade requirement.
+        game.upgradesNeededForRebirth = 3 + game.rebirths;
+        if (typeof game.silentClickingUnlocked !== 'boolean') {
+            game.silentClickingUnlocked = false;
+        }
+        if (typeof game.upgradeDiscountLevel !== 'number') {
+            game.upgradeDiscountLevel = 0;
+        }
+        game.upgradeDiscountLevel = Math.max(0, Math.min(10, Math.floor(game.upgradeDiscountLevel)));
+        if (typeof game.rebirthGemUpgradeLevel !== 'number') {
+            game.rebirthGemUpgradeLevel = 0;
+        }
+        game.rebirthGemUpgradeLevel = Math.max(0, Math.floor(game.rebirthGemUpgradeLevel));
+        if (!Number.isFinite(Number(game.overclockLevel)) || Number(game.overclockLevel) < 0) game.overclockLevel = 0;
+        game.overclockLevel = Math.floor(Number(game.overclockLevel));
+        if (!Number.isFinite(Number(game.autoAcceleratorLevel)) || Number(game.autoAcceleratorLevel) < 0) game.autoAcceleratorLevel = 0;
+        game.autoAcceleratorLevel = Math.floor(Number(game.autoAcceleratorLevel));
+        if (!Number.isFinite(Number(game.clicksPerClick)) || Number(game.clicksPerClick) < 1) game.clicksPerClick = 1;
+        if (!Number.isFinite(Number(game.multiplier)) || Number(game.multiplier) <= 0) game.multiplier = 1;
+        if (!Number.isFinite(Number(game.clicks)) || Number(game.clicks) < 0) game.clicks = 0;
+        if (!Number.isFinite(Number(game.bankBalance)) || Number(game.bankBalance) < 0) game.bankBalance = 0;
+        if (typeof game.bankUnlocked !== 'boolean') game.bankUnlocked = false;
+        if (typeof game.bankEnabled !== 'boolean') game.bankEnabled = false;
+        if (!Number.isFinite(Number(game.bankBalance))) game.bankBalance = 0;
+        game.bankBalance = Math.max(0, Number(game.bankBalance));
+        if (!Number.isFinite(Number(game.bankLastInterestAt))) game.bankLastInterestAt = Date.now();
+        if (!Number.isFinite(Number(game.lastActiveAt))) game.lastActiveAt = Date.now();
+        if (!Number.isFinite(Number(game.clickOverdriveLevel)) || game.clickOverdriveLevel < 0) game.clickOverdriveLevel = 0;
+        game.bankEnabled = game.bankUnlocked && game.bankEnabled;
+        applyBankInterest();
+
+        cloudResetVersion = Number(localStorage.getItem('ultimateIdleClicker_cloud_reset_version') || 0);
+        updateUI();
+        initializeCloudSave();
+        updateChatAuthUI();
+
+        // Periodically auto-save to the cloud while logged in.
+        setInterval(() => {
+            if (supabaseClient && cloudUser) {
+                cloudSaveGame(false);
+            }
+        }, 10000);
+    </script>
+</body>
+</html>
