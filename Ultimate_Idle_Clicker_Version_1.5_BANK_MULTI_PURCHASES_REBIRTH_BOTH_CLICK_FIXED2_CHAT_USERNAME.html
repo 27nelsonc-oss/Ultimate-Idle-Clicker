@@ -2404,3 +2404,89 @@ body {
         // Hard reset: wipe this game's save and return to the starting state.
         document.getElementById('hard-reset-btn').addEventListener('click', () => {
             const confirmed = confirm(
+                'HARD RESET: This will permanently erase your save, gems, rebirths, upgrades, and progress. Continue?'
+            );
+
+            if (!confirmed) return;
+
+            localStorage.removeItem('ultimateIdleClicker_scaled_clean_save');
+
+            game = {
+                clicks: 0,
+                clicksPerClick: 1,
+                autoClickers: 0,
+                totalUpgradesBought: 0,
+                upgradesNeededForRebirth: 3,
+                rebirths: 0,
+                multiplier: 1.0,
+                gems: 0,
+                clickerStationLevel: 0,
+                silentClickingUnlocked: false,
+                upgradeDiscountLevel: 0,
+                rebirthGemUpgradeLevel: 0,
+                overclockLevel: 0,
+                autoAcceleratorLevel: 0,
+                bankUnlocked: false,
+                bankEnabled: false,
+                bankBalance: 0,
+                bankLastInterestAt: Date.now()
+            };
+
+            updateUI();
+            saveGame();
+            alert('Save completely reset!');
+        });
+
+        // Initialize session on boot
+        loadGame();
+
+        // Compatibility for saves made before the rebirth-upgrade system existed.
+        if (typeof game.totalUpgradesBought !== 'number') {
+            game.totalUpgradesBought = Math.max(0, game.clicksPerClick - 1);
+        }
+        // Normalize older saves to the new rebirth upgrade requirement.
+        game.upgradesNeededForRebirth = 3 + game.rebirths;
+        if (typeof game.silentClickingUnlocked !== 'boolean') {
+            game.silentClickingUnlocked = false;
+        }
+        if (typeof game.upgradeDiscountLevel !== 'number') {
+            game.upgradeDiscountLevel = 0;
+        }
+        game.upgradeDiscountLevel = Math.max(0, Math.min(10, Math.floor(game.upgradeDiscountLevel)));
+        if (typeof game.rebirthGemUpgradeLevel !== 'number') {
+            game.rebirthGemUpgradeLevel = 0;
+        }
+        game.rebirthGemUpgradeLevel = Math.max(0, Math.floor(game.rebirthGemUpgradeLevel));
+        if (!Number.isFinite(Number(game.overclockLevel)) || Number(game.overclockLevel) < 0) game.overclockLevel = 0;
+        game.overclockLevel = Math.floor(Number(game.overclockLevel));
+        if (!Number.isFinite(Number(game.autoAcceleratorLevel)) || Number(game.autoAcceleratorLevel) < 0) game.autoAcceleratorLevel = 0;
+        game.autoAcceleratorLevel = Math.floor(Number(game.autoAcceleratorLevel));
+        if (!Number.isFinite(Number(game.clicksPerClick)) || Number(game.clicksPerClick) < 1) game.clicksPerClick = 1;
+        if (!Number.isFinite(Number(game.multiplier)) || Number(game.multiplier) <= 0) game.multiplier = 1;
+        if (!Number.isFinite(Number(game.clicks)) || Number(game.clicks) < 0) game.clicks = 0;
+        if (!Number.isFinite(Number(game.bankBalance)) || Number(game.bankBalance) < 0) game.bankBalance = 0;
+        if (typeof game.bankUnlocked !== 'boolean') game.bankUnlocked = false;
+        if (typeof game.bankEnabled !== 'boolean') game.bankEnabled = false;
+        if (!Number.isFinite(Number(game.bankBalance))) game.bankBalance = 0;
+        game.bankBalance = Math.max(0, Number(game.bankBalance));
+        if (!Number.isFinite(Number(game.bankLastInterestAt))) game.bankLastInterestAt = Date.now();
+        if (!Number.isFinite(Number(game.lastActiveAt))) game.lastActiveAt = Date.now();
+        if (!Number.isFinite(Number(game.clickOverdriveLevel)) || game.clickOverdriveLevel < 0) game.clickOverdriveLevel = 0;
+        game.bankEnabled = game.bankUnlocked && game.bankEnabled;
+        applyBankInterest();
+
+        cloudResetVersion = Number(localStorage.getItem('ultimateIdleClicker_cloud_reset_version') || 0);
+        updateUI();
+        initializeCloudSave();
+        updateChatAuthUI();
+        refreshDmUnreadCount();
+
+        // Periodically auto-save to the cloud while logged in.
+        setInterval(() => {
+            if (supabaseClient && cloudUser) {
+                cloudSaveGame(false);
+            }
+        }, 10000);
+    </script>
+</body>
+</html>
