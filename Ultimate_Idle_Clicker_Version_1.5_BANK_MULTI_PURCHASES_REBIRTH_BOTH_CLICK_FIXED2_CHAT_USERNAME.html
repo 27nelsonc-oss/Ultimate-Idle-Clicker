@@ -160,7 +160,18 @@
             font-size: 1.4rem;
         }
 
-        .toast {
+        .dm-unread-badge {
+        display: none;
+        margin-left: 6px;
+        padding: 2px 7px;
+        border-radius: 999px;
+        background: #ff4757;
+        color: white;
+        font-size: 0.75rem;
+        vertical-align: middle;
+    }
+
+    .toast {
             position: fixed;
             bottom: 20px;
             right: 20px;
@@ -567,7 +578,7 @@ body {
 
     <!-- Public Chat Panel -->
     <div class="panel chat-panel" id="chat-panel">
-        <h2 class="section-title" id="chat-title">💬 Chat</h2>
+        <h2 class="section-title" id="chat-title">💬 Chat <span id="chat-unread-badge" class="dm-unread-badge">0</span></h2>
         <button type="button" id="chat-back-global-btn" class="btn-upgrade" style="display:none; margin-bottom:8px;">← Back to Global Chat</button>
         <div class="sub-stat" id="chat-login-status" style="margin-bottom:8px;">Sign in to chat with other players.</div>
         <div id="chat-messages" style="height:220px; overflow-y:auto; background:#111; border:1px solid #555; border-radius:8px; padding:8px; box-sizing:border-box; margin-bottom:8px;">
@@ -752,6 +763,70 @@ body {
         let dmLoading = false;
         let dmTargetUserId = null;
         let dmTargetUsername = '';
+        let dmUnreadCount = 0;
+
+        function getDmReadStorageKey() {
+            return cloudUser ? `ultimateIdleClicker_dm_read_${cloudUser.id}` : '';
+        }
+
+        function getDmLastReadAt() {
+            const key = getDmReadStorageKey();
+            if (!key) return null;
+            const value = localStorage.getItem(key);
+            return value || null;
+        }
+
+        function updateChatTitle() {
+            const title = document.getElementById('chat-title');
+            const badge = document.getElementById('chat-unread-badge');
+            if (!title || !badge) return;
+
+            if (dmTargetUserId) {
+                title.firstChild.textContent = `💬 DM: ${dmTargetUsername} `;
+            } else {
+                title.firstChild.textContent = '💬 Chat ';
+            }
+
+            if (!dmTargetUserId && dmUnreadCount > 0) {
+                badge.innerText = String(dmUnreadCount);
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        async function refreshDmUnreadCount() {
+            if (!supabaseClient || !cloudUser) {
+                dmUnreadCount = 0;
+                updateChatTitle();
+                return;
+            }
+
+            const lastReadAt = getDmLastReadAt();
+            let query = supabaseClient
+                .from('game_direct_messages')
+                .select('id', { count: 'exact', head: true })
+                .eq('recipient_id', cloudUser.id);
+
+            if (lastReadAt) query = query.gt('created_at', lastReadAt);
+
+            const { count, error } = await query;
+            if (!error) dmUnreadCount = count || 0;
+            updateChatTitle();
+        }
+
+        function markDirectMessagesRead(messages) {
+            if (!cloudUser || !Array.isArray(messages)) return;
+            const incomingTimes = messages
+                .filter(message => message.recipient_id === cloudUser.id && message.created_at)
+                .map(message => message.created_at);
+            if (!incomingTimes.length) return;
+
+            const latestIncoming = incomingTimes.sort().at(-1);
+            localStorage.setItem(getDmReadStorageKey(), latestIncoming);
+            dmUnreadCount = 0;
+            updateChatTitle();
+        }
 
         const CHAT_OWNER_EMAIL = '27nelsonc@student.harrisburg.k12.or.us';
         const CHAT_TESTER_EMAIL = '27costat@student.harrisburg.k12.or.us';
@@ -942,6 +1017,8 @@ body {
                         (sender === dmTargetUserId && recipient === cloudUser.id)
                     ) {
                         loadDirectMessages();
+                    } else if (recipient === cloudUser.id && sender !== cloudUser.id) {
+                        refreshDmUnreadCount();
                     }
                 })
                 .subscribe();
@@ -962,16 +1039,17 @@ body {
             if (!loggedIn) {
                 dmTargetUserId = null;
                 dmTargetUsername = '';
-                title.innerText = '💬 Chat';
+                title.firstChild.textContent = '💬 Chat ';
                 backButton.style.display = 'none';
                 status.innerText = 'Sign in to chat with other players.';
                 document.getElementById('chat-messages').innerHTML = '<div class="sub-stat">Sign in to load chat messages.</div>';
                 document.getElementById('chat-status').innerText = '';
+                updateChatTitle();
                 return;
             }
 
             if (dmTargetUserId) {
-                title.innerText = `💬 DM: ${dmTargetUsername}`;
+                title.firstChild.textContent = `💬 DM: ${dmTargetUsername} `;
                 backButton.style.display = 'block';
                 status.innerText = `Private conversation with ${dmTargetUsername}`;
             } else {
@@ -979,6 +1057,7 @@ body {
                 backButton.style.display = 'none';
                 status.innerText = `Signed in as ${currentUsername || 'player'}`;
             }
+            updateChatTitle();
         }
 
         async function openDirectMessage(userId, username) {
@@ -1011,6 +1090,8 @@ body {
             }
 
             renderDirectMessages(data || []);
+            markDirectMessagesRead(data || []);
+            refreshDmUnreadCount();
         }
 
         function returnToGlobalChat() {
@@ -1020,7 +1101,9 @@ body {
             document.getElementById('chat-back-global-btn').style.display = 'none';
             document.getElementById('chat-login-status').innerText = `Signed in as ${currentUsername || 'player'}`;
             document.getElementById('chat-status').innerText = '';
+            updateChatTitle();
             loadChatMessages();
+            refreshDmUnreadCount();
         }
 
         async function sendChatMessage() {
@@ -2390,6 +2473,7 @@ body {
         updateUI();
         initializeCloudSave();
         updateChatAuthUI();
+        refreshDmUnreadCount();
 
         // Periodically auto-save to the cloud while logged in.
         setInterval(() => {
