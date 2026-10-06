@@ -567,7 +567,8 @@ body {
 
     <!-- Public Chat Panel -->
     <div class="panel chat-panel" id="chat-panel">
-        <h2 class="section-title">💬 Chat</h2>
+        <h2 class="section-title" id="chat-title">💬 Chat</h2>
+        <button type="button" id="chat-back-global-btn" class="btn-upgrade" style="display:none; margin-bottom:8px;">← Back to Global Chat</button>
         <div class="sub-stat" id="chat-login-status" style="margin-bottom:8px;">Sign in to chat with other players.</div>
         <div id="chat-messages" style="height:220px; overflow-y:auto; background:#111; border:1px solid #555; border-radius:8px; padding:8px; box-sizing:border-box; margin-bottom:8px;">
             <div class="sub-stat">Sign in to load chat messages.</div>
@@ -748,6 +749,9 @@ body {
         let chatChannel = null;
         let chatLastSentAt = 0;
         let chatLoading = false;
+        let dmLoading = false;
+        let dmTargetUserId = null;
+        let dmTargetUsername = '';
 
         const CHAT_OWNER_EMAIL = '27nelsonc@student.harrisburg.k12.or.us';
         const CHAT_TESTER_EMAIL = '27costat@student.harrisburg.k12.or.us';
@@ -828,11 +832,42 @@ body {
                 const row = document.createElement('div');
                 row.style.marginBottom = '7px';
                 row.style.overflowWrap = 'anywhere';
+
                 const header = document.createElement('span');
                 header.style.fontWeight = '700';
-                header.textContent = message.rank ? `(${message.rank}) ${message.username}` : message.username;
+
+                if (message.rank) {
+                    const rank = document.createElement('span');
+                    rank.textContent = `(${message.rank}) `;
+                    header.appendChild(rank);
+                }
+
+                if (message.user_id && message.user_id !== cloudUser?.id) {
+                    const usernameButton = document.createElement('button');
+                    usernameButton.type = 'button';
+                    usernameButton.textContent = message.username || 'Player';
+                    usernameButton.style.width = 'auto';
+                    usernameButton.style.padding = '0';
+                    usernameButton.style.margin = '0';
+                    usernameButton.style.border = '0';
+                    usernameButton.style.background = 'transparent';
+                    usernameButton.style.color = 'inherit';
+                    usernameButton.style.font = 'inherit';
+                    usernameButton.style.fontWeight = '700';
+                    usernameButton.style.textDecoration = 'underline';
+                    usernameButton.style.cursor = 'pointer';
+                    usernameButton.title = `Message ${message.username || 'Player'} privately`;
+                    usernameButton.addEventListener('click', () => openDirectMessage(message.user_id, message.username || 'Player'));
+                    header.appendChild(usernameButton);
+                } else {
+                    const username = document.createElement('span');
+                    username.textContent = message.username || 'Player';
+                    header.appendChild(username);
+                }
+
                 row.appendChild(header);
                 row.appendChild(document.createTextNode(' - '));
+
                 const body = document.createElement('span');
                 body.textContent = message.message;
                 row.appendChild(body);
@@ -841,12 +876,45 @@ body {
             container.scrollTop = container.scrollHeight;
         }
 
+        function renderDirectMessages(messages) {
+            const container = document.getElementById('chat-messages');
+            container.innerHTML = '';
+            if (!messages || messages.length === 0) {
+                const empty = document.createElement('div');
+                empty.className = 'sub-stat';
+                empty.textContent = `No private messages with ${dmTargetUsername} yet.`;
+                container.appendChild(empty);
+                return;
+            }
+
+            messages.forEach(message => {
+                const row = document.createElement('div');
+                row.style.marginBottom = '7px';
+                row.style.overflowWrap = 'anywhere';
+
+                const header = document.createElement('span');
+                header.style.fontWeight = '700';
+                header.textContent = message.sender_id === cloudUser?.id
+                    ? 'You'
+                    : (message.sender_username || dmTargetUsername || 'Player');
+
+                row.appendChild(header);
+                row.appendChild(document.createTextNode(' - '));
+
+                const body = document.createElement('span');
+                body.textContent = message.message;
+                row.appendChild(body);
+                container.appendChild(row);
+            });
+
+            container.scrollTop = container.scrollHeight;
+        }
         async function loadChatMessages() {
             if (!supabaseClient || !cloudUser || chatLoading) return;
             chatLoading = true;
             const { data, error } = await supabaseClient
                 .from('game_chat_messages')
-                .select('id,username,rank,message,created_at')
+                .select('id,user_id,username,rank,message,created_at')
                 .order('created_at', { ascending: false })
                 .limit(50);
             chatLoading = false;
@@ -862,7 +930,20 @@ body {
             if (chatChannel) supabaseClient.removeChannel(chatChannel);
             chatChannel = supabaseClient
                 .channel('game-chat-messages')
-                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'game_chat_messages' }, () => loadChatMessages())
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'game_chat_messages' }, () => {
+                    if (!dmTargetUserId) loadChatMessages();
+                })
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'game_direct_messages' }, payload => {
+                    if (!dmTargetUserId || !payload?.new) return;
+                    const sender = payload.new.sender_id;
+                    const recipient = payload.new.recipient_id;
+                    if (
+                        (sender === cloudUser.id && recipient === dmTargetUserId) ||
+                        (sender === dmTargetUserId && recipient === cloudUser.id)
+                    ) {
+                        loadDirectMessages();
+                    }
+                })
                 .subscribe();
         }
 
@@ -870,49 +951,137 @@ body {
             const input = document.getElementById('chat-input');
             const send = document.getElementById('chat-send-btn');
             const status = document.getElementById('chat-login-status');
-            if (!input || !send || !status) return;
+            const title = document.getElementById('chat-title');
+            const backButton = document.getElementById('chat-back-global-btn');
+            if (!input || !send || !status || !title || !backButton) return;
+
             const loggedIn = !!cloudUser;
             input.disabled = !loggedIn;
             send.disabled = !loggedIn;
-            status.innerText = loggedIn
-                ? `Signed in as ${currentUsername || 'player'}`
-                : 'Sign in to chat with other players.';
+
             if (!loggedIn) {
+                dmTargetUserId = null;
+                dmTargetUsername = '';
+                title.innerText = '💬 Chat';
+                backButton.style.display = 'none';
+                status.innerText = 'Sign in to chat with other players.';
                 document.getElementById('chat-messages').innerHTML = '<div class="sub-stat">Sign in to load chat messages.</div>';
                 document.getElementById('chat-status').innerText = '';
+                return;
             }
+
+            if (dmTargetUserId) {
+                title.innerText = `💬 DM: ${dmTargetUsername}`;
+                backButton.style.display = 'block';
+                status.innerText = `Private conversation with ${dmTargetUsername}`;
+            } else {
+                title.innerText = '💬 Chat';
+                backButton.style.display = 'none';
+                status.innerText = `Signed in as ${currentUsername || 'player'}`;
+            }
+        }
+
+        async function openDirectMessage(userId, username) {
+            if (!supabaseClient || !cloudUser || !userId || userId === cloudUser.id) return;
+            dmTargetUserId = userId;
+            dmTargetUsername = username || 'Player';
+            document.getElementById('chat-title').innerText = `💬 DM: ${dmTargetUsername}`;
+            document.getElementById('chat-back-global-btn').style.display = 'block';
+            document.getElementById('chat-login-status').innerText = `Private conversation with ${dmTargetUsername}`;
+            document.getElementById('chat-status').innerText = '';
+            await loadDirectMessages();
+        }
+
+        async function loadDirectMessages() {
+            if (!supabaseClient || !cloudUser || !dmTargetUserId || dmLoading) return;
+            dmLoading = true;
+
+            const { data, error } = await supabaseClient
+                .from('game_direct_messages')
+                .select('id,sender_id,recipient_id,sender_username,message,created_at')
+                .or(`and(sender_id.eq.${cloudUser.id},recipient_id.eq.${dmTargetUserId}),and(sender_id.eq.${dmTargetUserId},recipient_id.eq.${cloudUser.id})`)
+                .order('created_at', { ascending: true })
+                .limit(50);
+
+            dmLoading = false;
+
+            if (error) {
+                document.getElementById('chat-status').innerText = `❌ DM unavailable: ${error.message}`;
+                return;
+            }
+
+            renderDirectMessages(data || []);
+        }
+
+        function returnToGlobalChat() {
+            dmTargetUserId = null;
+            dmTargetUsername = '';
+            document.getElementById('chat-title').innerText = '💬 Chat';
+            document.getElementById('chat-back-global-btn').style.display = 'none';
+            document.getElementById('chat-login-status').innerText = `Signed in as ${currentUsername || 'player'}`;
+            document.getElementById('chat-status').innerText = '';
+            loadChatMessages();
         }
 
         async function sendChatMessage() {
             if (!supabaseClient || !cloudUser) return;
+
             const input = document.getElementById('chat-input');
             const status = document.getElementById('chat-status');
             const message = input.value.trim();
             const remaining = 1000 - (Date.now() - chatLastSentAt);
-            if (!message) { status.innerText = 'Enter a message first.'; return; }
-            if (message.length > 300) { status.innerText = 'Message is too long. Maximum is 300 characters.'; return; }
-            if (remaining > 0) { status.innerText = `Please wait ${(remaining / 1000).toFixed(1)}s.`; return; }
+
+            if (!message) {
+                status.innerText = 'Enter a message first.';
+                return;
+            }
+            if (message.length > 300) {
+                status.innerText = 'Message is too long. Maximum is 300 characters.';
+                return;
+            }
+            if (remaining > 0) {
+                status.innerText = `Please wait ${(remaining / 1000).toFixed(1)}s.`;
+                return;
+            }
+
             chatLastSentAt = Date.now();
-            const email = (cloudUser.email || '').toLowerCase();
-            const { error } = await supabaseClient.from('game_chat_messages').insert({
-                user_id: cloudUser.id,
-                email,
-                username: currentUsername,
-                rank: getChatRank(email),
-                message
-            });
+            let error;
+
+            if (dmTargetUserId) {
+                ({ error } = await supabaseClient.from('game_direct_messages').insert({
+                    sender_id: cloudUser.id,
+                    recipient_id: dmTargetUserId,
+                    sender_username: currentUsername,
+                    message
+                }));
+            } else {
+                const email = (cloudUser.email || '').toLowerCase();
+                ({ error } = await supabaseClient.from('game_chat_messages').insert({
+                    user_id: cloudUser.id,
+                    email,
+                    username: currentUsername,
+                    rank: getChatRank(email),
+                    message
+                }));
+            }
+
             if (error) {
                 status.innerText = error.message.includes('Please wait 1 second')
                     ? 'Please wait 1 second between messages.'
                     : `❌ ${error.message}`;
                 return;
             }
+
             input.value = '';
             document.getElementById('chat-char-count').innerText = '0';
             status.innerText = '';
-            await loadChatMessages();
-        }
 
+            if (dmTargetUserId) {
+                await loadDirectMessages();
+            } else {
+                await loadChatMessages();
+            }
+        }
         let cloudResetVersion = 0;
 
         function setCloudMessage(message, isError = false) {
@@ -2132,6 +2301,7 @@ body {
         document.getElementById('bank-withdraw-all').addEventListener('click', () => withdrawFromBank(1));
 
             document.getElementById('chat-send-btn').addEventListener('click', sendChatMessage);
+        document.getElementById('chat-back-global-btn').addEventListener('click', returnToGlobalChat);
         document.getElementById('chat-input').addEventListener('input', () => {
             document.getElementById('chat-char-count').innerText = String(document.getElementById('chat-input').value.length);
         });
