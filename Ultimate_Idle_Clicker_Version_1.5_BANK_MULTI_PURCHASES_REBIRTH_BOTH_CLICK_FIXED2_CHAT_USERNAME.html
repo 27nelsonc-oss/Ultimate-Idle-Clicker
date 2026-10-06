@@ -408,6 +408,30 @@ body {
 </style>
 
 
+
+<style>
+/* Minimal mobile compatibility patch — keeps the existing desktop layout unchanged. */
+@media (max-width: 600px) {
+    html, body { width: 100%; max-width: 100%; overflow-x: hidden; }
+    body { padding: 10px; box-sizing: border-box; }
+    .panel,
+    .main-panel,
+    .gem-station-panel,
+    .left-sidebar,
+    .bank-panel,
+    .chat-panel,
+    .hard-reset-container,
+    .admin-panel-container {
+        min-width: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    button, input, textarea, select { box-sizing: border-box; }
+    .btn-main { width: 140px; height: 140px; }
+    .multi-buy-controls { flex-wrap: wrap; }
+}
+</style>
 </head>
 <body>
 
