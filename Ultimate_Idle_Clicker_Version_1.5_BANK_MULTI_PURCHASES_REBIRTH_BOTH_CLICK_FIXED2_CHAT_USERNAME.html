@@ -858,6 +858,12 @@ body {
             return true;
         }
 
+        function formatChatTimestamp(createdAt) {
+            const date = new Date(createdAt);
+            if (Number.isNaN(date.getTime())) return '';
+            return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase();
+        }
+
         function renderChatMessages(messages) {
             const container = document.getElementById('chat-messages');
             container.innerHTML = '';
@@ -911,6 +917,10 @@ body {
                 const body = document.createElement('span');
                 body.textContent = message.message;
                 row.appendChild(body);
+                const timestamp = formatChatTimestamp(message.created_at);
+                if (timestamp) {
+                    row.appendChild(document.createTextNode(' ' + timestamp));
+                }
                 container.appendChild(row);
             });
             container.scrollTop = container.scrollHeight;
@@ -944,6 +954,10 @@ body {
                 const body = document.createElement('span');
                 body.textContent = message.message;
                 row.appendChild(body);
+                const timestamp = formatChatTimestamp(message.created_at);
+                if (timestamp) {
+                    row.appendChild(document.createTextNode(' ' + timestamp));
+                }
                 container.appendChild(row);
             });
 
