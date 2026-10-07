@@ -862,6 +862,7 @@ body {
         let playerPresenceChannel = null;
         let playerPresenceState = {};
         let playerPresenceRetryTimer = null;
+        let playerOnlineRefreshTimer = null;
         let playerListProfiles = [];
         let playerListSearchTerm = '';
 
@@ -876,15 +877,42 @@ body {
 
         function getOnlinePlayerIds() {
             const ids = new Set();
-            const state = playerPresenceChannel ? playerPresenceChannel.presenceState() : playerPresenceState;
-            Object.keys(state || {}).forEach(key => {
-                const entries = Array.isArray(state[key]) ? state[key] : [];
-                entries.forEach(entry => {
-                    const id = entry?.userId || key;
-                    if (id) ids.add(String(id));
-                });
+            const cutoff = Date.now() - 30000;
+            playerListProfiles.forEach(player => {
+                const seen = player?.last_seen_at ? new Date(player.last_seen_at).getTime() : 0;
+                if (seen && seen >= cutoff) ids.add(String(player.user_id));
             });
             return ids;
+        }
+
+        async function updatePlayerLastSeen() {
+            if (!supabaseClient || !cloudUser) return;
+            const now = new Date().toISOString();
+            const { error } = await supabaseClient
+                .from('game_profiles')
+                .update({ last_seen_at: now })
+                .eq('user_id', cloudUser.id);
+            if (!error) {
+                const me = playerListProfiles.find(player => String(player.user_id) === String(cloudUser.id));
+                if (me) me.last_seen_at = now;
+                renderPlayerList();
+            }
+        }
+
+        function startPlayerOnlineHeartbeat() {
+            if (playerOnlineRefreshTimer) clearInterval(playerOnlineRefreshTimer);
+            updatePlayerLastSeen();
+            playerOnlineRefreshTimer = setInterval(async () => {
+                if (cloudUser) {
+                    await updatePlayerLastSeen();
+                    await loadPlayerList(playerListSearchTerm);
+                }
+            }, 10000);
+        }
+
+        function stopPlayerOnlineHeartbeat() {
+            if (playerOnlineRefreshTimer) clearInterval(playerOnlineRefreshTimer);
+            playerOnlineRefreshTimer = null;
         }
 
         function renderPlayerList(profiles = playerListProfiles) {
@@ -951,17 +979,17 @@ body {
             if (status) status.innerText = playerListSearchTerm ? 'Searching players...' : 'Loading players...';
             let profiles = [];
             if (!playerListSearchTerm) {
-                const { data, error } = await supabaseClient.from('game_profiles').select('user_id,username').order('username', { ascending: true });
+                const { data, error } = await supabaseClient.from('game_profiles').select('user_id,username,last_seen_at').order('username', { ascending: true });
                 if (error) { if (status) status.innerText = '❌ Player list unavailable: ' + error.message; return; }
                 profiles = data || [];
             } else {
-                const { data: usernameMatches, error: usernameError } = await supabaseClient.from('game_profiles').select('user_id,username').ilike('username', '%' + playerListSearchTerm + '%').order('username', { ascending: true });
+                const { data: usernameMatches, error: usernameError } = await supabaseClient.from('game_profiles').select('user_id,username,last_seen_at').ilike('username', '%' + playerListSearchTerm + '%').order('username', { ascending: true });
                 if (usernameError) { if (status) status.innerText = '❌ Player search unavailable: ' + usernameError.message; return; }
                 profiles = usernameMatches || [];
                 if (playerListSearchTerm.includes('@')) {
                     const emailHash = await hashPlayerEmail(playerListSearchTerm);
                     if (emailHash) {
-                        const { data: emailMatches, error: emailError } = await supabaseClient.from('game_profiles').select('user_id,username').eq('email_lookup_hash', emailHash);
+                        const { data: emailMatches, error: emailError } = await supabaseClient.from('game_profiles').select('user_id,username,last_seen_at').eq('email_lookup_hash', emailHash);
                         if (!emailError && emailMatches) {
                             const seen = new Set(profiles.map(player => player.user_id));
                             emailMatches.forEach(player => { if (!seen.has(player.user_id)) profiles.push(player); });
@@ -1719,6 +1747,7 @@ body {
                 await loadChatMessages();
                 setupChatRealtime();
                 setupPlayerPresence();
+                startPlayerOnlineHeartbeat();
                 await loadPlayerList();
                 await refreshDmUnreadCount();
             }
@@ -1731,6 +1760,7 @@ body {
                         updateChatAuthUI();
                         await loadChatMessages();
                         setupPlayerPresence();
+                        startPlayerOnlineHeartbeat();
                         await loadPlayerList();
                         await refreshDmUnreadCount();
                     });
@@ -1761,6 +1791,7 @@ body {
                 await loadUsername();
                 updateChatAuthUI();
                 setupPlayerPresence();
+                startPlayerOnlineHeartbeat();
                 await loadPlayerList();
                 await refreshDmUnreadCount();
                 setCloudMessage('Account created and logged in.');
@@ -1806,6 +1837,7 @@ body {
         document.getElementById('cloud-logout-btn').addEventListener('click', async () => {
             await supabaseClient.auth.signOut();
             stopPlayerPresence();
+            stopPlayerOnlineHeartbeat();
             cloudUser = null;
             currentUsername = '';
             dmUnreadCount = 0;
