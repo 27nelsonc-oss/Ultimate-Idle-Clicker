@@ -261,9 +261,19 @@ body {
     margin-right: auto !important;
 }
 
-.gem-station-panel {
+.gem-station-player-list {
     grid-column: 3 !important;
     grid-row: 1 !important;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 20px !important;
+}
+
+.gem-station-panel {
+    grid-column: auto !important;
+    grid-row: auto !important;
     width: 100% !important;
     max-width: 620px !important;
     margin-left: 0 !important;
@@ -389,7 +399,9 @@ body {
     }
 
     .main-panel,
+    .gem-station-player-list,
     .gem-station-panel,
+    .player-list-panel,
     .left-sidebar,
     .bank-panel,
     .chat-panel,
@@ -434,9 +446,9 @@ body {
 
 /* Player List */
 .player-list-panel {
-    grid-column: 3 !important;
-    grid-row: 2 !important;
-    align-self: start !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+    align-self: stretch !important;
     width: 100% !important;
     max-width: 620px !important;
     margin: 0 !important;
@@ -542,7 +554,8 @@ body {
 
     </div>
 
-    <!-- Permanent Upgrade Station Panel -->
+    <!-- Gem Station + Player List -->
+    <div class="gem-station-player-list">
     <div class="panel gem-station-panel" style="width:92%; max-width:620px; box-sizing:border-box; margin:0 auto;">
         <h2 class="section-title">💎 Gem Station</h2>
         <div class="gem-display">Gems: <span id="gem-display">0</span></div>
@@ -617,6 +630,8 @@ body {
         </div>
         <div id="player-list-status" class="sub-stat player-list-status">Sign in to see players.</div>
         <div id="player-list-results" class="player-list-results"></div>
+    </div>
+
     </div>
 
     <!-- Bank + Chat sidebar -->
