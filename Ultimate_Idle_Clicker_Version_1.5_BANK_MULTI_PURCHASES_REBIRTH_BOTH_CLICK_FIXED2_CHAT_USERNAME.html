@@ -888,13 +888,11 @@ body {
         async function updatePlayerLastSeen() {
             if (!supabaseClient || !cloudUser) return;
             const now = new Date().toISOString();
-            const { error } = await supabaseClient
-                .from('game_profiles')
-                .update({ last_seen_at: now })
-                .eq('user_id', cloudUser.id);
+            const { data: touchedAt, error } = await supabaseClient.rpc('touch_player_presence');
             if (!error) {
+                const heartbeatTime = touchedAt || now;
                 const me = playerListProfiles.find(player => String(player.user_id) === String(cloudUser.id));
-                if (me) me.last_seen_at = now;
+                if (me) me.last_seen_at = heartbeatTime;
                 renderPlayerList();
             }
         }
