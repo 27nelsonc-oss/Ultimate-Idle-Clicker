@@ -781,6 +781,41 @@ body {
                 </div>
             </div>
 
+            <div style="margin-top: 12px; padding: 10px; border: 1px solid #555; border-radius: 8px;">
+                <strong>🏦 Banked Clicks</strong>
+                <div class="sub-stat" style="margin: 6px 0;">Add Banked Clicks to your own Bank. The Bank must already be unlocked.</div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <input id="admin-bank-clicks-amount" type="number" min="1" value="10000" style="flex:1; min-width:180px; padding:8px; box-sizing:border-box;">
+                    <button id="admin-add-bank-clicks" class="btn-upgrade">+ Banked Clicks</button>
+                </div>
+                <div id="admin-bank-clicks-status" class="sub-stat" style="margin-top:8px;"></div>
+            </div>
+
+            <div id="admin-owner-player-tools" style="display:none; margin-top:12px; padding:10px; border:1px solid #555; border-radius:8px;">
+                <strong>👤 Owner Only: Add Resources to Another Player</strong>
+                <div class="sub-stat" style="margin:6px 0;">Enter a player's account email and add a selected resource to their cloud save.</div>
+                <div style="display:grid; grid-template-columns:minmax(220px,1fr) minmax(190px,0.7fr) minmax(140px,0.4fr); gap:8px; align-items:center;">
+                    <input id="admin-target-resource-email" type="email" placeholder="Player email" style="width:100%; padding:8px; box-sizing:border-box;">
+                    <select id="admin-target-resource" style="width:100%; padding:8px; box-sizing:border-box; background:#111; color:white; border:1px solid #555; border-radius:8px;">
+                        <option value="clicks">Clicks</option>
+                        <option value="bank_clicks">Banked Clicks</option>
+                        <option value="gems">Gems</option>
+                        <option value="auto_clickers">Auto Clickers</option>
+                        <option value="click_upgrades">Click Upgrades</option>
+                        <option value="rebirths">Rebirths</option>
+                        <option value="rebirth_gem_levels">More Gems/Rebirth Levels</option>
+                        <option value="overclock_levels">Overclock Levels</option>
+                        <option value="auto_accelerator_levels">Auto Accelerator Levels</option>
+                        <option value="click_overdrive_levels">Click Overdrive Levels</option>
+                        <option value="gem_station_levels">Gem Station Levels</option>
+                        <option value="upgrade_discount_levels">Upgrade Discount Levels</option>
+                    </select>
+                    <input id="admin-target-resource-amount" type="number" min="1" value="1000" style="width:100%; padding:8px; box-sizing:border-box;">
+                </div>
+                <button id="admin-add-target-resource" class="btn-upgrade" style="margin-top:8px;">+ Add to Player Account</button>
+                <div id="admin-target-resource-status" class="sub-stat" style="margin-top:8px;"></div>
+            </div>
+
             <div style="margin-top: 12px; padding: 10px; border: 1px solid #8b0000; border-radius: 8px;">
                 <strong>🛠️ Trial: Player Cloud Save Reset</strong>
                 <div class="sub-stat" style="margin: 6px 0;">Server-side test. Enter another player's account email to reset their cloud save.</div>
@@ -2328,6 +2363,13 @@ body {
             return Number.isFinite(value) && value > 0 ? value : 0;
         }
 
+        function updateOwnerAdminControls() {
+            const section = document.getElementById('admin-owner-player-tools');
+            if (!section) return;
+            const email = (cloudUser?.email || '').toLowerCase();
+            section.style.display = adminUnlocked && email === CHAT_OWNER_EMAIL ? 'block' : 'none';
+        }
+
         function adminSaveAndUpdate() {
             // Keep values sensible and prevent negative resources.
             game.clicks = Math.max(0, game.clicks);
@@ -2392,6 +2434,7 @@ body {
                     adminUnlocked = true;
                     document.getElementById('admin-panel').style.display = 'block';
                     document.getElementById('admin-login-area').style.display = 'none';
+                    updateOwnerAdminControls();
                     message.innerText = '';
                     adminRequestToken = null;
                 } else if (data?.status === 'denied' || data?.status === 'expired') {
@@ -2447,6 +2490,7 @@ body {
                 adminUnlocked = true;
                 document.getElementById('admin-panel').style.display = 'block';
                 document.getElementById('admin-login-area').style.display = 'none';
+                updateOwnerAdminControls();
                 message.innerText = '';
             } else {
                 message.innerText = '❌ Incorrect password for this account.';
@@ -2460,6 +2504,71 @@ body {
                 document.getElementById('admin-login-btn').click();
             }
         });
+
+        document.getElementById('admin-add-bank-clicks').addEventListener('click', () => {
+            const status = document.getElementById('admin-bank-clicks-status');
+            const amount = adminAmount('admin-bank-clicks-amount');
+            if (!game.bankUnlocked) {
+                status.innerText = '❌ Unlock the Bank first.';
+                status.style.color = '#ff7777';
+                return;
+            }
+            if (!amount) {
+                status.innerText = '❌ Enter an amount greater than 0.';
+                status.style.color = '#ff7777';
+                return;
+            }
+            applyBankInterest();
+            game.bankBalance += amount;
+            status.innerText = '✅ Added ' + amount.toLocaleString() + ' Banked Clicks.';
+            status.style.color = '#77ff77';
+            adminSaveAndUpdate();
+        });
+
+        async function adminAddTargetResource() {
+            const status = document.getElementById('admin-target-resource-status');
+            const email = document.getElementById('admin-target-resource-email').value.trim();
+            const resource = document.getElementById('admin-target-resource').value;
+            const amount = adminAmount('admin-target-resource-amount');
+
+            if ((cloudUser?.email || '').toLowerCase() !== CHAT_OWNER_EMAIL) {
+                status.innerText = '❌ Owner account required.';
+                status.style.color = '#ff7777';
+                return;
+            }
+            if (!email) {
+                status.innerText = '❌ Enter the player email.';
+                status.style.color = '#ff7777';
+                return;
+            }
+            if (!amount) {
+                status.innerText = '❌ Enter an amount greater than 0.';
+                status.style.color = '#ff7777';
+                return;
+            }
+
+            status.innerText = 'Adding resource to player cloud save...';
+            status.style.color = '';
+            const { data, error } = await supabaseClient.functions.invoke('admin-modify-player-save', {
+                body: { email, resource, amount }
+            });
+
+            if (error) {
+                status.innerText = '❌ ' + error.message;
+                status.style.color = '#ff7777';
+                return;
+            }
+            if (data?.error) {
+                status.innerText = '❌ ' + data.error;
+                status.style.color = '#ff7777';
+                return;
+            }
+
+            status.innerText = '✅ ' + (data?.message || 'Resource added.');
+            status.style.color = '#77ff77';
+        }
+
+        document.getElementById('admin-add-target-resource').addEventListener('click', adminAddTargetResource);
 
         document.getElementById('admin-add-clicks').addEventListener('click', () => {
             game.clicks += adminAmount('admin-clicks-amount');
@@ -2607,6 +2716,7 @@ body {
 
         document.getElementById('admin-lock').addEventListener('click', () => {
             adminUnlocked = false;
+            updateOwnerAdminControls();
             document.getElementById('admin-panel').style.display = 'none';
             document.getElementById('admin-login-area').style.display = 'block';
             document.getElementById('admin-password').value = '';
