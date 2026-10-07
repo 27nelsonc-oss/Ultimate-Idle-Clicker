@@ -864,6 +864,55 @@ body {
             return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase();
         }
 
+        function getGlobalChatResetStart(now = new Date()) {
+            const start = new Date(now);
+            if (start.getHours() < 12) start.setHours(0, 0, 0, 0);
+            else start.setHours(12, 0, 0, 0);
+            return start;
+        }
+
+        function getDirectMessageResetStart(now = new Date()) {
+            const start = new Date(now);
+            start.setHours(0, 0, 0, 0);
+            const epoch = new Date(2026, 0, 1, 0, 0, 0, 0);
+            const dayNumber = Math.floor(
+                (Date.UTC(start.getFullYear(), start.getMonth(), start.getDate()) -
+                    Date.UTC(epoch.getFullYear(), epoch.getMonth(), epoch.getDate())) / 86400000
+            );
+            if (dayNumber % 2 !== 0) start.setDate(start.getDate() - 1);
+            return start;
+        }
+
+        function scheduleChatResetRefresh() {
+            if (window.chatResetTimer) clearTimeout(window.chatResetTimer);
+            const now = new Date();
+
+            const globalStart = getGlobalChatResetStart(now);
+            const nextGlobal = new Date(globalStart);
+            if (globalStart.getHours() === 0) nextGlobal.setHours(12, 0, 0, 0);
+            else {
+                nextGlobal.setDate(nextGlobal.getDate() + 1);
+                nextGlobal.setHours(0, 0, 0, 0);
+            }
+
+            const dmStart = getDirectMessageResetStart(now);
+            const nextDm = new Date(dmStart);
+            nextDm.setDate(nextDm.getDate() + 2);
+            nextDm.setHours(0, 0, 0, 0);
+
+            const nextReset = Math.min(nextGlobal.getTime(), nextDm.getTime());
+            const delay = Math.max(1000, nextReset - now.getTime() + 250);
+
+            window.chatResetTimer = setTimeout(async () => {
+                if (cloudUser) {
+                    if (dmTargetUserId) await loadDirectMessages();
+                    else await loadChatMessages();
+                    await refreshDmUnreadCount();
+                }
+                scheduleChatResetRefresh();
+            }, delay);
+        }
+
         function renderChatMessages(messages) {
             const container = document.getElementById('chat-messages');
             container.innerHTML = '';
@@ -1027,10 +1076,12 @@ body {
             }
 
             const markers = getDmReadMarkers();
+            const resetStart = getDirectMessageResetStart();
             const { data, error } = await supabaseClient
                 .from('game_direct_messages')
                 .select('id,sender_id,sender_username,created_at')
                 .eq('recipient_id', cloudUser.id)
+                .gte('created_at', resetStart.toISOString())
                 .order('created_at', { ascending: true })
                 .limit(100);
 
@@ -1077,9 +1128,11 @@ body {
         async function loadChatMessages() {
             if (!supabaseClient || !cloudUser || chatLoading) return;
             chatLoading = true;
+            const resetStart = getGlobalChatResetStart();
             const { data, error } = await supabaseClient
                 .from('game_chat_messages')
                 .select('id,user_id,username,rank,message,created_at')
+                .gte('created_at', resetStart.toISOString())
                 .order('created_at', { ascending: false })
                 .limit(50);
             chatLoading = false;
@@ -1174,10 +1227,12 @@ body {
             if (!supabaseClient || !cloudUser || !dmTargetUserId || dmLoading) return;
             dmLoading = true;
 
+            const resetStart = getDirectMessageResetStart();
             const { data, error } = await supabaseClient
                 .from('game_direct_messages')
                 .select('id,sender_id,recipient_id,sender_username,message,created_at')
                 .or(`and(sender_id.eq.${cloudUser.id},recipient_id.eq.${dmTargetUserId}),and(sender_id.eq.${dmTargetUserId},recipient_id.eq.${cloudUser.id})`)
+                .gte('created_at', resetStart.toISOString())
                 .order('created_at', { ascending: true })
                 .limit(50);
 
@@ -2581,6 +2636,7 @@ body {
         updateUI();
         initializeCloudSave();
         updateChatAuthUI();
+            scheduleChatResetRefresh();
 
         // Periodically auto-save to the cloud while logged in.
         setInterval(() => {
