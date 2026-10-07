@@ -373,7 +373,7 @@ body {
 /* Hard reset is also at the bottom, below the main content. */
  .hard-reset-container {
     grid-column: 1 / 4 !important;
-    grid-row: 2 !important;
+    grid-row: 3 !important;
     width: 100% !important;
     margin: 0 auto !important;
     text-align: center !important;
@@ -431,6 +431,34 @@ body {
     .btn-main { width: 140px; height: 140px; }
     .multi-buy-controls { flex-wrap: wrap; }
 }
+
+/* Player List */
+.player-list-panel {
+    grid-column: 3 !important;
+    grid-row: 2 !important;
+    width: 100% !important;
+    max-width: 620px !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+}
+.player-list-search-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+.player-list-search-row input { flex: 1; min-width: 0; padding: 8px; border-radius: 8px; border: 1px solid #555; background: #111; color: white; box-sizing: border-box; }
+.player-list-search-row button { width: auto; margin: 0; padding: 8px 12px; }
+.player-list-status { margin-bottom: 6px; }
+.player-list-results { max-height: 260px; overflow-y: auto; padding-right: 3px; }
+.player-list-row { display: flex; align-items: center; gap: 7px; padding: 5px 2px; border-bottom: 1px solid #2a2a2a; }
+.player-list-indicator { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 9px; background: #747d8c; }
+.player-list-indicator.online { background: #2ed573; }
+.player-list-name { width: auto !important; margin: 0 !important; padding: 0 !important; border: 0 !important; background: transparent !important; color: inherit !important; font: inherit !important; font-weight: 700 !important; text-align: left !important; cursor: pointer !important; }
+.player-list-name:hover { text-decoration: underline; }
+.player-list-you { color: var(--text-dim); font-size: 0.85rem; }
+@media (max-width: 850px) {
+    .player-list-panel { order: 3; }
+    .left-sidebar { order: 4; }
+    .hard-reset-container { order: 5; }
+    .admin-panel-container { order: 6; }
+}
+
 </style>
 </head>
 <body>
@@ -577,6 +605,17 @@ body {
             <input type="number" min="1" step="1" value="1" id="gem-up1-quantity" aria-label="Number of Clicker Station upgrades">
             <button type="button" id="gem-up1-max-btn">Max</button>
         </div>
+    </div>
+
+    <!-- Player List -->
+    <div class="panel player-list-panel" id="player-list-panel">
+        <h2 class="section-title">👥 Players</h2>
+        <div class="player-list-search-row">
+            <input id="player-search-input" type="text" placeholder="Search username or email" autocomplete="off">
+            <button type="button" id="player-search-btn" class="btn-upgrade">Search</button>
+        </div>
+        <div id="player-list-status" class="sub-stat player-list-status">Sign in to see players.</div>
+        <div id="player-list-results" class="player-list-results"></div>
     </div>
 
     <!-- Bank + Chat sidebar -->
@@ -804,6 +843,141 @@ body {
         }
 
         let currentUsername = '';
+        let playerPresenceChannel = null;
+        let playerPresenceState = {};
+        let playerListProfiles = [];
+        let playerListSearchTerm = '';
+
+
+        async function hashPlayerEmail(email) {
+            const normalized = (email || '').trim().toLowerCase();
+            if (!normalized || !window.crypto?.subtle) return '';
+            const data = new TextEncoder().encode(normalized);
+            const digest = await window.crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(digest)).map(byte => byte.toString(16).padStart(2, '0')).join('');
+        }
+
+        function getOnlinePlayerIds() {
+            const ids = new Set();
+            const state = playerPresenceChannel ? playerPresenceChannel.presenceState() : playerPresenceState;
+            Object.keys(state || {}).forEach(key => {
+                const entries = Array.isArray(state[key]) ? state[key] : [];
+                entries.forEach(entry => {
+                    const id = entry?.userId || key;
+                    if (id) ids.add(String(id));
+                });
+            });
+            return ids;
+        }
+
+        function renderPlayerList(profiles = playerListProfiles) {
+            const results = document.getElementById('player-list-results');
+            const status = document.getElementById('player-list-status');
+            if (!results || !status) return;
+            results.innerHTML = '';
+            if (!cloudUser) { status.innerText = 'Sign in to see players.'; return; }
+            const onlineIds = getOnlinePlayerIds();
+            const sorted = [...profiles].sort((a, b) => {
+                const aOnline = onlineIds.has(String(a.user_id)) ? 1 : 0;
+                const bOnline = onlineIds.has(String(b.user_id)) ? 1 : 0;
+                if (aOnline !== bOnline) return bOnline - aOnline;
+                return String(a.username || '').localeCompare(String(b.username || ''), undefined, { sensitivity: 'base' });
+            });
+            const onlineCount = sorted.filter(player => onlineIds.has(String(player.user_id))).length;
+            status.innerText = playerListSearchTerm
+                ? (sorted.length ? 'Found ' + sorted.length + ' player' + (sorted.length === 1 ? '' : 's') + ' • ' + onlineCount + ' online' : 'No matching players found.')
+                : 'Online: ' + onlineCount + ' • Accounts: ' + sorted.length;
+            sorted.forEach(player => {
+                const row = document.createElement('div');
+                row.className = 'player-list-row';
+                const online = onlineIds.has(String(player.user_id));
+                const indicator = document.createElement('span');
+                indicator.className = 'player-list-indicator' + (online ? ' online' : '');
+                indicator.title = online ? 'Online' : 'Offline';
+                row.appendChild(indicator);
+                if (String(player.user_id) === String(cloudUser.id)) {
+                    const name = document.createElement('span');
+                    name.className = 'player-list-name';
+                    name.style.cursor = 'default';
+                    name.textContent = player.username || currentUsername || 'You';
+                    row.appendChild(name);
+                    const you = document.createElement('span');
+                    you.className = 'player-list-you';
+                    you.textContent = '(You)';
+                    row.appendChild(you);
+                } else {
+                    const name = document.createElement('button');
+                    name.type = 'button';
+                    name.className = 'player-list-name';
+                    name.textContent = player.username || 'Player';
+                    name.title = 'Direct message ' + (player.username || 'Player');
+                    name.addEventListener('click', () => openDirectMessage(player.user_id, player.username || 'Player'));
+                    row.appendChild(name);
+                    const state = document.createElement('span');
+                    state.className = 'player-list-you';
+                    state.textContent = online ? 'Online' : 'Offline';
+                    row.appendChild(state);
+                }
+                results.appendChild(row);
+            });
+        }
+
+        async function loadPlayerList(searchTerm = playerListSearchTerm) {
+            if (!supabaseClient || !cloudUser) {
+                playerListProfiles = [];
+                playerListSearchTerm = '';
+                renderPlayerList([]);
+                return;
+            }
+            playerListSearchTerm = searchTerm.trim();
+            const status = document.getElementById('player-list-status');
+            if (status) status.innerText = playerListSearchTerm ? 'Searching players...' : 'Loading players...';
+            let profiles = [];
+            if (!playerListSearchTerm) {
+                const { data, error } = await supabaseClient.from('game_profiles').select('user_id,username').order('username', { ascending: true });
+                if (error) { if (status) status.innerText = '❌ Player list unavailable: ' + error.message; return; }
+                profiles = data || [];
+            } else {
+                const { data: usernameMatches, error: usernameError } = await supabaseClient.from('game_profiles').select('user_id,username').ilike('username', '%' + playerListSearchTerm + '%').order('username', { ascending: true });
+                if (usernameError) { if (status) status.innerText = '❌ Player search unavailable: ' + usernameError.message; return; }
+                profiles = usernameMatches || [];
+                if (playerListSearchTerm.includes('@')) {
+                    const emailHash = await hashPlayerEmail(playerListSearchTerm);
+                    if (emailHash) {
+                        const { data: emailMatches, error: emailError } = await supabaseClient.from('game_profiles').select('user_id,username').eq('email_lookup_hash', emailHash);
+                        if (!emailError && emailMatches) {
+                            const seen = new Set(profiles.map(player => player.user_id));
+                            emailMatches.forEach(player => { if (!seen.has(player.user_id)) profiles.push(player); });
+                        }
+                    }
+                }
+            }
+            playerListProfiles = profiles;
+            renderPlayerList(profiles);
+        }
+
+        function setupPlayerPresence() {
+            if (!supabaseClient || !cloudUser) return;
+            if (playerPresenceChannel) supabaseClient.removeChannel(playerPresenceChannel);
+            playerPresenceState = {};
+            playerPresenceChannel = supabaseClient.channel('ultimate-idle-clicker-player-presence', { config: { private: true, presence: { key: cloudUser.id } } })
+                .on('presence', { event: 'sync' }, () => { playerPresenceState = playerPresenceChannel.presenceState(); renderPlayerList(); })
+                .on('presence', { event: 'join' }, () => { playerPresenceState = playerPresenceChannel.presenceState(); renderPlayerList(); })
+                .on('presence', { event: 'leave' }, () => { playerPresenceState = playerPresenceChannel.presenceState(); renderPlayerList(); })
+                .subscribe(async status => {
+                    if (status === 'SUBSCRIBED') {
+                        await playerPresenceChannel.track({ userId: cloudUser.id, username: currentUsername || 'Player', online_at: new Date().toISOString() });
+                        playerPresenceState = playerPresenceChannel.presenceState();
+                        renderPlayerList();
+                    }
+                });
+        }
+
+        function stopPlayerPresence() {
+            if (playerPresenceChannel && supabaseClient) supabaseClient.removeChannel(playerPresenceChannel);
+            playerPresenceChannel = null;
+            playerPresenceState = {};
+        }
 
         function generateDefaultUsername(user) {
             const idPart = String(user?.id || '').replace(/-/g, '').slice(0, 8);
@@ -1192,6 +1366,10 @@ body {
             if (!loggedIn) {
                 dmTargetUserId = null;
                 dmTargetUsername = '';
+                stopPlayerPresence();
+                playerListProfiles = [];
+                playerListSearchTerm = '';
+                renderPlayerList([]);
                 titleText.innerText = '💬 Chat';
                 backButton.style.display = 'none';
                 status.innerText = 'Sign in to chat with other players.';
@@ -1480,6 +1658,8 @@ body {
                 updateChatAuthUI();
                 await loadChatMessages();
                 setupChatRealtime();
+                setupPlayerPresence();
+                await loadPlayerList();
                 await refreshDmUnreadCount();
             }
             supabaseClient.auth.onAuthStateChange((_event, session) => {
@@ -1490,6 +1670,8 @@ body {
                     loadUsername().then(async () => {
                         updateChatAuthUI();
                         await loadChatMessages();
+                        setupPlayerPresence();
+                        await loadPlayerList();
                         await refreshDmUnreadCount();
                     });
                     setupChatRealtime();
@@ -1518,6 +1700,8 @@ body {
                 updateCloudUI();
                 await loadUsername();
                 updateChatAuthUI();
+                setupPlayerPresence();
+                await loadPlayerList();
                 await refreshDmUnreadCount();
                 setCloudMessage('Account created and logged in.');
             } else {
@@ -1539,19 +1723,35 @@ body {
             await loadUsername();
             updateChatAuthUI();
             await cloudLoadGame(false);
+            setupPlayerPresence();
+            await loadPlayerList();
             await refreshDmUnreadCount();
             setCloudStatus('Logged in.');
         });
 
-        document.getElementById('username-save-btn').addEventListener('click', saveUsername);
+        document.getElementById('username-save-btn').addEventListener('click', async () => {
+            const saved = await saveUsername();
+            if (saved && playerPresenceChannel && cloudUser) {
+                await playerPresenceChannel.track({ userId: cloudUser.id, username: currentUsername || 'Player', online_at: new Date().toISOString() });
+                await loadPlayerList();
+            }
+        });
+        document.getElementById('player-search-btn').addEventListener('click', () => loadPlayerList(document.getElementById('player-search-input').value));
+        document.getElementById('player-search-input').addEventListener('keydown', event => {
+            if (event.key === 'Enter') { event.preventDefault(); loadPlayerList(event.target.value); }
+        });
 
         document.getElementById('cloud-save-btn').addEventListener('click', () => cloudSaveGame());
         document.getElementById('cloud-load-btn').addEventListener('click', () => cloudLoadGame());
         document.getElementById('cloud-logout-btn').addEventListener('click', async () => {
             await supabaseClient.auth.signOut();
+            stopPlayerPresence();
             cloudUser = null;
             currentUsername = '';
             dmUnreadCount = 0;
+            playerListProfiles = [];
+            playerListSearchTerm = '';
+            renderPlayerList([]);
             updateCloudUI();
             updateChatAuthUI();
         });
