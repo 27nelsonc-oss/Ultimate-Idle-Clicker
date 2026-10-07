@@ -1798,6 +1798,55 @@ body {
             }
         }
 
+        async function applyPendingAdminGrants() {
+            if (!supabaseClient || !cloudUser) return;
+            const { data: grants, error } = await supabaseClient.rpc('claim_game_admin_player_grants', { limit_count: 100 });
+            if (error || !Array.isArray(grants) || !grants.length) return;
+            const ids = grants.map(g => g.id);
+            try {
+                for (const g of grants) {
+                    const n = Number(g.amount);
+                    if (!Number.isFinite(n) || n <= 0) continue;
+                    switch (g.resource) {
+                        case 'clicks': game.clicks = Math.max(0, Number(game.clicks) || 0) + n; break;
+                        case 'bank_clicks':
+                            game.bankBalance = Math.max(0, Number(game.bankBalance) || 0) + n;
+                            if (!Number.isFinite(Number(game.bankLastInterestAt))) game.bankLastInterestAt = Date.now();
+                            break;
+                        case 'gems': game.gems = Math.max(0, Math.floor(Number(game.gems) || 0)) + Math.floor(n); break;
+                        case 'auto_clickers': game.autoClickers = Math.max(0, Math.floor(Number(game.autoClickers) || 0)) + Math.floor(n); break;
+                        case 'click_upgrades': {
+                            const a = Math.floor(n);
+                            game.clicksPerClick = Math.max(1, Math.floor(Number(game.clicksPerClick) || 1)) + a;
+                            game.totalUpgradesBought = Math.max(0, Math.floor(Number(game.totalUpgradesBought) || 0)) + a;
+                            break;
+                        }
+                        case 'rebirths': {
+                            const a = Math.floor(n);
+                            game.rebirths = Math.max(0, Math.floor(Number(game.rebirths) || 0)) + a;
+                            game.multiplier = Math.max(1, Number(game.multiplier) || 1) + a * 0.5;
+                            game.upgradesNeededForRebirth = 3 + game.rebirths;
+                            break;
+                        }
+                        case 'rebirth_gem_levels': game.rebirthGemUpgradeLevel = Math.max(0, Math.floor(Number(game.rebirthGemUpgradeLevel) || 0)) + Math.floor(n); break;
+                        case 'overclock_levels': game.overclockLevel = Math.max(0, Math.floor(Number(game.overclockLevel) || 0)) + Math.floor(n); break;
+                        case 'auto_accelerator_levels': game.autoAcceleratorLevel = Math.max(0, Math.floor(Number(game.autoAcceleratorLevel) || 0)) + Math.floor(n); break;
+                        case 'click_overdrive_levels': game.clickOverdriveLevel = Math.max(0, Math.floor(Number(game.clickOverdriveLevel) || 0)) + Math.floor(n); break;
+                        case 'gem_station_levels': game.clickerStationLevel = Math.max(0, Math.floor(Number(game.clickerStationLevel) || 0)) + Math.floor(n); break;
+                        case 'upgrade_discount_levels': game.upgradeDiscountLevel = Math.min(10, Math.max(0, Math.floor(Number(game.upgradeDiscountLevel) || 0) + Math.floor(n))); break;
+                    }
+                }
+                updateUI();
+                if (!await saveGame()) throw new Error('Cloud save failed while applying admin grant.');
+                const done = await supabaseClient.rpc('complete_game_admin_player_grants', { grant_ids: ids });
+                if (done.error) throw done.error;
+                setCloudStatus('Admin grant applied.');
+            } catch (e) {
+                await supabaseClient.rpc('release_game_admin_player_grants', { grant_ids: ids });
+                console.error('Admin grant application error:', e);
+            }
+        }
+
         async function initializeCloudSave() {
             updateCloudUI();
             if (!supabaseClient) return;
@@ -1807,6 +1856,7 @@ body {
             updateChatAuthUI();
             if (cloudUser) {
                 await cloudLoadGame(false);
+                await applyPendingAdminGrants();
                 await loadUsername();
                 updateChatAuthUI();
                 await loadChatMessages();
@@ -1822,6 +1872,7 @@ body {
                 updateChatAuthUI();
                 if (cloudUser) {
                     loadUsername().then(async () => {
+                        await applyPendingAdminGrants();
                         updateChatAuthUI();
                         await loadChatMessages();
                         setupPlayerPresence();
@@ -1961,13 +2012,12 @@ body {
         }
 
         // --- LOCAL STORAGE (AUTO-SAVE) ---
-        function saveGame() {
+        async function saveGame() {
             game.lastActiveAt = Date.now();
             localStorage.setItem('ultimateIdleClicker_scaled_clean_save', JSON.stringify(game));
             showToast();
-            if (supabaseClient && cloudUser) {
-                cloudSaveGame(false);
-            }
+            if (supabaseClient && cloudUser) return await cloudSaveGame(false);
+            return true;
         }
 
         function loadGame() {
@@ -3107,9 +3157,10 @@ body {
             scheduleChatResetRefresh();
 
         // Periodically auto-save to the cloud while logged in.
-        setInterval(() => {
+        setInterval(async () => {
             if (supabaseClient && cloudUser) {
-                cloudSaveGame(false);
+                await applyPendingAdminGrants();
+                await cloudSaveGame(false);
             }
         }, 10000);
     </script>
