@@ -2657,7 +2657,11 @@ body {
             if (button.id === 'click-btn') {
                 if (suppressNextMainClick) suppressNextMainClick = false;
                 if (game.silentClickingUnlocked) {
-                    startSilentClicking();
+                    if (silentClickHolding) {
+                        stopSilentClicking();
+                    } else {
+                        performMainClick();
+                    }
                 } else {
                     performMainClick();
                 }
