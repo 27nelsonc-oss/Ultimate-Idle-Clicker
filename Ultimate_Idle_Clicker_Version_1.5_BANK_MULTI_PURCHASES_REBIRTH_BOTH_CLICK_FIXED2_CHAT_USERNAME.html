@@ -1656,8 +1656,10 @@ body {
             if (showStatus) setCloudStatus('⚠️ Your cloud save was reset by an administrator.');
 }
 
+        let cloudLoadInProgress = false;
+
         async function cloudSaveGame(showStatus = true) {
-            if (!supabaseClient || !cloudUser) return false;
+            if (!supabaseClient || !cloudUser || cloudLoadInProgress) return false;
 
             const { data: currentSave, error: checkError } = await supabaseClient
                 .from('game_saves')
@@ -1693,6 +1695,9 @@ body {
         }
 
         async function cloudLoadGame(showStatus = true) {
+            if (cloudLoadInProgress) return false;
+            cloudLoadInProgress = true;
+            try {
             if (!supabaseClient || !cloudUser) return false;
             const { data, error } = await supabaseClient
                 .from('game_saves')
@@ -1738,6 +1743,9 @@ body {
             }
             if (showStatus) setCloudStatus('Cloud save was empty.', true);
             return false;
+            } finally {
+                cloudLoadInProgress = false;
+            }
         }
 
         async function initializeCloudSave() {
