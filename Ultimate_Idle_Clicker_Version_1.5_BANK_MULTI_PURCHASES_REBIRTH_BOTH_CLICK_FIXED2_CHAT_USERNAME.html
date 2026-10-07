@@ -1813,6 +1813,7 @@ body {
             updateChatAuthUI();
             await cloudLoadGame(false);
             setupPlayerPresence();
+            startPlayerOnlineHeartbeat();
             await loadPlayerList();
             await refreshDmUnreadCount();
             setCloudStatus('Logged in.');
