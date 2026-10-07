@@ -863,11 +863,13 @@ body {
 
         const CHAT_OWNER_EMAIL = '27nelsonc@student.harrisburg.k12.or.us';
         const CHAT_TESTER_EMAIL = '27costat@student.harrisburg.k12.or.us';
+        const CHAT_ADMIN_EMAIL = '27costak';
 
         function getChatRank(email) {
             const normalized = (email || '').toLowerCase();
             if (normalized === CHAT_OWNER_EMAIL) return 'Owner';
             if (normalized === CHAT_TESTER_EMAIL) return 'Tester';
+            if (normalized === CHAT_ADMIN_EMAIL) return 'Admin';
             return '';
         }
 
