@@ -861,6 +861,7 @@ body {
         let currentUsername = '';
         let playerPresenceChannel = null;
         let playerPresenceState = {};
+        let playerPresenceRetryTimer = null;
         let playerListProfiles = [];
         let playerListSearchTerm = '';
 
@@ -974,21 +975,64 @@ body {
 
         function setupPlayerPresence() {
             if (!supabaseClient || !cloudUser) return;
+
+            if (playerPresenceRetryTimer) {
+                clearTimeout(playerPresenceRetryTimer);
+                playerPresenceRetryTimer = null;
+            }
             if (playerPresenceChannel) supabaseClient.removeChannel(playerPresenceChannel);
+
             playerPresenceState = {};
-            playerPresenceChannel = supabaseClient.channel('ultimate-idle-clicker-player-presence', { config: { private: true, presence: { key: cloudUser.id } } })
-                .on('presence', { event: 'sync' }, () => { playerPresenceState = playerPresenceChannel.presenceState(); renderPlayerList(); })
-                .on('presence', { event: 'join' }, () => { playerPresenceState = playerPresenceChannel.presenceState(); renderPlayerList(); })
-                .on('presence', { event: 'leave' }, () => { playerPresenceState = playerPresenceChannel.presenceState(); renderPlayerList(); })
+            const channel = supabaseClient.channel('ultimate-idle-clicker-player-presence', {
+                config: {
+                    private: true,
+                    presence: { key: cloudUser.id }
+                }
+            });
+            playerPresenceChannel = channel;
+
+            const refreshPresenceView = () => {
+                if (playerPresenceChannel !== channel) return;
+                playerPresenceState = channel.presenceState();
+                renderPlayerList();
+            };
+
+            channel
+                .on('presence', { event: 'sync' }, refreshPresenceView)
+                .on('presence', { event: 'join' }, refreshPresenceView)
+                .on('presence', { event: 'leave' }, refreshPresenceView)
                 .subscribe(async status => {
+                    if (playerPresenceChannel !== channel) return;
+
                     if (status === 'SUBSCRIBED') {
-                        await playerPresenceChannel.track({ userId: cloudUser.id, username: currentUsername || 'Player', online_at: new Date().toISOString() });
-                        playerPresenceState = playerPresenceChannel.presenceState();
+                        const trackResult = await channel.track({
+                            userId: cloudUser.id,
+                            username: currentUsername || 'Player',
+                            online_at: new Date().toISOString()
+                        });
+
+                        if (playerPresenceChannel !== channel) return;
+                        playerPresenceState = channel.presenceState();
                         renderPlayerList();
+
+                        if (trackResult !== 'ok' && trackResult !== 'success') {
+                            playerPresenceRetryTimer = setTimeout(() => {
+                                playerPresenceRetryTimer = null;
+                                setupPlayerPresence();
+                            }, 3000);
+                        }
+                    } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+                        playerPresenceState = {};
+                        renderPlayerList();
+                        if (cloudUser && playerPresenceChannel === channel) {
+                            playerPresenceRetryTimer = setTimeout(() => {
+                                playerPresenceRetryTimer = null;
+                                setupPlayerPresence();
+                            }, 3000);
+                        }
                     }
                 });
         }
-
         function stopPlayerPresence() {
             if (playerPresenceChannel && supabaseClient) supabaseClient.removeChannel(playerPresenceChannel);
             playerPresenceChannel = null;
