@@ -1276,18 +1276,19 @@ body {
             return cloudUser ? DM_READ_MARKER_PREFIX + cloudUser.id : null;
         }
 
-        function getDmReadMarkers() {
-            if (!cloudUser) return {};
-            try {
-                return JSON.parse(localStorage.getItem(getDmReadMarkerKey()) || '{}');
-            } catch {
-                return {};
-            }
-        }
-
-        function saveDmReadMarkers(markers) {
-            const key = getDmReadMarkerKey();
-            if (key) localStorage.setItem(key, JSON.stringify(markers));
+        async function getDmReadMarkers() {
+            if (!supabaseClient || !cloudUser) return {};
+            const { data, error } = await supabaseClient
+                .from('game_direct_message_reads')
+                .select('sender_id,last_read_at')
+                .eq('user_id', cloudUser.id);
+            if (error) return {};
+            const markers = {};
+            (data || []).forEach(row => {
+                const timestamp = Date.parse(row.last_read_at);
+                if (Number.isFinite(timestamp)) markers[row.sender_id] = timestamp;
+            });
+            return markers;
         }
 
         function renderDmUnreadSenders() {
@@ -1335,7 +1336,7 @@ body {
                 return;
             }
 
-            const markers = getDmReadMarkers();
+            const markers = await getDmReadMarkers();
             const resetStart = getDirectMessageResetStart();
             const { data, error } = await supabaseClient
                 .from('game_direct_messages')
@@ -1369,7 +1370,7 @@ body {
             updateDmUnreadBadge();
         }
 
-        function markDirectMessagesRead(messages) {
+        async function markDirectMessagesRead(messages) {
             if (!cloudUser || !dmTargetUserId || !Array.isArray(messages)) return;
             const incoming = messages.filter(message => message.recipient_id === cloudUser.id);
             if (!incoming.length) return;
@@ -1377,9 +1378,17 @@ body {
             const latest = Math.max(...incoming.map(message => Date.parse(message.created_at) || 0));
             if (!latest) return;
 
-            const markers = getDmReadMarkers();
-            markers[dmTargetUserId] = latest;
-            saveDmReadMarkers(markers);
+            const { error } = await supabaseClient
+                .from('game_direct_message_reads')
+                .upsert({
+                    user_id: cloudUser.id,
+                    sender_id: dmTargetUserId,
+                    last_read_at: new Date(latest).toISOString(),
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'user_id,sender_id' });
+
+            if (error) return;
+
             dmUnreadSenders = dmUnreadSenders.filter(sender => sender.userId !== dmTargetUserId);
             dmUnreadCount = Math.max(0, dmUnreadCount - incoming.length);
             updateDmUnreadBadge();
@@ -1509,7 +1518,7 @@ body {
 
             const messages = data || [];
             renderDirectMessages(messages);
-            markDirectMessagesRead(messages);
+            await markDirectMessagesRead(messages);
             await refreshDmUnreadCount();
         }
 
