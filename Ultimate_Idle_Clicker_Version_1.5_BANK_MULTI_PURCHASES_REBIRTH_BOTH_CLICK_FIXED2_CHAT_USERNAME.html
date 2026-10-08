@@ -1644,6 +1644,7 @@ body {
             }
         }
         let cloudResetVersion = 0;
+        let hardResetInProgress = false;
 
         function setCloudMessage(message, isError = false) {
             const el = document.getElementById('cloud-message');
@@ -2386,8 +2387,9 @@ body {
 
         // --- GAME LOOP ---
         setInterval(() => {
+            if (hardResetInProgress) return;
             const regularCps = game.autoClickers * game.multiplier * getOverclockMultiplier() * getAutoAcceleratorMultiplier();
-            const gemStationCps = getClickerStationCPS(game.clickerStationLevel);
+            const gemStationCps = getClickerStationCps(game.clickerStationLevel);
             
             addGeneratedClicks((regularCps + gemStationCps) / 10);
             updateUI();
@@ -3076,40 +3078,70 @@ body {
             }
         });
 
-        // Hard reset: wipe this game's save and return to the starting state.
-        document.getElementById('hard-reset-btn').addEventListener('click', () => {
+        // Hard reset: wipe this game's save and keep the reset synchronized with cloud save.
+        document.getElementById('hard-reset-btn').addEventListener('click', async () => {
             const confirmed = confirm(
                 'HARD RESET: This will permanently erase your save, gems, rebirths, upgrades, and progress. Continue?'
             );
 
-            if (!confirmed) return;
+            if (!confirmed || hardResetInProgress) return;
 
-            localStorage.removeItem('ultimateIdleClicker_scaled_clean_save');
+            hardResetInProgress = true;
+            stopSilentClicking();
 
-            game = {
-                clicks: 0,
-                clicksPerClick: 1,
-                autoClickers: 0,
-                totalUpgradesBought: 0,
-                upgradesNeededForRebirth: 3,
-                rebirths: 0,
-                multiplier: 1.0,
-                gems: 0,
-                clickerStationLevel: 0,
-                silentClickingUnlocked: false,
-                upgradeDiscountLevel: 0,
-                rebirthGemUpgradeLevel: 0,
-                overclockLevel: 0,
-                autoAcceleratorLevel: 0,
-                bankUnlocked: false,
-                bankEnabled: false,
-                bankBalance: 0,
-                bankLastInterestAt: Date.now()
-            };
+            try {
+                // Do not let an in-progress cloud load restore the old save after the reset.
+                while (cloudLoadInProgress) {
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                }
 
-            updateUI();
-            saveGame();
-            alert('Save completely reset!');
+                // Advance the reset version so other sessions cannot restore the old cloud save.
+                const localResetVersion = Number(localStorage.getItem('ultimateIdleClicker_cloud_reset_version') || 0);
+                cloudResetVersion = Math.max(Number(cloudResetVersion) || 0, localResetVersion) + 1;
+                localStorage.setItem('ultimateIdleClicker_cloud_reset_version', String(cloudResetVersion));
+                localStorage.removeItem('ultimateIdleClicker_scaled_clean_save');
+
+                game = {
+                    clicks: 0,
+                    clicksPerClick: 1,
+                    autoClickers: 0,
+                    totalUpgradesBought: 0,
+                    upgradesNeededForRebirth: 3,
+                    rebirths: 0,
+                    multiplier: 1.0,
+                    gems: 0,
+                    clickerStationLevel: 0,
+                    silentClickingUnlocked: false,
+                    upgradeDiscountLevel: 0,
+                    rebirthGemUpgradeLevel: 0,
+                    overclockLevel: 0,
+                    autoAcceleratorLevel: 0,
+                    clickOverdriveLevel: 0,
+                    lastActiveAt: Date.now(),
+                    bankUnlocked: false,
+                    bankEnabled: false,
+                    bankBalance: 0,
+                    bankLastInterestAt: Date.now()
+                };
+
+                // Save the reset state locally immediately, then synchronize the cloud copy.
+                localStorage.setItem('ultimateIdleClicker_scaled_clean_save', JSON.stringify(game));
+                updateUI();
+
+                if (supabaseClient && cloudUser) {
+                    const cloudReset = await cloudSaveGame(false);
+                    if (!cloudReset) {
+                        setCloudStatus('⚠️ Local save reset. Cloud reset could not be confirmed; please use Save to Cloud.');
+                        alert('Save reset locally, but the cloud reset could not be confirmed.');
+                        return;
+                    }
+                    setCloudStatus('Save completely reset locally and in the cloud.');
+                }
+
+                alert('Save completely reset!');
+            } finally {
+                hardResetInProgress = false;
+            }
         });
 
         // Initialize session on boot
