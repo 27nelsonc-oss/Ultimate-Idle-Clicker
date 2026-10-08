@@ -1691,6 +1691,7 @@ body {
         let hardResetInProgress = false;
         let globalAnnouncementChannel = null;
         let ownerSelectedPlayer = null;
+        let autoClickFraction = 0;
         let ownerPlayerListAdminMode = false;
 
         function renderGlobalAnnouncement(announcement) {
@@ -2267,12 +2268,16 @@ body {
         function addGeneratedClicks(amount) {
             const earned = Number(amount);
             if (!Number.isFinite(earned) || earned <= 0) return;
+            const currentClicks = Number(game.clicks);
+            const safeClicks = Number.isFinite(currentClicks) ? currentClicks : 0;
+            const currentBank = Number(game.bankBalance);
+            const safeBank = Number.isFinite(currentBank) ? currentBank : 0;
             if (game.bankUnlocked && game.bankEnabled) {
                 const bankAmount = earned * BANK_DEPOSIT_RATE;
-                game.bankBalance += bankAmount;
-                game.clicks += earned - bankAmount;
+                game.bankBalance = safeBank + bankAmount;
+                game.clicks = safeClicks + earned - bankAmount;
             } else {
-                game.clicks += earned;
+                game.clicks = safeClicks + earned;
             }
         }
 
@@ -2524,7 +2529,14 @@ body {
             const regularCps = autoClickers * multiplier * getOverclockMultiplier() * getAutoAcceleratorMultiplier();
             const gemStationCps = getClickerStationCPS(Number(game.clickerStationLevel) || 0);
             const totalCps = regularCps + gemStationCps;
-            if (Number.isFinite(totalCps)) addGeneratedClicks(totalCps / 10);
+            if (Number.isFinite(totalCps) && totalCps > 0) {
+                autoClickFraction += totalCps / 10;
+                const wholeClicks = Math.floor(autoClickFraction);
+                if (wholeClicks > 0) {
+                    autoClickFraction -= wholeClicks;
+                    addGeneratedClicks(wholeClicks);
+                }
+            }
             updateUI();
         }, 100);
 
