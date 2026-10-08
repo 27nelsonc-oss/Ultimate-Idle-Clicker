@@ -797,6 +797,11 @@ body {
 
             <div id="admin-owner-player-tools" style="display:none; margin-top:12px; padding:10px; border:1px solid #555; border-radius:8px;">
                 <strong>👤 Owner Only: Add Resources to Another Player</strong>
+                <div style="display:flex; align-items:center; gap:8px; margin:8px 0;">
+                    <input id="owner-player-list-admin-mode" type="checkbox" style="width:18px; height:18px;">
+                    <label for="owner-player-list-admin-mode">Player List Admin Mode</label>
+                </div>
+                <div class="sub-stat" style="margin-bottom:6px;">When ON, clicking a player selects them for your Admin tools. When OFF, clicking their name opens a DM.</div>
                 <div class="sub-stat" style="margin:6px 0;">Enter a player's account email and add a selected resource to their cloud save.</div>
                 <div style="display:grid; grid-template-columns:minmax(220px,1fr) minmax(190px,0.7fr) minmax(140px,0.4fr); gap:8px; align-items:center;">
                     <input id="admin-target-resource-email" type="email" placeholder="Player email" style="width:100%; padding:8px; box-sizing:border-box;">
@@ -1032,7 +1037,7 @@ body {
                     name.textContent = player.username || 'Player';
                     name.title = 'Direct message ' + (player.username || 'Player');
                     name.addEventListener('click', () => {
-                        if ((cloudUser?.email || '').toLowerCase() === CHAT_OWNER_EMAIL) {
+                        if ((cloudUser?.email || '').toLowerCase() === CHAT_OWNER_EMAIL && ownerPlayerListAdminMode) {
                             ownerSelectedPlayer = { userId: String(player.user_id), username: player.username || 'Player' };
                             syncOwnerSelectedPlayerUI();
                         } else {
@@ -1681,6 +1686,7 @@ body {
         let hardResetInProgress = false;
         let globalAnnouncementChannel = null;
         let ownerSelectedPlayer = null;
+        let ownerPlayerListAdminMode = false;
 
         function renderGlobalAnnouncement(announcement) {
             const panel = document.getElementById('global-announcement-panel');
@@ -2536,6 +2542,7 @@ body {
             if (!section) return;
             const email = (cloudUser?.email || '').toLowerCase();
             section.style.display = adminUnlocked && email === CHAT_OWNER_EMAIL ? 'block' : 'none';
+            if (email !== CHAT_OWNER_EMAIL) ownerPlayerListAdminMode = false;
         }
 
         function adminSaveAndUpdate() {
@@ -2737,6 +2744,19 @@ body {
         }
 
         document.getElementById('admin-add-target-resource').addEventListener('click', adminAddTargetResource);
+
+        document.getElementById('owner-player-list-admin-mode')?.addEventListener('change', updateOwnerPlayerListAdminMode);
+
+        function updateOwnerPlayerListAdminMode() {
+            const toggle = document.getElementById('owner-player-list-admin-mode');
+            const isOwner = (cloudUser?.email || '').toLowerCase() === CHAT_OWNER_EMAIL;
+            ownerPlayerListAdminMode = Boolean(toggle?.checked) && isOwner;
+            if (!ownerPlayerListAdminMode) {
+                ownerSelectedPlayer = null;
+                const label = document.getElementById('admin-selected-player');
+                if (label) label.innerText = 'No player selected.';
+            }
+        }
 
         function syncOwnerSelectedPlayerUI() {
             const label = document.getElementById('admin-selected-player');
