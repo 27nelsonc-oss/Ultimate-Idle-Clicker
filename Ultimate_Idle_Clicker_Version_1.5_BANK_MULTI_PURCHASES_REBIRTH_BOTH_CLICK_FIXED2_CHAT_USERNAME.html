@@ -2516,7 +2516,7 @@ body {
         setInterval(() => {
             if (hardResetInProgress) return;
             const regularCps = game.autoClickers * game.multiplier * getOverclockMultiplier() * getAutoAcceleratorMultiplier();
-            const gemStationCps = getClickerStationCps(game.clickerStationLevel);
+            const gemStationCps = getClickerStationCPS(game.clickerStationLevel);
             
             addGeneratedClicks((regularCps + gemStationCps) / 10);
             updateUI();
