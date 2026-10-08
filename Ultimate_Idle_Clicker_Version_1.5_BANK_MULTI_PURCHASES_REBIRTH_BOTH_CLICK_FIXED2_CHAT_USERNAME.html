@@ -820,6 +820,17 @@ body {
                 <div id="admin-target-resource-status" class="sub-stat" style="margin-top:8px;"></div>
             </div>
 
+            <div style="margin-top:12px; padding:10px; border:1px solid #555; border-radius:8px;">
+                <strong>🔎 Owner Only: View Player Info</strong>
+                <div class="sub-stat" style="margin:6px 0;">Enter a player's account email to view their account and game statistics. This does not change their save.</div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <input id="admin-view-player-email" type="email" placeholder="Player email" style="flex:1; min-width:220px; padding:8px; box-sizing:border-box;">
+                    <button id="admin-view-player-info" class="btn-upgrade">View Player Info</button>
+                </div>
+                <div id="admin-view-player-status" class="sub-stat" style="margin-top:8px;"></div>
+                <div id="admin-view-player-results" style="display:none; margin-top:8px; padding:8px; border:1px solid #333; border-radius:8px; line-height:1.6;"></div>
+            </div>
+
             <div style="margin-top:12px; padding:10px; border:1px solid #00C7B1; border-radius:8px;">
                 <strong>📢 Global Announcement</strong>
                 <div class="sub-stat" style="margin:6px 0;">This message is shown to every player. Maximum 500 characters.</div>
@@ -2717,6 +2728,59 @@ body {
         }
 
         document.getElementById('admin-add-target-resource').addEventListener('click', adminAddTargetResource);
+
+        async function adminViewPlayerInfo() {
+            const status = document.getElementById('admin-view-player-status');
+            const results = document.getElementById('admin-view-player-results');
+            const email = document.getElementById('admin-view-player-email').value.trim().toLowerCase();
+            if (results) { results.style.display = 'none'; results.innerHTML = ''; }
+            if ((cloudUser?.email || '').toLowerCase() !== CHAT_OWNER_EMAIL) { status.innerText = '❌ Owner account required.'; status.style.color = '#ff7777'; return; }
+            if (!supabaseClient || !cloudUser) { status.innerText = '❌ Log into your cloud account first.'; status.style.color = '#ff7777'; return; }
+            if (!email) { status.innerText = '❌ Enter the player email.'; status.style.color = '#ff7777'; return; }
+            status.innerText = 'Loading player information...'; status.style.color = '';
+            const emailHash = await hashPlayerEmail(email);
+            if (!emailHash) { status.innerText = '❌ Could not create the player lookup.'; status.style.color = '#ff7777'; return; }
+            const { data, error } = await supabaseClient.rpc('owner_view_player_info', { target_email_hash: emailHash });
+            if (error) { status.innerText = '❌ View failed: ' + error.message; status.style.color = '#ff7777'; return; }
+            const p = data;
+            if (!p) { status.innerText = '❌ No player information returned.'; status.style.color = '#ff7777'; return; }
+            const formatNumber = value => Number(value || 0).toLocaleString();
+            const formatDate = value => value ? new Date(value).toLocaleString() : 'Never / unavailable';
+            const yesNo = value => value ? 'Yes' : 'No';
+            results.innerHTML = '<strong>👤 ' + String(p.username || 'No username') + '</strong>' +
+                '<br>Email: ' + String(p.email || 'Unknown') +
+                '<br>Account ID: ' + String(p.user_id || 'Unknown') +
+                '<br>Account created: ' + formatDate(p.created_at) +
+                '<br>Email confirmed: ' + yesNo(p.email_confirmed) +
+                '<br>Last seen: ' + formatDate(p.last_seen_at) +
+                '<br>Cloud save last updated: ' + formatDate(p.save_updated_at) +
+                '<br><br><strong>Game Stats</strong>' +
+                '<br>Clicks: ' + formatNumber(p.clicks) +
+                '<br>Clicks per Click: ' + formatNumber(p.clicks_per_click) +
+                '<br>Auto Clickers: ' + formatNumber(p.auto_clickers) +
+                '<br>Total Click Upgrades: ' + formatNumber(p.total_upgrades_bought) +
+                '<br>Rebirths: ' + formatNumber(p.rebirths) +
+                '<br>Multiplier: ' + Number(p.multiplier || 1).toLocaleString(undefined, { maximumFractionDigits: 2 }) + 'x' +
+                '<br>Gems: ' + formatNumber(p.gems) +
+                '<br>Gem Station Level: ' + formatNumber(p.gem_station_level) +
+                '<br>Silent Clicking: ' + yesNo(p.silent_clicking_unlocked) +
+                '<br>Upgrade Discount Level: ' + formatNumber(p.upgrade_discount_level) +
+                '<br>More Gems/Rebirth Level: ' + formatNumber(p.rebirth_gem_upgrade_level) +
+                '<br>Overclock Level: ' + formatNumber(p.overclock_level) +
+                '<br>Auto Accelerator Level: ' + formatNumber(p.auto_accelerator_level) +
+                '<br>Click Overdrive Level: ' + formatNumber(p.click_overdrive_level) +
+                '<br>Bank Unlocked: ' + yesNo(p.bank_unlocked) +
+                '<br>Bank Enabled: ' + yesNo(p.bank_enabled) +
+                '<br>Banked Clicks: ' + formatNumber(p.bank_balance) +
+                '<br>Save Found: ' + yesNo(p.save_found);
+            results.style.display = 'block';
+            status.innerText = '✅ Player information loaded.'; status.style.color = '#77ff77';
+        }
+
+        document.getElementById('admin-view-player-info').addEventListener('click', adminViewPlayerInfo);
+        document.getElementById('admin-view-player-email').addEventListener('keydown', event => {
+            if (event.key === 'Enter') adminViewPlayerInfo();
+        });
 
         document.getElementById('admin-publish-announcement').addEventListener('click', async () => {
             await saveGlobalAnnouncement(document.getElementById('admin-global-announcement').value);
