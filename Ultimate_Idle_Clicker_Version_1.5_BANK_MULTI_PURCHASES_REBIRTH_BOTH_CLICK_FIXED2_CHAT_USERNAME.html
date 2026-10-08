@@ -827,6 +827,7 @@ body {
                     <input id="admin-view-player-email" type="email" placeholder="Player email" style="flex:1; min-width:220px; padding:8px; box-sizing:border-box;">
                     <button id="admin-view-player-info" class="btn-upgrade">View Player Info</button>
                 </div>
+                <div id="admin-selected-player" class="sub-stat" style="margin-top:8px;">No player selected.</div>
                 <div id="admin-view-player-status" class="sub-stat" style="margin-top:8px;"></div>
                 <div id="admin-view-player-results" style="display:none; margin-top:8px; padding:8px; border:1px solid #333; border-radius:8px; line-height:1.6;"></div>
             </div>
@@ -1030,7 +1031,14 @@ body {
                     name.className = 'player-list-name';
                     name.textContent = player.username || 'Player';
                     name.title = 'Direct message ' + (player.username || 'Player');
-                    name.addEventListener('click', () => openDirectMessage(player.user_id, player.username || 'Player'));
+                    name.addEventListener('click', () => {
+                        if ((cloudUser?.email || '').toLowerCase() === CHAT_OWNER_EMAIL) {
+                            ownerSelectedPlayer = { userId: String(player.user_id), username: player.username || 'Player' };
+                            syncOwnerSelectedPlayerUI();
+                        } else {
+                            openDirectMessage(player.user_id, player.username || 'Player');
+                        }
+                    });
                     row.appendChild(name);
                     const state = document.createElement('span');
                     state.className = 'player-list-you';
@@ -1672,6 +1680,7 @@ body {
         let cloudResetVersion = 0;
         let hardResetInProgress = false;
         let globalAnnouncementChannel = null;
+        let ownerSelectedPlayer = null;
 
         function renderGlobalAnnouncement(announcement) {
             const panel = document.getElementById('global-announcement-panel');
@@ -2686,7 +2695,7 @@ body {
 
         async function adminAddTargetResource() {
             const status = document.getElementById('admin-target-resource-status');
-            const email = document.getElementById('admin-target-resource-email').value.trim();
+            const email = await resolveOwnerSelectedEmail('admin-target-resource-email');
             const resource = document.getElementById('admin-target-resource').value;
             const amount = adminAmount('admin-target-resource-amount');
 
@@ -2729,10 +2738,37 @@ body {
 
         document.getElementById('admin-add-target-resource').addEventListener('click', adminAddTargetResource);
 
+        function syncOwnerSelectedPlayerUI() {
+            const label = document.getElementById('admin-selected-player');
+            if (label) label.innerText = ownerSelectedPlayer ? 'Selected player: ' + ownerSelectedPlayer.username : 'No player selected.';
+            const viewInput = document.getElementById('admin-view-player-email');
+            const grantInput = document.getElementById('admin-target-resource-email');
+            if (ownerSelectedPlayer) {
+                if (viewInput) viewInput.dataset.selectedUserId = ownerSelectedPlayer.userId;
+                if (grantInput) grantInput.dataset.selectedUserId = ownerSelectedPlayer.userId;
+            }
+        }
+
+        async function resolveOwnerSelectedEmail(inputId) {
+            const input = document.getElementById(inputId);
+            if (!input) return '';
+            if (ownerSelectedPlayer && input.dataset.selectedUserId === ownerSelectedPlayer.userId) {
+                const { data, error } = await supabaseClient
+                    .from('game_profiles')
+                    .select('email_lookup_hash')
+                    .eq('user_id', ownerSelectedPlayer.userId)
+                    .maybeSingle();
+                if (!error && data?.email_lookup_hash) {
+                    input.dataset.selectedEmailHash = data.email_lookup_hash;
+                }
+            }
+            return input.value.trim().toLowerCase();
+        }
+
         async function adminViewPlayerInfo() {
             const status = document.getElementById('admin-view-player-status');
             const results = document.getElementById('admin-view-player-results');
-            const email = document.getElementById('admin-view-player-email').value.trim().toLowerCase();
+            const email = await resolveOwnerSelectedEmail('admin-view-player-email');
             if (results) { results.style.display = 'none'; results.innerHTML = ''; }
             if ((cloudUser?.email || '').toLowerCase() !== CHAT_OWNER_EMAIL) { status.innerText = '❌ Owner account required.'; status.style.color = '#ff7777'; return; }
             if (!supabaseClient || !cloudUser) { status.innerText = '❌ Log into your cloud account first.'; status.style.color = '#ff7777'; return; }
