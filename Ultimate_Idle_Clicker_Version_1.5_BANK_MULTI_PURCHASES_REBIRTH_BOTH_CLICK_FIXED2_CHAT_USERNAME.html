@@ -715,7 +715,12 @@ body {
         </div>
 
         <div id="admin-panel" style="display: none; margin-top: 15px;">
-            <div style="padding: 10px; border: 1px solid #8b0000; border-radius: 8px; margin-bottom: 12px;">
+            <div style="padding: 10px; border: 1px solid #00C7B1; border-radius: 8px; margin-bottom: 12px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <strong>👑 Owner Player List Mode</strong>
+                <input id="owner-player-list-admin-mode" type="checkbox" style="width:20px; height:20px;">
+                <label for="owner-player-list-admin-mode">Click player names to select them for Admin tools</label>
+                <div class="sub-stat" style="flex-basis:100%;">OFF = player names open DMs. ON = player names select a player for your Admin tools.</div>
+            </div>            <div style="padding: 10px; border: 1px solid #8b0000; border-radius: 8px; margin-bottom: 12px;">
                 <strong>⚠️ Admin Controls Unlocked</strong>
                 <div class="sub-stat">Use these controls to add or remove game resources.</div>
             </div>
@@ -2746,6 +2751,7 @@ body {
         document.getElementById('admin-add-target-resource').addEventListener('click', adminAddTargetResource);
 
         document.getElementById('owner-player-list-admin-mode')?.addEventListener('change', updateOwnerPlayerListAdminMode);
+        updateOwnerPlayerListAdminMode();
 
         function updateOwnerPlayerListAdminMode() {
             const toggle = document.getElementById('owner-player-list-admin-mode');
