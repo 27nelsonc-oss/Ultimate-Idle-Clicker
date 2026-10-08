@@ -492,6 +492,10 @@ body {
     <!-- Main Game Panel -->
     <div class="panel main-panel">
         <h1>Ultimate Idle Clicker</h1>
+        <div id="global-announcement-panel" style="display:none; margin:0 0 12px 0; padding:9px 10px; border:1px solid #00C7B1; border-radius:8px; background:#171717; text-align:left; box-sizing:border-box;">
+            <strong>📢 Announcement</strong>
+            <div id="global-announcement-message" style="margin-top:4px; white-space:pre-wrap; overflow-wrap:anywhere;"></div>
+        </div>
         <div class="stat-display" id="click-display">0</div>
         <div class="sub-stat">Clicks</div>
         
@@ -814,6 +818,17 @@ body {
                 </div>
                 <button id="admin-add-target-resource" class="btn-upgrade" style="margin-top:8px;">+ Add to Player Account</button>
                 <div id="admin-target-resource-status" class="sub-stat" style="margin-top:8px;"></div>
+            </div>
+
+            <div style="margin-top:12px; padding:10px; border:1px solid #00C7B1; border-radius:8px;">
+                <strong>📢 Global Announcement</strong>
+                <div class="sub-stat" style="margin:6px 0;">This message is shown to every player. Maximum 500 characters.</div>
+                <textarea id="admin-global-announcement" maxlength="500" rows="3" placeholder="Type an announcement for all players..." style="width:100%; box-sizing:border-box; padding:8px; border-radius:8px; border:1px solid #555; background:#111; color:white; resize:vertical;"></textarea>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
+                    <button id="admin-publish-announcement" class="btn-upgrade">Publish Announcement</button>
+                    <button id="admin-clear-announcement" class="btn-upgrade">Clear Announcement</button>
+                </div>
+                <div id="admin-announcement-status" class="sub-stat" style="margin-top:8px;"></div>
             </div>
 
             <div style="margin-top: 12px; padding: 10px; border: 1px solid #8b0000; border-radius: 8px;">
@@ -1645,6 +1660,85 @@ body {
         }
         let cloudResetVersion = 0;
         let hardResetInProgress = false;
+        let globalAnnouncementChannel = null;
+
+        function renderGlobalAnnouncement(announcement) {
+            const panel = document.getElementById('global-announcement-panel');
+            const message = document.getElementById('global-announcement-message');
+            if (!panel || !message) return;
+            const text = String(announcement?.message || '').trim();
+            if (!text) {
+                message.textContent = '';
+                panel.style.display = 'none';
+                return;
+            }
+            message.textContent = text;
+            panel.style.display = 'block';
+        }
+
+        async function loadGlobalAnnouncement() {
+            if (!supabaseClient) return;
+            const { data, error } = await supabaseClient
+                .from('game_global_announcement')
+                .select('id,message,updated_at')
+                .eq('id', 1)
+                .maybeSingle();
+            if (error) {
+                console.error('Global announcement load error:', error);
+                return;
+            }
+            renderGlobalAnnouncement(data);
+            const input = document.getElementById('admin-global-announcement');
+            if (input && !input.value.trim() && data?.message) input.value = data.message;
+        }
+
+        function setupGlobalAnnouncementRealtime() {
+            if (!supabaseClient) return;
+            if (globalAnnouncementChannel) supabaseClient.removeChannel(globalAnnouncementChannel);
+            globalAnnouncementChannel = supabaseClient
+                .channel('game-global-announcement')
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: 'game_global_announcement'
+                }, payload => {
+                    if (payload.eventType === 'DELETE') renderGlobalAnnouncement(null);
+                    else renderGlobalAnnouncement(payload.new);
+                })
+                .subscribe();
+        }
+
+        async function saveGlobalAnnouncement(message) {
+            const status = document.getElementById('admin-announcement-status');
+            if ((cloudUser?.email || '').toLowerCase() !== CHAT_OWNER_EMAIL) {
+                if (status) { status.innerText = '❌ Owner account required.'; status.style.color = '#ff7777'; }
+                return;
+            }
+            if (!supabaseClient || !cloudUser) {
+                if (status) { status.innerText = '❌ Log into your cloud account first.'; status.style.color = '#ff7777'; }
+                return;
+            }
+            const text = String(message || '').trim();
+            if (text.length > 500) {
+                if (status) { status.innerText = '❌ Announcement is too long. Maximum is 500 characters.'; status.style.color = '#ff7777'; }
+                return;
+            }
+            const { error } = await supabaseClient
+                .from('game_global_announcement')
+                .upsert({
+                    id: 1,
+                    message: text || null,
+                    updated_by: cloudUser.id,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'id' });
+            if (error) {
+                console.error('Global announcement save error:', error);
+                if (status) { status.innerText = '❌ Announcement failed: ' + error.message; status.style.color = '#ff7777'; }
+                return;
+            }
+            renderGlobalAnnouncement({ message: text });
+            if (status) { status.innerText = text ? '✅ Announcement published to all players.' : '✅ Announcement cleared.'; status.style.color = '#77ff77'; }
+        }
 
         function setCloudMessage(message, isError = false) {
             const el = document.getElementById('cloud-message');
@@ -1851,6 +1945,8 @@ body {
         async function initializeCloudSave() {
             updateCloudUI();
             if (!supabaseClient) return;
+            await loadGlobalAnnouncement();
+            setupGlobalAnnouncementRealtime();
             const { data: { session } } = await supabaseClient.auth.getSession();
             cloudUser = session ? session.user : null;
             updateCloudUI();
@@ -2621,6 +2717,15 @@ body {
         }
 
         document.getElementById('admin-add-target-resource').addEventListener('click', adminAddTargetResource);
+
+        document.getElementById('admin-publish-announcement').addEventListener('click', async () => {
+            await saveGlobalAnnouncement(document.getElementById('admin-global-announcement').value);
+        });
+
+        document.getElementById('admin-clear-announcement').addEventListener('click', async () => {
+            document.getElementById('admin-global-announcement').value = '';
+            await saveGlobalAnnouncement('');
+        });
 
         document.getElementById('admin-add-clicks').addEventListener('click', () => {
             game.clicks += adminAmount('admin-clicks-amount');
