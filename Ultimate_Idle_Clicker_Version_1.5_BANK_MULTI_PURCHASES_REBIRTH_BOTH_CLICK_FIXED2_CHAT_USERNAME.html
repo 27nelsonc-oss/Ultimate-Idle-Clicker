@@ -2235,8 +2235,10 @@ body {
             const elapsedHours = Math.min(OFFLINE_PROGRESS_CAP_HOURS, (now - last) / 3600000);
             const elapsedSeconds = elapsedHours * 3600;
             if (elapsedSeconds <= 0) return 0;
-            const regularCps = game.autoClickers * game.multiplier * getOverclockMultiplier() * getAutoAcceleratorMultiplier();
-            const gemStationCps = getClickerStationCPS(game.clickerStationLevel);
+            const autoClickers = Math.max(0, Number(game.autoClickers) || 0);
+            const multiplier = Math.max(1, Number(game.multiplier) || 1);
+            const regularCps = autoClickers * multiplier * getOverclockMultiplier() * getAutoAcceleratorMultiplier();
+            const gemStationCps = getClickerStationCPS(Number(game.clickerStationLevel) || 0);
             const offlineClicks = (regularCps + gemStationCps) * elapsedSeconds * OFFLINE_PROGRESS_EFFICIENCY;
             if (offlineClicks > 0) addGeneratedClicks(offlineClicks);
             applyBankInterest();
@@ -2379,9 +2381,11 @@ body {
             document.getElementById('click-display').innerText = Math.floor(game.clicks).toLocaleString();
             document.getElementById('cpc-display').innerText = `Clicks per Click: ${(game.clicksPerClick * game.multiplier * getClickOverdriveMultiplier()).toFixed(1)}`;
             
-            const regularCps = game.autoClickers * game.multiplier * getOverclockMultiplier() * getAutoAcceleratorMultiplier();
-            const gemStationCps = getClickerStationCPS(game.clickerStationLevel);
-            const totalCps = regularCps + gemStationCps;
+            const autoClickers = Math.max(0, Number(game.autoClickers) || 0);
+            const multiplier = Math.max(1, Number(game.multiplier) || 1);
+            const regularCps = autoClickers * multiplier * getOverclockMultiplier() * getAutoAcceleratorMultiplier();
+            const gemStationCps = getClickerStationCPS(Number(game.clickerStationLevel) || 0);
+            const totalCps = Number.isFinite(regularCps + gemStationCps) ? regularCps + gemStationCps : 0;
             
             document.getElementById('cps-display').innerText = `Auto Clicks/sec: ${totalCps.toFixed(1)}`;
             document.getElementById('multiplier-display').innerText = `Multiplier: ${game.multiplier.toFixed(1)}x`;
@@ -2515,10 +2519,12 @@ body {
         // --- GAME LOOP ---
         setInterval(() => {
             if (hardResetInProgress) return;
-            const regularCps = game.autoClickers * game.multiplier * getOverclockMultiplier() * getAutoAcceleratorMultiplier();
-            const gemStationCps = getClickerStationCPS(game.clickerStationLevel);
-            
-            addGeneratedClicks((regularCps + gemStationCps) / 10);
+            const autoClickers = Math.max(0, Number(game.autoClickers) || 0);
+            const multiplier = Math.max(1, Number(game.multiplier) || 1);
+            const regularCps = autoClickers * multiplier * getOverclockMultiplier() * getAutoAcceleratorMultiplier();
+            const gemStationCps = getClickerStationCPS(Number(game.clickerStationLevel) || 0);
+            const totalCps = regularCps + gemStationCps;
+            if (Number.isFinite(totalCps)) addGeneratedClicks(totalCps / 10);
             updateUI();
         }, 100);
 
@@ -3391,6 +3397,17 @@ body {
         if (typeof game.totalUpgradesBought !== 'number') {
             game.totalUpgradesBought = Math.max(0, game.clicksPerClick - 1);
         }
+        // Normalize auto-clicker values so older/cloud saves cannot produce NaN CPS.
+        if (!Number.isFinite(Number(game.autoClickers)) || Number(game.autoClickers) < 0) game.autoClickers = 0;
+        game.autoClickers = Math.floor(Number(game.autoClickers));
+        // Normalize the rebirth multiplier used by all automatic click calculations.
+        if (!Number.isFinite(Number(game.multiplier)) || Number(game.multiplier) <= 0) game.multiplier = 1;
+        // Normalize auto-clicker upgrade levels.
+        if (!Number.isFinite(Number(game.overclockLevel)) || Number(game.overclockLevel) < 0) game.overclockLevel = 0;
+        game.overclockLevel = Math.floor(Number(game.overclockLevel));
+        if (!Number.isFinite(Number(game.autoAcceleratorLevel)) || Number(game.autoAcceleratorLevel) < 0) game.autoAcceleratorLevel = 0;
+        game.autoAcceleratorLevel = Math.floor(Number(game.autoAcceleratorLevel));
+
         // Normalize older saves to the new rebirth upgrade requirement.
         game.upgradesNeededForRebirth = 3 + game.rebirths;
         if (typeof game.silentClickingUnlocked !== 'boolean') {
