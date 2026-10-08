@@ -2746,6 +2746,12 @@ body {
             if (ownerSelectedPlayer) {
                 if (viewInput) viewInput.dataset.selectedUserId = ownerSelectedPlayer.userId;
                 if (grantInput) grantInput.dataset.selectedUserId = ownerSelectedPlayer.userId;
+                resolveOwnerSelectedEmail('admin-view-player-email').then(email => {
+                    if (viewInput && ownerSelectedPlayer) viewInput.value = email;
+                });
+                resolveOwnerSelectedEmail('admin-target-resource-email').then(email => {
+                    if (grantInput && ownerSelectedPlayer) grantInput.value = email;
+                });
             }
         }
 
@@ -2753,13 +2759,16 @@ body {
             const input = document.getElementById(inputId);
             if (!input) return '';
             if (ownerSelectedPlayer && input.dataset.selectedUserId === ownerSelectedPlayer.userId) {
-                const { data, error } = await supabaseClient
+                const { data: hashData, error: hashError } = await supabaseClient
                     .from('game_profiles')
                     .select('email_lookup_hash')
                     .eq('user_id', ownerSelectedPlayer.userId)
                     .maybeSingle();
-                if (!error && data?.email_lookup_hash) {
-                    input.dataset.selectedEmailHash = data.email_lookup_hash;
+                if (!hashError && hashData?.email_lookup_hash) {
+                    const { data: emailData, error: emailError } = await supabaseClient.rpc('owner_view_player_email_by_hash', {
+                        target_email_hash: hashData.email_lookup_hash
+                    });
+                    if (!emailError && emailData) return String(emailData).trim().toLowerCase();
                 }
             }
             return input.value.trim().toLowerCase();
