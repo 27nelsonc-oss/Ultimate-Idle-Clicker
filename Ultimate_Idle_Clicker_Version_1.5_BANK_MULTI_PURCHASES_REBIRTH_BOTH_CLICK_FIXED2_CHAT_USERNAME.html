@@ -2240,7 +2240,7 @@ body {
         async function refreshChatTitleBadges() { if (supabaseClient && cloudUser) await loadChatMessages(); }
         async function refreshOwnerTitleTools() {
             const section = document.getElementById('owner-title-tools'); if (!section) return;
-            section.style.display = isGameOwner() ? 'block' : 'none';
+            section.style.display = adminUnlocked && isGameOwner() ? 'block' : 'none';
             const targetStatus = document.getElementById('admin-title-target-status');
             if (!isGameOwner()) return;
             if (!ownerSelectedPlayer) { if (targetStatus) targetStatus.textContent = 'No player selected. Turn on Owner Player List Mode and click a player name.'; return; }
@@ -2983,6 +2983,7 @@ body {
             if (section) section.style.display = adminUnlocked && email === CHAT_OWNER_EMAIL ? 'block' : 'none';
             if (eventSection) eventSection.style.display = adminUnlocked && email === CHAT_OWNER_EMAIL ? 'block' : 'none';
             if (email !== CHAT_OWNER_EMAIL) ownerPlayerListAdminMode = false;
+            refreshOwnerTitleTools();
         }
 
         function adminSaveAndUpdate() {
