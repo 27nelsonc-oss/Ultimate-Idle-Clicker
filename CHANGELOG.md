@@ -10,7 +10,7 @@
 - **Verification:** The three database migrations applied successfully. Inline JavaScript syntax checks passed for both script blocks; HTML checks confirmed one HTML root, balanced style/script tags, one title panel, and no new duplicate element IDs. The source already contains a duplicate `owner-player-list-admin-mode` ID; it was left unchanged as unrelated existing markup.
 - **Not tested:** No browser execution or downloaded standalone Chrome-tab test has been performed yet. Please test title panel placement in a separate tab, owner preview/test claim, activation in chat, real claim race behavior with a second account, and owner grant/removal.
 - **Code commits:** 10fab29dc8b291a808ec39b7ef80f149f6032c62 (feature) and 1b830d55eb3ff9dcef09b8eb16f18585784608d8 (owner-only visibility safeguard).
-- **Database migration:** `add_halloween_title_collection_and_test_claims`, `allow_chat_to_display_active_titles`, and `restrict_title_rpc_to_authenticated_users`.
+- **Database migration:** `add_halloween_title_collection_and_test_claims`, `allow_chat_to_display_active_titles`, `restrict_title_rpc_to_authenticated_users`, and `restrict_title_table_grants`.
 - **Rollback:** Revert the HTML commit on `Halloween`; remove the title SQL objects only after confirming no other branch uses them. Do not change `game-development` or `main`.
 
 ### 2026-10-12 — Halloween Admin Abuse event (initial testing build)
