@@ -6,9 +6,9 @@
     <title>Ultimate Idle Clicker</title>
     <style>
         :root {
-            --bg-color: #121212;
-            --panel-bg: #1e1e1e;
-            --accent-color: #00C7B1; /* Your custom turquoise/mint color */
+            --bg-color: #0d0b0a;
+            --panel-bg: #1b1714;
+            --accent-color: #ff7518; /* Your custom turquoise/mint color */
             --gem-color: #2ed573;
             --text-color: #ffffff;
             --text-dim: #a4b0be;
@@ -99,16 +99,16 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 0 15px rgba(0, 199, 177, 0.6); 
+            box-shadow: 0 0 15px rgba(255, 117, 24, 0.6); 
         }
 
         .btn-main:active {
             transform: scale(0.97);
-            box-shadow: 0 0 8px rgba(0, 199, 177, 0.8);
+            box-shadow: 0 0 8px rgba(255, 117, 24, 0.8);
         }
 
         .btn-upgrade {
-            background-color: #2f3542;
+            background-color: #302018;
             color: white;
             text-align: left;
             display: flex;
@@ -124,25 +124,25 @@
         }
 
         .btn-upgrade:not(:disabled):hover {
-            background-color: #57606f;
+            background-color: #4a2a19;
         }
 
         .btn-rebirth {
-            background-color: #ffa502;
+            background-color: #ff7518;
             color: #121212;
         }
 
         .btn-rebirth:not(:disabled):hover {
-            background-color: #eccc68;
+            background-color: #ff9f43;
         }
 
         .btn-gem-upgrade {
-            background-color: #1e3799;
+            background-color: #4b2354;
             color: white;
         }
 
         .btn-gem-upgrade:not(:disabled):hover {
-            background-color: #0c2461;
+            background-color: #32153a;
         }
 
         .cost-tag {
@@ -153,7 +153,7 @@
         }
 
         .section-title {
-            border-bottom: 2px solid #2f3542;
+            border-bottom: 2px solid #50301e;
             padding-bottom: 8px;
             margin-top: 0;
             color: var(--gem-color);
@@ -164,7 +164,7 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background: #2ed573;
+            background: #ff7518;
             color: black;
             padding: 10px 20px;
             border-radius: 5px;
@@ -207,16 +207,16 @@
     width: 72px;
     padding: 5px 7px;
     border-radius: 6px;
-    border: 1px solid #59636e;
-    background: #1b2229;
+    border: 1px solid #65452f;
+    background: #201915;
     color: inherit;
     box-sizing: border-box;
 }
 .multi-buy-controls button {
     padding: 5px 9px;
     border-radius: 6px;
-    border: 1px solid #59636e;
-    background: #2b333c;
+    border: 1px solid #65452f;
+    background: #35251c;
     color: inherit;
     cursor: pointer;
 }
@@ -468,13 +468,13 @@ body {
     box-sizing: border-box !important;
 }
 .player-list-search-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
-.player-list-search-row input { flex: 1; min-width: 0; padding: 8px; border-radius: 8px; border: 1px solid #555; background: #111; color: white; box-sizing: border-box; }
+.player-list-search-row input { flex: 1; min-width: 0; padding: 8px; border-radius: 8px; border: 1px solid #5a3825; background: #111; color: white; box-sizing: border-box; }
 .player-list-search-row button { width: auto; margin: 0; padding: 8px 12px; }
 .player-list-status { margin-bottom: 6px; }
 .player-list-results { max-height: 260px; overflow-y: auto; padding-right: 3px; }
-.player-list-row { display: flex; align-items: center; gap: 7px; padding: 5px 2px; border-bottom: 1px solid #2a2a2a; }
+.player-list-row { display: flex; align-items: center; gap: 7px; padding: 5px 2px; border-bottom: 1px solid #33251d; }
 .player-list-indicator { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 9px; background: #747d8c; }
-.player-list-indicator.online { background: #2ed573; }
+.player-list-indicator.online { background: #ff7518; }
 .player-list-name { width: auto !important; margin: 0 !important; padding: 0 !important; border: 0 !important; background: transparent !important; color: inherit !important; font: inherit !important; font-weight: 700 !important; text-align: left !important; cursor: pointer !important; }
 .player-list-name:hover { text-decoration: underline; }
 .player-list-you { color: var(--text-dim); font-size: 0.85rem; }
@@ -492,7 +492,7 @@ body {
     <!-- Main Game Panel -->
     <div class="panel main-panel">
         <h1>Ultimate Idle Clicker</h1>
-        <div id="global-announcement-panel" style="display:none; margin:0 0 12px 0; padding:9px 10px; border:1px solid #00C7B1; border-radius:8px; background:#171717; text-align:left; box-sizing:border-box;">
+        <div id="global-announcement-panel" style="display:none; margin:0 0 12px 0; padding:9px 10px; border:1px solid #ff7518; border-radius:8px; background:#171717; text-align:left; box-sizing:border-box;">
             <strong>📢 Announcement</strong>
             <div id="global-announcement-message" style="margin-top:4px; white-space:pre-wrap; overflow-wrap:anywhere;"></div>
         </div>
@@ -679,10 +679,10 @@ body {
         <div id="dm-unread-list" style="display:none; margin-bottom:8px;"></div>
         <button type="button" id="chat-back-global-btn" class="btn-upgrade" style="display:none; margin-bottom:8px;">← Back to Global Chat</button>
         <div class="sub-stat" id="chat-login-status" style="margin-bottom:8px;">Sign in to chat with other players.</div>
-        <div id="chat-messages" style="height:220px; overflow-y:auto; background:#111; border:1px solid #555; border-radius:8px; padding:8px; box-sizing:border-box; margin-bottom:8px;">
+        <div id="chat-messages" style="height:220px; overflow-y:auto; background:#111; border:1px solid #5a3825; border-radius:8px; padding:8px; box-sizing:border-box; margin-bottom:8px;">
             <div class="sub-stat">Sign in to load chat messages.</div>
         </div>
-        <textarea id="chat-input" maxlength="300" rows="5" placeholder="Type a message..." disabled style="width:100%; min-width:0; resize:vertical; padding:8px; border-radius:8px; border:1px solid #555; background:#111; color:white; box-sizing:border-box; display:block;"></textarea>
+        <textarea id="chat-input" maxlength="300" rows="5" placeholder="Type a message..." disabled style="width:100%; min-width:0; resize:vertical; padding:8px; border-radius:8px; border:1px solid #5a3825; background:#111; color:white; box-sizing:border-box; display:block;"></textarea>
         <button type="button" id="chat-send-btn" class="btn-upgrade" disabled style="width:100%; margin-top:8px;">Send</button>
         <div style="display:flex; justify-content:space-between; gap:8px; margin-top:5px;">
             <div class="sub-stat" id="chat-status"></div>
@@ -705,7 +705,7 @@ body {
                     id="admin-password"
                     type="password"
                     placeholder="Password"
-                    style="flex: 1; min-width: 180px; padding: 10px; border-radius: 8px; border: 1px solid #555; background:#111; color:white;"
+                    style="flex: 1; min-width: 180px; padding: 10px; border-radius: 8px; border: 1px solid #5a3825; background:#111; color:white;"
                 >
                 <button id="admin-login-btn" class="btn-upgrade" style="max-width: 180px;">
                     Unlock Admin
@@ -715,7 +715,7 @@ body {
         </div>
 
         <div id="admin-panel" style="display: none; margin-top: 15px;">
-            <div style="padding: 10px; border: 1px solid #00C7B1; border-radius: 8px; margin-bottom: 12px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <div style="padding: 10px; border: 1px solid #ff7518; border-radius: 8px; margin-bottom: 12px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
                 <strong>👑 Owner Player List Mode</strong>
                 <input id="owner-player-list-admin-mode" type="checkbox" style="width:20px; height:20px;">
                 <label for="owner-player-list-admin-mode">Click player names to select them for Admin tools</label>
@@ -790,7 +790,7 @@ body {
                 </div>
             </div>
 
-            <div style="margin-top: 12px; padding: 10px; border: 1px solid #555; border-radius: 8px;">
+            <div style="margin-top: 12px; padding: 10px; border: 1px solid #5a3825; border-radius: 8px;">
                 <strong>🏦 Banked Clicks</strong>
                 <div class="sub-stat" style="margin: 6px 0;">Add Banked Clicks to your own Bank. The Bank must already be unlocked.</div>
                 <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
@@ -800,7 +800,7 @@ body {
                 <div id="admin-bank-clicks-status" class="sub-stat" style="margin-top:8px;"></div>
             </div>
 
-            <div id="admin-owner-player-tools" style="display:none; margin-top:12px; padding:10px; border:1px solid #555; border-radius:8px;">
+            <div id="admin-owner-player-tools" style="display:none; margin-top:12px; padding:10px; border:1px solid #5a3825; border-radius:8px;">
                 <strong>👤 Owner Only: Add Resources to Another Player</strong>
                 <div style="display:flex; align-items:center; gap:8px; margin:8px 0;">
                     <input id="owner-player-list-admin-mode" type="checkbox" style="width:18px; height:18px;">
@@ -810,7 +810,7 @@ body {
                 <div class="sub-stat" style="margin:6px 0;">Enter a player's account email and add a selected resource to their cloud save.</div>
                 <div style="display:grid; grid-template-columns:minmax(220px,1fr) minmax(190px,0.7fr) minmax(140px,0.4fr); gap:8px; align-items:center;">
                     <input id="admin-target-resource-email" type="email" placeholder="Player email" style="width:100%; padding:8px; box-sizing:border-box;">
-                    <select id="admin-target-resource" style="width:100%; padding:8px; box-sizing:border-box; background:#111; color:white; border:1px solid #555; border-radius:8px;">
+                    <select id="admin-target-resource" style="width:100%; padding:8px; box-sizing:border-box; background:#111; color:white; border:1px solid #5a3825; border-radius:8px;">
                         <option value="clicks">Clicks</option>
                         <option value="bank_clicks">Banked Clicks</option>
                         <option value="gems">Gems</option>
@@ -830,7 +830,7 @@ body {
                 <div id="admin-target-resource-status" class="sub-stat" style="margin-top:8px;"></div>
             </div>
 
-            <div style="margin-top:12px; padding:10px; border:1px solid #555; border-radius:8px;">
+            <div style="margin-top:12px; padding:10px; border:1px solid #5a3825; border-radius:8px;">
                 <strong>🔎 Owner Only: View Player Info</strong>
                 <div class="sub-stat" style="margin:6px 0;">Enter a player's account email to view their account and game statistics. This does not change their save.</div>
                 <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
@@ -839,13 +839,13 @@ body {
                 </div>
                 <div id="admin-selected-player" class="sub-stat" style="margin-top:8px;">No player selected.</div>
                 <div id="admin-view-player-status" class="sub-stat" style="margin-top:8px;"></div>
-                <div id="admin-view-player-results" style="display:none; margin-top:8px; padding:8px; border:1px solid #333; border-radius:8px; line-height:1.6;"></div>
+                <div id="admin-view-player-results" style="display:none; margin-top:8px; padding:8px; border:1px solid #3a261b; border-radius:8px; line-height:1.6;"></div>
             </div>
 
-            <div style="margin-top:12px; padding:10px; border:1px solid #00C7B1; border-radius:8px;">
+            <div style="margin-top:12px; padding:10px; border:1px solid #ff7518; border-radius:8px;">
                 <strong>📢 Global Announcement</strong>
                 <div class="sub-stat" style="margin:6px 0;">This message is shown to every player. Maximum 500 characters.</div>
-                <textarea id="admin-global-announcement" maxlength="500" rows="3" placeholder="Type an announcement for all players..." style="width:100%; box-sizing:border-box; padding:8px; border-radius:8px; border:1px solid #555; background:#111; color:white; resize:vertical;"></textarea>
+                <textarea id="admin-global-announcement" maxlength="500" rows="3" placeholder="Type an announcement for all players..." style="width:100%; box-sizing:border-box; padding:8px; border-radius:8px; border:1px solid #5a3825; background:#111; color:white; resize:vertical;"></textarea>
                 <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
                     <button id="admin-publish-announcement" class="btn-upgrade">Publish Announcement</button>
                     <button id="admin-clear-announcement" class="btn-upgrade">Clear Announcement</button>
@@ -883,7 +883,7 @@ body {
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <!-- CLOUD SAVE -->
-    <div id="cloud-save-panel" style="width:100%; max-width:700px; margin:10px auto; padding:12px; box-sizing:border-box; text-align:center; border:1px solid #555; border-radius:8px;">
+    <div id="cloud-save-panel" style="width:100%; max-width:700px; margin:10px auto; padding:12px; box-sizing:border-box; text-align:center; border:1px solid #5a3825; border-radius:8px;">
         <h2 style="margin:0 0 8px 0;">☁️ Cloud Save</h2>
         <div id="cloud-logged-out">
             <input id="cloud-email" type="email" placeholder="Email" style="margin:4px; padding:6px;">
@@ -897,7 +897,7 @@ body {
             <div style="margin-top:10px;">
                 <div class="sub-stat" style="margin-bottom:4px;">Public Username (shown in Chat)</div>
                 <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                    <input id="username-input" type="text" maxlength="20" placeholder="3-20 letters, numbers, _ or -" style="flex:1; min-width:180px; padding:8px; border-radius:8px; border:1px solid #555; background:#111; color:white; box-sizing:border-box;">
+                    <input id="username-input" type="text" maxlength="20" placeholder="3-20 letters, numbers, _ or -" style="flex:1; min-width:180px; padding:8px; border-radius:8px; border:1px solid #5a3825; background:#111; color:white; box-sizing:border-box;">
                     <button type="button" id="username-save-btn" class="btn-upgrade" style="width:auto; min-width:100px; margin:0;">Save Username</button>
                 </div>
                 <div id="username-status" class="sub-stat" style="margin-top:4px;"></div>
