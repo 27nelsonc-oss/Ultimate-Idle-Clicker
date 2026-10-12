@@ -130,3 +130,15 @@ These entries are brief historical summaries. Verify actual diffs in GitHub befo
 - **Not tested / user testing needed:**
 - **Commit SHA:**
 - **Rollback instructions:** Exact prior commit/file and safe steps.
+
+### 2026-10-12 — Make title-management controls reliably visible
+- **Request/problem:** Ensure the owner can see the title grant/remove controls in the Halloween Admin Panel.
+- **Root cause:** The title-management section was initially hidden and its visibility depended on title refresh timing. The Admin Panel's unlock/lock state did not explicitly refresh that section.
+- **Change made:** The title section now requires both owner identity and an unlocked Admin Panel to display. Updating owner Admin controls now refreshes title-management visibility, so unlocking makes it appear and locking hides it again.
+- **Files/functions touched:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`; `refreshOwnerTitleTools()`, `updateOwnerAdminControls()`.
+- **Preserved behavior / compatibility:** No title-claim rules, title grant/removal RPCs, chat rendering, save schema, general layout, `game-development`, or `main` were changed.
+- **Tests run and results:** Confirmed the updated visibility condition and refresh call are present in the source. No live browser test was performed.
+- **Not tested / user testing needed:** Sign in as the owner on the Halloween branch, unlock Admin Panel, confirm “Title Management (Owner Only)” appears, then lock Admin and confirm it hides.
+- **Commit SHA:** `c1d88def3547abb452f9dfbdb9a87f83c89bed22` (HTML); documentation update follows.
+- **Rollback instructions:** Revert the HTML visibility-fix commit on `Halloween`; no changes were made to other branches.
+
