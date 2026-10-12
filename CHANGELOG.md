@@ -4,6 +4,15 @@ This file records user-visible behavior changes and meaningful project changes. 
 
 ## Unreleased
 
+### 2026-10-12 — Keep Cloud Save directly under the main game interface
+- **Problem/request:** Keep Cloud Save easy to reach as new panels and features are added, rather than letting it drift farther down the page.
+- **Change:** Moved the existing Cloud Save panel into the main game panel, immediately below the main interface and rebirth control. The Cloud Save contents and behavior were not changed.
+- **Files:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`
+- **Verification:** Source checks confirmed one Cloud Save panel, placed after the rebirth control and before the Gem Station section; HTML still ends correctly. No browser/standalone-tab test was performed.
+- **Commit:** `5fcc9d356233ccfe56ad67db7cd93ca50db2df5e`
+- **Rollback:** Revert this commit on `game-development` to restore the previous Cloud Save position.
+
+
 ### 2026-10-12 — Improve cloud-save reliability
 - **Problem/request:** Make progress sync more reliable between devices and prevent stale saves from replacing newer cloud progress.
 - **Change:** Queue save attempts that overlap a load/save; defer load-related saves until loading finishes; load cloud data when the signed-in account changes (not on token refresh); replace check-then-upsert with a conditional update or insert so a concurrent cloud change is not silently overwritten.
