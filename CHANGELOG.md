@@ -4,6 +4,15 @@ This file records user-visible behavior changes and meaningful project changes. 
 
 ## Unreleased
 
+### 2026-10-12 — Improve cloud-save reliability
+- **Problem/request:** Make progress sync more reliable between devices and prevent stale saves from replacing newer cloud progress.
+- **Change:** Queue save attempts that overlap a load/save; defer load-related saves until loading finishes; load cloud data when an auth session changes; replace check-then-upsert with a conditional update or insert so a concurrent cloud change is not silently overwritten.
+- **Files:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`
+- **Verification:** Source-level review of the changed save/load/auth flows; GitHub file re-fetched after the code commit.
+- **Not tested:** Real two-device sync against the live Supabase project; browser execution and race-condition testing still required.
+- **Commit:** `66873d21996ba0d0a260a7e6edec37befadeacfc` (game code).
+- **Rollback:** Revert the game-code commit above on `game-development`; no changes to `main` or database schema.
+
 ### Current priority
 - Fix reliable cross-device cloud saving first. The same account should load its latest progress on another device, without an older save overwriting newer progress.
 - Offline progress is a separate follow-up priority; do not bundle unrelated changes into the cloud-save fix.
