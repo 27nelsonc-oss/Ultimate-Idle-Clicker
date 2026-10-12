@@ -486,6 +486,9 @@ body {
 }
 
 </style>
+<style>
+.titles-panel{width:100%;max-width:100%;box-sizing:border-box;margin-top:4px}.title-card{border:1px solid #6b3a1d;border-radius:8px;padding:10px;margin:8px 0;background:#17110d}.title-name{color:#ff7518;font-weight:800;letter-spacing:.2px}.title-action-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.title-action-row .btn-upgrade{flex:1;min-width:110px}.title-modal-backdrop{position:fixed;inset:0;z-index:10000;display:none;align-items:center;justify-content:center;padding:18px;box-sizing:border-box;background:rgba(0,0,0,.82)}.title-modal-card{width:min(440px,100%);box-sizing:border-box;background:#1b1714;border:2px solid #ff7518;border-radius:14px;padding:22px;text-align:center;box-shadow:0 0 28px rgba(255,117,24,.25)}.title-modal-card h2{color:#ff7518;margin-top:0}.title-chat-badge{color:#ff7518;font-weight:800;margin-right:5px}#owner-title-tools{border:1px solid #ff7518;border-radius:8px;padding:10px;margin:12px 0}#owner-title-tools button{margin:4px 4px 4px 0}
+</style>
 </head>
 <body>
 
@@ -694,6 +697,23 @@ body {
         </div>
     </div>
 
+    <!-- Halloween Titles Panel: directly beneath Chat -->
+    <div class="panel titles-panel" id="titles-panel">
+        <h2 class="section-title">🏷️ My Titles</h2>
+        <div class="sub-stat" id="titles-login-status">Sign in to view and manage your titles.</div>
+        <div id="titles-owned-list"></div>
+        <div class="sub-stat" id="titles-status" style="margin-top:8px;">The Spookyest: requires 10 rebirths. First successful claim wins.</div>
+        <button type="button" id="title-claim-btn" class="btn-upgrade" style="display:none;width:100%;margin-top:8px;">Claim The Spookyest</button>
+        <div id="owner-title-test-tools" style="display:none;margin-top:12px;padding:10px;border:1px solid #ff7518;border-radius:8px;">
+            <strong>🧪 Owner Title Testing</strong>
+            <label style="display:flex;align-items:center;gap:8px;margin-top:8px;"><input type="checkbox" id="title-test-mode" checked style="width:18px;height:18px;">Test mode — claiming will NOT reserve the real title</label>
+            <button type="button" id="title-preview-popup-btn" class="btn-upgrade" style="width:100%;margin-top:8px;">Preview Claim Popup</button>
+        </div>
+        <div class="title-modal-backdrop" id="title-claim-modal" role="dialog" aria-modal="true" aria-labelledby="title-modal-heading">
+            <div class="title-modal-card"><h2 id="title-modal-heading">🎃 A Rare Title Awaits!</h2><div class="title-name" style="font-size:1.35rem;margin:12px 0;">The Spookyest</div><p id="title-modal-description">You have reached 10 rebirths. Be the first player to claim this limited title!</p><div class="title-action-row"><button type="button" id="title-modal-claim-btn" class="btn-upgrade">Claim Title</button><button type="button" id="title-modal-close-btn" class="btn-upgrade">Not Now</button></div><div class="sub-stat" id="title-modal-status" style="margin-top:10px;"></div></div>
+        </div>
+    </div>
+
     </div>
 
     <!-- Hidden Admin Panel -->
@@ -724,7 +744,17 @@ body {
                 <input id="owner-player-list-admin-mode" type="checkbox" style="width:20px; height:20px;">
                 <label for="owner-player-list-admin-mode">Click player names to select them for Admin tools</label>
                 <div class="sub-stat" style="flex-basis:100%;">OFF = player names open DMs. ON = player names select a player for your Admin tools.</div>
-            </div>            <div style="padding: 10px; border: 1px solid #8b0000; border-radius: 8px; margin-bottom: 12px;">
+            </div>
+
+            <div id="owner-title-tools" style="margin:12px 0;">
+                <strong>🏷️ Title Management (Owner Only)</strong>
+                <div class="sub-stat" style="margin-top:6px;">Select a player by clicking their name in the player list while Owner Player List Mode is ON. Grants behave like owned titles, but test grants do not reserve the one-time public claim.</div>
+                <div class="sub-stat" id="admin-title-target-status" style="margin-top:8px;">No player selected.</div>
+                <button type="button" id="admin-title-grant-btn" class="btn-upgrade">Grant The Spookyest</button>
+                <button type="button" id="admin-title-remove-btn" class="btn-upgrade">Remove The Spookyest</button>
+                <div class="sub-stat" id="admin-title-manage-status" style="margin-top:6px;"></div>
+            </div>
+            <div style="padding: 10px; border: 1px solid #8b0000; border-radius: 8px; margin-bottom: 12px;">
                 <strong>⚠️ Admin Controls Unlocked</strong>
                 <div class="sub-stat">Use these controls to add or remove game resources.</div>
             </div>
@@ -1299,7 +1329,7 @@ body {
             }, delay);
         }
 
-        function renderChatMessages(messages) {
+        async function renderChatMessages(messages) {
             const container = document.getElementById('chat-messages');
             container.innerHTML = '';
             if (!messages || messages.length === 0) {
@@ -1309,6 +1339,11 @@ body {
                 container.appendChild(empty);
                 return;
             }
+            const userIds = [...new Set((messages || []).map(message => message.user_id).filter(Boolean))];
+            const titleRowsResult = supabaseClient && cloudUser && userIds.length
+                ? await supabaseClient.from('game_title_preferences').select('user_id,active_title_id').in('user_id', userIds)
+                : { data: [] };
+            const activeTitlesByUser = new Map((titleRowsResult.data || []).map(item => [String(item.user_id), item.active_title_id]));
             messages.forEach(message => {
                 const row = document.createElement('div');
                 row.style.marginBottom = '7px';
@@ -1323,6 +1358,13 @@ body {
                     header.appendChild(rank);
                 }
 
+                const activeTitleId = activeTitlesByUser.get(String(message.user_id || ''));
+                if (activeTitleId) {
+                    const titleBadge = document.createElement('span');
+                    titleBadge.className = 'title-chat-badge';
+                    titleBadge.textContent = '[' + titleDisplayName(activeTitleId) + '] ';
+                    header.appendChild(titleBadge);
+                }
                 if (message.user_id && message.user_id !== cloudUser?.id) {
                     const usernameButton = document.createElement('button');
                     usernameButton.type = 'button';
@@ -2073,6 +2115,142 @@ body {
                 await supabaseClient.rpc('release_game_admin_player_grants', { grant_ids: ids });
                 console.error('Admin grant application error:', e);
             }
+        }
+
+
+        // --- HALLOWEEN TITLE SYSTEM ---
+        const SPOOKIEST_TITLE_ID = 'the_spookyest';
+        const SPOOKIEST_TITLE_NAME = 'The Spookyest';
+        let titleClaimStatus = { claimed: false, claimed_by_me: false };
+        let titlePopupOpen = false;
+        let titlePopupTestOverride = false;
+        let titlePopupShownForQualification = false;
+        let titleRefreshInProgress = false;
+        function isGameOwner() { return (cloudUser?.email || '').toLowerCase() === CHAT_OWNER_EMAIL; }
+        function titleDisplayName(titleId) { return titleId === SPOOKIEST_TITLE_ID ? SPOOKIEST_TITLE_NAME : ''; }
+        function showTitleClaimPopup(testPreview = false) {
+            const modal = document.getElementById('title-claim-modal');
+            if (!modal || !cloudUser) return;
+            titlePopupOpen = true; titlePopupTestOverride = Boolean(testPreview);
+            const testMode = isGameOwner() && (testPreview || document.getElementById('title-test-mode')?.checked);
+            const description = document.getElementById('title-modal-description');
+            const claimButton = document.getElementById('title-modal-claim-btn');
+            const status = document.getElementById('title-modal-status');
+            if (description) description.textContent = testMode ? 'Testing preview: claiming here adds the title to your collection without reserving the one real public claim.' : 'You have reached 10 rebirths. Be the first player to claim this limited title!';
+            if (claimButton) claimButton.textContent = testMode ? 'Test Claim (Does Not Reserve)' : 'Claim Title';
+            if (status) status.textContent = testMode ? 'Owner test mode is active. This cannot block another player from earning the real title.' : '';
+            modal.style.display = 'flex';
+        }
+        function closeTitleClaimPopup() {
+            const modal = document.getElementById('title-claim-modal');
+            if (modal) modal.style.display = 'none';
+            titlePopupOpen = false; titlePopupTestOverride = false;
+        }
+        async function refreshTitlePanel() {
+            if (!supabaseClient || !cloudUser || titleRefreshInProgress) {
+                const loginStatus = document.getElementById('titles-login-status');
+                if (loginStatus) loginStatus.textContent = cloudUser ? 'Title services are unavailable.' : 'Sign in to view and manage your titles.';
+                return;
+            }
+            titleRefreshInProgress = true;
+            try {
+                const [ownedResult, preferenceResult, statusResult] = await Promise.all([
+                    supabaseClient.from('game_player_titles').select('title_id,source,granted_at').eq('user_id', cloudUser.id),
+                    supabaseClient.from('game_title_preferences').select('active_title_id').eq('user_id', cloudUser.id).maybeSingle(),
+                    supabaseClient.rpc('get_spookyest_title_status')
+                ]);
+                if (ownedResult.error) throw ownedResult.error;
+                if (preferenceResult.error) throw preferenceResult.error;
+                if (statusResult.error) throw statusResult.error;
+                const owned = ownedResult.data || [];
+                const activeTitle = preferenceResult.data?.active_title_id || null;
+                titleClaimStatus = statusResult.data || { claimed: false, claimed_by_me: false };
+                const loginStatus = document.getElementById('titles-login-status');
+                if (loginStatus) loginStatus.textContent = owned.length ? 'Your title collection:' : 'You do not own any titles yet.';
+                const list = document.getElementById('titles-owned-list');
+                if (list) {
+                    list.innerHTML = '';
+                    if (!owned.length) {
+                        const empty = document.createElement('div'); empty.className = 'sub-stat';
+                        empty.textContent = 'Titles you earn or receive will appear here.'; list.appendChild(empty);
+                    }
+                    owned.forEach(item => {
+                        const card = document.createElement('div'); card.className = 'title-card';
+                        const name = document.createElement('div'); name.className = 'title-name'; name.textContent = titleDisplayName(item.title_id); card.appendChild(name);
+                        const state = document.createElement('div'); state.className = 'sub-stat'; state.textContent = activeTitle === item.title_id ? 'Currently active in chat' : 'Owned • not currently active'; card.appendChild(state);
+                        const action = document.createElement('button'); action.type = 'button'; action.className = 'btn-upgrade'; action.style.width = '100%'; action.style.marginTop = '8px';
+                        action.textContent = activeTitle === item.title_id ? 'Deactivate Title' : 'Activate Title';
+                        action.addEventListener('click', () => setActiveGameTitle(activeTitle === item.title_id ? null : item.title_id)); card.appendChild(action); list.appendChild(card);
+                    });
+                }
+                const titleStatus = document.getElementById('titles-status');
+                const claimButton = document.getElementById('title-claim-btn');
+                const isOwner = isGameOwner();
+                const testTools = document.getElementById('owner-title-test-tools');
+                if (testTools) testTools.style.display = isOwner ? 'block' : 'none';
+                const testMode = isOwner && Boolean(document.getElementById('title-test-mode')?.checked);
+                const qualifies = Number(game.rebirths || 0) >= 10;
+                const hasEarnedTitle = owned.some(item => item.title_id === SPOOKIEST_TITLE_ID && item.source === 'earned');
+                if (claimButton) {
+                    claimButton.style.display = qualifies && !hasEarnedTitle && (!titleClaimStatus.claimed || titleClaimStatus.claimed_by_me) ? 'block' : 'none';
+                    claimButton.textContent = testMode ? 'Test Claim The Spookyest' : 'Claim The Spookyest';
+                }
+                if (titleStatus) titleStatus.textContent = titleClaimStatus.claimed
+                    ? (titleClaimStatus.claimed_by_me ? 'The public title claim is recorded to your account.' : 'The Spookyest has already been claimed by another player. Owner test grants do not affect that claim.')
+                    : (qualifies ? 'You qualify! The first successful claim wins.' : 'The Spookyest requires 10 rebirths. First successful claim wins.');
+                if (isOwner) await refreshOwnerTitleTools();
+                if (qualifies && !hasEarnedTitle && !titleClaimStatus.claimed && !titlePopupShownForQualification) {
+                    titlePopupShownForQualification = true;
+                    if (!isOwner || !testMode) showTitleClaimPopup(false);
+                }
+            } catch (error) {
+                console.error('Title panel refresh failed:', error);
+                const status = document.getElementById('titles-status'); if (status) status.textContent = 'Could not load titles right now. Please try again.';
+            } finally { titleRefreshInProgress = false; }
+        }
+        async function setActiveGameTitle(titleId) {
+            if (!supabaseClient || !cloudUser) return;
+            const { data, error } = await supabaseClient.rpc('set_active_game_title', { p_title_id: titleId });
+            if (error || !data?.success) { alert(error?.message || 'Could not update active title.'); return; }
+            await refreshTitlePanel(); await refreshChatTitleBadges();
+        }
+        async function claimSpookyestTitle(forceTest = false) {
+            if (!supabaseClient || !cloudUser) return;
+            const isTestClaim = isGameOwner() && (forceTest || document.getElementById('title-test-mode')?.checked || titlePopupTestOverride);
+            const modalStatus = document.getElementById('title-modal-status');
+            if (!isTestClaim) await cloudSaveGame(false);
+            const { data, error } = await supabaseClient.rpc('claim_spookyest_title', { p_test_mode: isTestClaim });
+            if (error || !data?.success) {
+                const message = data?.reason === 'already_claimed' ? 'Another player has already claimed The Spookyest.'
+                    : data?.reason === 'not_qualified' ? 'The cloud save does not show 10 rebirths yet. Wait for the save to finish and try again.'
+                    : data?.reason === 'sign_in_required' ? 'Please sign in first.' : error?.message || 'Could not claim this title.';
+                if (modalStatus) modalStatus.textContent = message; else alert(message);
+                await refreshTitlePanel(); return;
+            }
+            closeTitleClaimPopup(); await refreshTitlePanel(); await refreshChatTitleBadges();
+            const status = document.getElementById('titles-status');
+            if (status) status.textContent = isTestClaim ? 'Test title added! The real one-time public claim remains available.' : 'Title claimed successfully!';
+        }
+        async function refreshChatTitleBadges() { if (supabaseClient && cloudUser) await loadChatMessages(); }
+        async function refreshOwnerTitleTools() {
+            const section = document.getElementById('owner-title-tools'); if (!section) return;
+            section.style.display = isGameOwner() ? 'block' : 'none';
+            const targetStatus = document.getElementById('admin-title-target-status');
+            if (!isGameOwner()) return;
+            if (!ownerSelectedPlayer) { if (targetStatus) targetStatus.textContent = 'No player selected. Turn on Owner Player List Mode and click a player name.'; return; }
+            const { data, error } = await supabaseClient.from('game_player_titles').select('title_id,source').eq('user_id', ownerSelectedPlayer.userId).eq('title_id', SPOOKIEST_TITLE_ID).maybeSingle();
+            if (error) { if (targetStatus) targetStatus.textContent = 'Could not check selected player title ownership.'; return; }
+            if (targetStatus) targetStatus.textContent = ownerSelectedPlayer.username + (data ? ' currently has The Spookyest.' : ' does not currently have The Spookyest.');
+        }
+        async function manageSelectedPlayerTitle(action) {
+            if (!isGameOwner() || !ownerSelectedPlayer || !supabaseClient) {
+                const status = document.getElementById('admin-title-manage-status'); if (status) status.textContent = 'Select a player first. Owner access is required.'; return;
+            }
+            const { data, error } = await supabaseClient.rpc('owner_manage_game_title', { p_target_user_id: ownerSelectedPlayer.userId, p_action: action });
+            const status = document.getElementById('admin-title-manage-status');
+            if (error || !data?.success) { if (status) status.textContent = error?.message || 'Could not update this player title.'; return; }
+            if (status) status.textContent = action === 'grant' ? 'Title granted.' : 'Title removed.';
+            await refreshOwnerTitleTools();
         }
 
         async function initializeCloudSave() {
@@ -3030,6 +3208,7 @@ body {
                     if (grantInput && ownerSelectedPlayer) grantInput.value = email;
                 });
             }
+            refreshOwnerTitleTools();
         }
 
         async function resolveOwnerSelectedEmail(inputId) {
@@ -3697,8 +3876,27 @@ body {
         initializeCloudSave();
         loadAdminAbuseSettings();
         setInterval(loadAdminAbuseSettings, 5000);
+
+        document.getElementById('title-claim-btn')?.addEventListener('click', () => {
+            if (isGameOwner() && document.getElementById('title-test-mode')?.checked) showTitleClaimPopup(true); else showTitleClaimPopup(false);
+        });
+        document.getElementById('title-modal-claim-btn')?.addEventListener('click', () => claimSpookyestTitle(false));
+        document.getElementById('title-modal-close-btn')?.addEventListener('click', closeTitleClaimPopup);
+        document.getElementById('title-preview-popup-btn')?.addEventListener('click', () => {
+            const toggle = document.getElementById('title-test-mode'); if (toggle) toggle.checked = true; showTitleClaimPopup(true);
+        });
+        document.getElementById('title-test-mode')?.addEventListener('change', () => {
+            if (isGameOwner() && document.getElementById('title-test-mode').checked) showTitleClaimPopup(true);
+            refreshTitlePanel();
+        });
+        document.getElementById('admin-title-grant-btn')?.addEventListener('click', () => manageSelectedPlayerTitle('grant'));
+        document.getElementById('admin-title-remove-btn')?.addEventListener('click', () => manageSelectedPlayerTitle('remove'));
+        document.getElementById('title-claim-modal')?.addEventListener('click', event => { if (event.target.id === 'title-claim-modal') closeTitleClaimPopup(); });
+
         updateChatAuthUI();
             scheduleChatResetRefresh();
+            refreshTitlePanel();
+            setInterval(refreshTitlePanel, 5000);
 
         // Periodically auto-save to the cloud while logged in.
         setInterval(async () => {
