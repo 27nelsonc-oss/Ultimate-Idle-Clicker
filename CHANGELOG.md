@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### 2026-10-12 — Fix owner title-management visibility
+- **Request:** Make sure the owner can find and use the title grant/remove controls in the Halloween Admin Panel.
+- **Change:** The title-management section now refreshes whenever Admin controls are updated, including when the panel is unlocked or locked. It is shown only while the signed-in account is the owner and the Admin Panel is unlocked.
+- **Files:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`
+- **Verification:** Confirmed the intended visibility guard and refresh call are present in the updated source. No live browser/session test was available.
+- **Commit:** `c1d88def3547abb452f9dfbdb9a87f83c89bed22`
+- **Rollback:** Revert the HTML change to restore prior visibility behavior.
+
+
 ### 2026-10-12 — Halloween title collection and claim testing
 - **Request:** Add title ownership controls for testing, a player title collection under Chat, activate/deactivate controls, and a claim-popup preview that does not consume the limited public claim.
 - **Change:** Added the orange/black My Titles panel directly beneath Chat, with ownership display and active-title toggles. Active titles appear before usernames in global chat. The owner can preview the claim popup and test-claim The Spookyest without reserving the real one-time claim. The title management controls are hidden from non-owners and hidden again when the owner session ends. Owner-only Admin Panel controls can grant or remove the title for the currently selected player.
