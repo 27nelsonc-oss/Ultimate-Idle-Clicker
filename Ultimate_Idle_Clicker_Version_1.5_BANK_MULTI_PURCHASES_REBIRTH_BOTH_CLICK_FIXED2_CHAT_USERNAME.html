@@ -496,6 +496,10 @@ body {
             <strong>📢 Announcement</strong>
             <div id="global-announcement-message" style="margin-top:4px; white-space:pre-wrap; overflow-wrap:anywhere;"></div>
         </div>
+        <div id="admin-abuse-active-banner" style="display:none; margin:0 0 12px 0; padding:10px; border:2px solid #ff7518; border-radius:8px; background:#24150e; color:#fff; text-align:center; box-sizing:border-box;">
+            <strong>🎃 ADMIN ABUSE ACTIVE!</strong>
+            <div id="admin-abuse-active-details" style="margin-top:4px;"></div>
+        </div>
         <div class="stat-display" id="click-display">0</div>
         <div class="sub-stat">Clicks</div>
         
@@ -853,6 +857,26 @@ body {
                 <div id="admin-announcement-status" class="sub-stat" style="margin-top:8px;"></div>
             </div>
 
+            <div id="admin-abuse-controls" style="display:none; margin-top:12px; padding:12px; border:2px solid #ff7518; border-radius:8px; background:#24150e;">
+                <strong style="font-size:1.1rem;">🎃 Admin Abuse — Server-Wide Event</strong>
+                <div class="sub-stat" style="margin:6px 0;">Owner only. Both manual clicking and auto-clickers use the same multiplier. Eligible upgrades are discounted while the event is active.</div>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin-top:10px;">
+                    <div>
+                        <label for="admin-abuse-click-multiplier">Click + Auto-Clicker Multiplier</label>
+                        <input id="admin-abuse-click-multiplier" type="number" min="1" max="100000" step="0.5" value="10" style="width:100%; box-sizing:border-box; padding:8px; margin-top:5px;">
+                    </div>
+                    <div>
+                        <label for="admin-abuse-discount">Upgrade Discount (%)</label>
+                        <input id="admin-abuse-discount" type="number" min="0" max="100" step="1" value="50" style="width:100%; box-sizing:border-box; padding:8px; margin-top:5px;">
+                    </div>
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+                    <button id="admin-abuse-save-settings" class="btn-upgrade">Save Event Settings</button>
+                    <button id="admin-abuse-toggle" class="btn-upgrade" style="background:#ff7518; color:#17100b;">Activate Admin Abuse</button>
+                </div>
+                <div id="admin-abuse-status" class="sub-stat" style="margin-top:8px;">Event is inactive.</div>
+            </div>
+
             <div style="margin-top: 12px; padding: 10px; border: 1px solid #8b0000; border-radius: 8px;">
                 <strong>🛠️ Trial: Player Cloud Save Reset</strong>
                 <div class="sub-stat" style="margin: 6px 0;">Server-side test. Enter another player's account email to reset their cloud save.</div>
@@ -879,6 +903,14 @@ body {
     </div>
 
     <div class="toast" id="save-toast">Game Auto-Saved!</div>
+
+    <div id="admin-abuse-popup" role="dialog" aria-modal="true" aria-labelledby="admin-abuse-popup-title" style="display:none; position:fixed; inset:0; z-index:10000; align-items:center; justify-content:center; padding:20px; background:rgba(0,0,0,0.82); box-sizing:border-box;">
+        <div style="width:min(100%,420px); padding:22px; border:2px solid #ff7518; border-radius:14px; background:#1b1714; color:white; text-align:center; box-shadow:0 0 30px rgba(255,117,24,0.35);">
+            <h2 id="admin-abuse-popup-title" style="margin-top:0; color:#ff7518;">🎃 ADMIN ABUSE IS ACTIVE!</h2>
+            <div id="admin-abuse-popup-details" style="line-height:1.6; margin:12px 0;"></div>
+            <button type="button" id="admin-abuse-popup-close" class="btn-upgrade" style="width:100%;">LET THE CHAOS BEGIN!</button>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -2172,6 +2204,12 @@ body {
 
     <script>
         // --- GAME STATE ---
+        let adminAbuseSettings = {
+            active: false,
+            click_multiplier: 10,
+            upgrade_discount_percent: 50
+        };
+
         let game = {
             clicks: 0,
             clicksPerClick: 1,
@@ -2211,8 +2249,8 @@ body {
         }
 
         function getGemUpgradeCost(level) {
-            if (level === 0) return 1;
-            return Math.floor(1 * Math.pow(1.5, level));
+            if (level === 0) return Math.max(1, Math.floor(getAdminAbuseUpgradePriceMultiplier()));
+            return Math.max(1, Math.floor(1 * Math.pow(1.5, level) * getAdminAbuseUpgradePriceMultiplier()));
         }
 
         // --- LOCAL STORAGE (AUTO-SAVE) ---
@@ -2242,13 +2280,132 @@ body {
             setTimeout(() => { toast.style.opacity = '0'; }, 1500);
         }
 
+        // --- ADMIN ABUSE EVENT ---
+        function getAdminAbuseClickMultiplier() {
+            if (!adminAbuseSettings.active) return 1;
+            const multiplier = Number(adminAbuseSettings.click_multiplier);
+            return Number.isFinite(multiplier) ? Math.max(1, Math.min(100000, multiplier)) : 10;
+        }
+
+        function getAdminAbuseUpgradePriceMultiplier() {
+            if (!adminAbuseSettings.active) return 1;
+            const discount = Number(adminAbuseSettings.upgrade_discount_percent);
+            const safeDiscount = Number.isFinite(discount) ? Math.max(0, Math.min(100, discount)) : 50;
+            return 1 - safeDiscount / 100;
+        }
+
+        function showAdminAbusePopup() {
+            const popup = document.getElementById('admin-abuse-popup');
+            const details = document.getElementById('admin-abuse-popup-details');
+            if (!popup || !details) return;
+            details.textContent = `Manual clicks and auto-clickers: ×${getAdminAbuseClickMultiplier().toLocaleString()}\nUpgrade discount: ${Math.round(Number(adminAbuseSettings.upgrade_discount_percent) || 0)}% off`;
+            details.style.whiteSpace = 'pre-line';
+            popup.style.display = 'flex';
+        }
+
+        function applyAdminAbuseSettings(settings, showPopupOnActivation = true) {
+            const wasActive = Boolean(adminAbuseSettings.active);
+            const multiplier = Number(settings?.click_multiplier);
+            const discount = Number(settings?.upgrade_discount_percent);
+            adminAbuseSettings = {
+                active: Boolean(settings?.active),
+                click_multiplier: Number.isFinite(multiplier) ? Math.max(1, Math.min(100000, multiplier)) : 10,
+                upgrade_discount_percent: Number.isFinite(discount) ? Math.max(0, Math.min(100, Math.floor(discount))) : 50
+            };
+
+            const banner = document.getElementById('admin-abuse-active-banner');
+            const bannerDetails = document.getElementById('admin-abuse-active-details');
+            const status = document.getElementById('admin-abuse-status');
+            const toggle = document.getElementById('admin-abuse-toggle');
+            if (banner) banner.style.display = adminAbuseSettings.active ? 'block' : 'none';
+            if (bannerDetails && adminAbuseSettings.active) {
+                bannerDetails.textContent = `Clicks and auto-clickers ×${getAdminAbuseClickMultiplier().toLocaleString()} • Upgrades ${adminAbuseSettings.upgrade_discount_percent}% off`;
+            }
+            if (status) {
+                status.textContent = adminAbuseSettings.active
+                    ? `🎃 ACTIVE — ×${getAdminAbuseClickMultiplier().toLocaleString()} clicking/auto-clicking, ${adminAbuseSettings.upgrade_discount_percent}% off upgrades.`
+                    : 'Event is inactive.';
+                status.style.color = adminAbuseSettings.active ? '#ff9f43' : '';
+            }
+            if (toggle) toggle.textContent = adminAbuseSettings.active ? 'Deactivate Admin Abuse' : 'Activate Admin Abuse';
+
+            const multiplierInput = document.getElementById('admin-abuse-click-multiplier');
+            const discountInput = document.getElementById('admin-abuse-discount');
+            if (multiplierInput && document.activeElement !== multiplierInput) multiplierInput.value = String(adminAbuseSettings.click_multiplier);
+            if (discountInput && document.activeElement !== discountInput) discountInput.value = String(adminAbuseSettings.upgrade_discount_percent);
+
+            if (showPopupOnActivation && !wasActive && adminAbuseSettings.active) showAdminAbusePopup();
+            if (typeof updateUI === 'function') updateUI();
+        }
+
+        async function loadAdminAbuseSettings() {
+            if (!supabaseClient) return;
+            const { data, error } = await supabaseClient
+                .from('game_admin_abuse')
+                .select('id,active,click_multiplier,upgrade_discount_percent,updated_at')
+                .eq('id', 1)
+                .maybeSingle();
+            if (error) {
+                console.error('Admin Abuse settings load error:', error);
+                return;
+            }
+            if (data) applyAdminAbuseSettings(data);
+        }
+
+        async function saveAdminAbuseSettings(nextActive = adminAbuseSettings.active) {
+            const status = document.getElementById('admin-abuse-status');
+            if (!adminUnlocked || (cloudUser?.email || '').toLowerCase() !== CHAT_OWNER_EMAIL) {
+                if (status) status.textContent = '❌ Owner account and unlocked Admin Panel required.';
+                return false;
+            }
+            if (!supabaseClient || !cloudUser) {
+                if (status) status.textContent = '❌ Log into your owner cloud account first.';
+                return false;
+            }
+            const multiplier = Number(document.getElementById('admin-abuse-click-multiplier').value);
+            const discount = Number(document.getElementById('admin-abuse-discount').value);
+            if (!Number.isFinite(multiplier) || multiplier < 1 || multiplier > 100000 ||
+                !Number.isFinite(discount) || discount < 0 || discount > 100 || !Number.isInteger(discount)) {
+                if (status) status.textContent = '❌ Multiplier must be 1–100,000 and discount must be a whole number from 0–100.';
+                return false;
+            }
+
+            const { data, error } = await supabaseClient
+                .from('game_admin_abuse')
+                .update({
+                    active: Boolean(nextActive),
+                    click_multiplier: multiplier,
+                    upgrade_discount_percent: discount,
+                    updated_at: new Date().toISOString(),
+                    updated_by: cloudUser.id
+                })
+                .eq('id', 1)
+                .select('id,active,click_multiplier,upgrade_discount_percent,updated_at')
+                .maybeSingle();
+
+            if (error || !data) {
+                console.error('Admin Abuse settings save error:', error);
+                if (status) status.textContent = '❌ Could not save event settings. Check owner access and Supabase connection.';
+                return false;
+            }
+            applyAdminAbuseSettings(data);
+            if (status) status.textContent = data.active
+                ? `🎃 Admin Abuse activated for everyone: ×${getAdminAbuseClickMultiplier()} and ${data.upgrade_discount_percent}% off.`
+                : 'Admin Abuse deactivated for everyone.';
+            return true;
+        }
+
+        document.getElementById('admin-abuse-popup-close').addEventListener('click', () => {
+            document.getElementById('admin-abuse-popup').style.display = 'none';
+        });
+
         // --- DYNAMIC COSTS ---
         function getUp1Cost() {
-            return Math.floor(BASE_UP1_COST * Math.pow(1.6, game.totalUpgradesBought) * getUpgradePriceMultiplier());
+            return Math.max(1, Math.floor(BASE_UP1_COST * Math.pow(1.6, game.totalUpgradesBought) * getUpgradePriceMultiplier() * getAdminAbuseUpgradePriceMultiplier()));
         }
 
         function getUp2Cost() {
-            return Math.floor(BASE_UP2_COST * Math.pow(1.15, game.autoClickers) * getUpgradePriceMultiplier());
+            return Math.max(1, Math.floor(BASE_UP2_COST * Math.pow(1.15, game.autoClickers) * getUpgradePriceMultiplier() * getAdminAbuseUpgradePriceMultiplier()));
         }
 
         function getUpgradePriceMultiplier() {
@@ -2257,7 +2414,7 @@ body {
         }
 
         function getUpgradeDiscountCost(level) {
-            return Math.max(1, level + 1);
+            return Math.max(1, Math.floor((level + 1) * getAdminAbuseUpgradePriceMultiplier()));
         }
 
         function getRebirthGemReward() {
@@ -2269,11 +2426,11 @@ body {
         }
 
         function getRebirthGemUpgradeGemCost(level) {
-            return 3 * Math.pow(2, level);
+            return Math.max(1, Math.floor(3 * Math.pow(2, level) * getAdminAbuseUpgradePriceMultiplier()));
         }
 
         function getRebirthGemUpgradeClickCost(level) {
-            return 5000 * Math.pow(3, level);
+            return Math.max(1, Math.floor(5000 * Math.pow(3, level) * getAdminAbuseUpgradePriceMultiplier()));
         }
 
         function getOverclockMultiplier() {
@@ -2281,7 +2438,7 @@ body {
         }
 
         function getOverclockCost(level) {
-            return 2500 * Math.pow(4, level);
+            return Math.max(1, Math.floor(2500 * Math.pow(4, level) * getAdminAbuseUpgradePriceMultiplier()));
         }
 
         function getAutoAcceleratorMultiplier() {
@@ -2289,7 +2446,7 @@ body {
         }
 
         function getAutoAcceleratorCost(level) {
-            return 3000 * Math.pow(3, level);
+            return Math.max(1, Math.floor(3000 * Math.pow(3, level) * getAdminAbuseUpgradePriceMultiplier()));
         }
 
         // Temporary upgrade: increases Clicks per Click without changing Auto CPS.
@@ -2298,7 +2455,7 @@ body {
         }
 
         function getClickOverdriveCost(level) {
-            return 4000 * Math.pow(3, level);
+            return Math.max(1, Math.floor(4000 * Math.pow(3, level) * getAdminAbuseUpgradePriceMultiplier()));
         }
 
         const OFFLINE_PROGRESS_CAP_HOURS = 24;
@@ -2459,11 +2616,11 @@ body {
         // --- UI UPDATE ---
         function updateUI() {
             document.getElementById('click-display').innerText = Math.floor(game.clicks).toLocaleString();
-            document.getElementById('cpc-display').innerText = `Clicks per Click: ${(game.clicksPerClick * game.multiplier * getClickOverdriveMultiplier()).toFixed(1)}`;
+            document.getElementById('cpc-display').innerText = `Clicks per Click: ${(game.clicksPerClick * game.multiplier * getClickOverdriveMultiplier() * getAdminAbuseClickMultiplier()).toFixed(1)}`;
             
             const autoClickers = Math.max(0, Number(game.autoClickers) || 0);
             const multiplier = Math.max(1, Number(game.multiplier) || 1);
-            const regularCps = autoClickers * multiplier * getOverclockMultiplier() * getAutoAcceleratorMultiplier();
+            const regularCps = autoClickers * multiplier * getOverclockMultiplier() * getAutoAcceleratorMultiplier() * getAdminAbuseClickMultiplier();
             const gemStationCps = getClickerStationCPS(Number(game.clickerStationLevel) || 0);
             const totalCps = Number.isFinite(regularCps + gemStationCps) ? regularCps + gemStationCps : 0;
             
@@ -2601,7 +2758,7 @@ body {
             if (hardResetInProgress) return;
             const autoClickers = Math.max(0, Number(game.autoClickers) || 0);
             const multiplier = Math.max(1, Number(game.multiplier) || 1);
-            const regularCps = autoClickers * multiplier * getOverclockMultiplier() * getAutoAcceleratorMultiplier();
+            const regularCps = autoClickers * multiplier * getOverclockMultiplier() * getAutoAcceleratorMultiplier() * getAdminAbuseClickMultiplier();
             const gemStationCps = getClickerStationCPS(Number(game.clickerStationLevel) || 0);
             const totalCps = regularCps + gemStationCps;
             if (Number.isFinite(totalCps) && totalCps > 0) {
@@ -2637,9 +2794,10 @@ body {
 
         function updateOwnerAdminControls() {
             const section = document.getElementById('admin-owner-player-tools');
-            if (!section) return;
+            const eventSection = document.getElementById('admin-abuse-controls');
             const email = (cloudUser?.email || '').toLowerCase();
-            section.style.display = adminUnlocked && email === CHAT_OWNER_EMAIL ? 'block' : 'none';
+            if (section) section.style.display = adminUnlocked && email === CHAT_OWNER_EMAIL ? 'block' : 'none';
+            if (eventSection) eventSection.style.display = adminUnlocked && email === CHAT_OWNER_EMAIL ? 'block' : 'none';
             if (email !== CHAT_OWNER_EMAIL) ownerPlayerListAdminMode = false;
         }
 
@@ -2946,6 +3104,14 @@ body {
             if (event.key === 'Enter') adminViewPlayerInfo();
         });
 
+        document.getElementById('admin-abuse-save-settings').addEventListener('click', async () => {
+            await saveAdminAbuseSettings(adminAbuseSettings.active);
+        });
+
+        document.getElementById('admin-abuse-toggle').addEventListener('click', async () => {
+            await saveAdminAbuseSettings(!adminAbuseSettings.active);
+        });
+
         document.getElementById('admin-publish-announcement').addEventListener('click', async () => {
             await saveGlobalAnnouncement(document.getElementById('admin-global-announcement').value);
         });
@@ -3119,7 +3285,7 @@ body {
             const safeMultiplier = Number.isFinite(multiplier) && multiplier > 0 ? multiplier : 1;
             const safeOverdriveLevel = Number.isFinite(clickOverdriveLevel) && clickOverdriveLevel >= 0 ? clickOverdriveLevel : 0;
             const safeOverclockLevel = Number.isFinite(overclockLevel) && overclockLevel >= 0 ? overclockLevel : 0;
-            const earned = baseClick * safeMultiplier * (1 + safeOverdriveLevel * 0.25) * (1 + safeOverclockLevel * 0.25);
+            const earned = baseClick * safeMultiplier * (1 + safeOverdriveLevel * 0.25) * (1 + safeOverclockLevel * 0.25) * getAdminAbuseClickMultiplier();
             addGeneratedClicks(earned);
             updateUI();
         }
@@ -3529,6 +3695,8 @@ body {
         cloudResetVersion = Number(localStorage.getItem('ultimateIdleClicker_cloud_reset_version') || 0);
         updateUI();
         initializeCloudSave();
+        loadAdminAbuseSettings();
+        setInterval(loadAdminAbuseSettings, 5000);
         updateChatAuthUI();
             scheduleChatResetRefresh();
 
