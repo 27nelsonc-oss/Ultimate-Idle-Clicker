@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-10-12 — Release The Spookyest when owner removes it
+- **Request:** Ensure removing the title from its holder makes the limited public title available again.
+- **Change:** Updated the server-side `owner_manage_game_title` RPC so removing The Spookyest also deletes the one-time claim record only when that selected player is the recorded claimant. Removing a test grant from someone else does not release or affect the actual claimant's title.
+- **Verification:** Applied the Supabase migration successfully and confirmed the existing claim record remained unchanged during verification; no title was removed as part of verification.
+- **Not tested:** A live owner removal and subsequent claim by another account still needs browser/account testing.
+- **Rollback:** Restore the previous `owner_manage_game_title(uuid,text)` function definition if needed.
+
+
 ### 2026-10-12 — Fix owner title-management visibility
 - **Request:** Make sure the owner can find and use the title grant/remove controls in the Halloween Admin Panel.
 - **Change:** The title-management section now refreshes whenever Admin controls are updated, including when the panel is unlocked or locked. It is shown only while the signed-in account is the owner and the Admin Panel is unlocked.
