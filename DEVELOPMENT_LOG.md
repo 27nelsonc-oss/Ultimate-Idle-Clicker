@@ -141,4 +141,13 @@ These entries are brief historical summaries. Verify actual diffs in GitHub befo
 - **Not tested / user testing needed:** Sign in as the owner on the Halloween branch, unlock Admin Panel, confirm “Title Management (Owner Only)” appears, then lock Admin and confirm it hides.
 - **Commit SHA:** `c1d88def3547abb452f9dfbdb9a87f83c89bed22` (HTML); documentation update follows.
 - **Rollback instructions:** Revert the HTML visibility-fix commit on `Halloween`; no changes were made to other branches.
+### 2026-10-12 — Release the limited title when owner removes it
+- **Request/problem:** Removing The Spookyest should make the limited public claim available again.
+- **Root cause:** The owner removal RPC deleted the player's title ownership and active preference, but left the separate one-time claim row intact.
+- **Change made:** Updated `public.owner_manage_game_title(uuid,text)` to delete the public claim record when and only when its `claimed_by` user matches the selected player being stripped of the title. Removing an unrelated test grant does not affect the true claimant.
+- **Files/functions touched:** Supabase function `public.owner_manage_game_title(uuid,text)`; Halloween branch documentation.
+- **Preserved behavior / compatibility:** Grants remain test grants; title eligibility and atomic claim flow remain unchanged. The currently recorded claim was not deleted during verification.
+- **Tests run and results:** Supabase migration returned success. Queried current claim state after migration and confirmed the existing claim record remained in place. Did not simulate a destructive owner removal or second account claim.
+- **Not tested / user testing needed:** In Halloween branch, remove The Spookyest from its current claimant; verify status shows available, then test claim from a qualified account.
+- **Rollback instructions:** Reapply the previous function definition from Git history/migration history. This is a server-side behavior change; reverting the HTML alone will not roll it back.
 
