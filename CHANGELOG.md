@@ -15,8 +15,6 @@
 
 This file records user-visible behavior changes and meaningful project changes. New entries go at the top. Do not invent history or claim tests that were not performed. Detailed implementation and rollback notes belong in [DEVELOPMENT_LOG.md](DEVELOPMENT_LOG.md). The editing contract is in [DEVELOPMENT_RULES.md](DEVELOPMENT_RULES.md).
 
-## Unreleased
-
 ### 2026-10-12 — Halloween theme colors
 - **Request:** Apply a Halloween orange-and-black color theme to the separate `Halloween` branch only, preserving the regular game layout and gameplay.
 - **Change:** Updated the existing theme palette, main-button glow/accent, upgrade and rebirth button colors, panel/input borders, and related decorative colors. Kept the current layout, wording, game mechanics, save format, and semantic success/error colors unchanged.
