@@ -569,6 +569,33 @@ body {
             <span class="cost-tag" id="rebirth-reward">+0 Gems</span>
         </button>
 
+
+    <!-- CLOUD SAVE -->
+    <div id="cloud-save-panel" style="width:100%; max-width:700px; margin:10px auto; padding:12px; box-sizing:border-box; text-align:center; border:1px solid #555; border-radius:8px;">
+        <h2 style="margin:0 0 8px 0;">☁️ Cloud Save</h2>
+        <div id="cloud-logged-out">
+            <input id="cloud-email" type="email" placeholder="Email" style="margin:4px; padding:6px;">
+            <input id="cloud-password" type="password" placeholder="Password" style="margin:4px; padding:6px;">
+            <button id="cloud-signup-btn" class="btn-upgrade">Create Account</button>
+            <button id="cloud-login-btn" class="btn-upgrade">Log In</button>
+            <div id="cloud-message" class="sub-stat" style="margin-top:6px;"></div>
+        </div>
+        <div id="cloud-logged-in" style="display:none;">
+            <div id="cloud-user-label" class="sub-stat"></div>
+            <div style="margin-top:10px;">
+                <div class="sub-stat" style="margin-bottom:4px;">Public Username (shown in Chat)</div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <input id="username-input" type="text" maxlength="20" placeholder="3-20 letters, numbers, _ or -" style="flex:1; min-width:180px; padding:8px; border-radius:8px; border:1px solid #555; background:#111; color:white; box-sizing:border-box;">
+                    <button type="button" id="username-save-btn" class="btn-upgrade" style="width:auto; min-width:100px; margin:0;">Save Username</button>
+                </div>
+                <div id="username-status" class="sub-stat" style="margin-top:4px;"></div>
+            </div>
+            <button id="cloud-save-btn" class="btn-upgrade">Save to Cloud</button>
+            <button id="cloud-load-btn" class="btn-upgrade">Load from Cloud</button>
+            <button id="cloud-logout-btn" class="btn-upgrade">Log Out</button>
+            <div id="cloud-status" class="sub-stat" style="margin-top:6px;"></div>
+        </div>
+    </div>
     </div>
 
     <!-- Gem Station + Player List -->
@@ -881,33 +908,6 @@ body {
     <div class="toast" id="save-toast">Game Auto-Saved!</div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <!-- CLOUD SAVE -->
-    <div id="cloud-save-panel" style="width:100%; max-width:700px; margin:10px auto; padding:12px; box-sizing:border-box; text-align:center; border:1px solid #555; border-radius:8px;">
-        <h2 style="margin:0 0 8px 0;">☁️ Cloud Save</h2>
-        <div id="cloud-logged-out">
-            <input id="cloud-email" type="email" placeholder="Email" style="margin:4px; padding:6px;">
-            <input id="cloud-password" type="password" placeholder="Password" style="margin:4px; padding:6px;">
-            <button id="cloud-signup-btn" class="btn-upgrade">Create Account</button>
-            <button id="cloud-login-btn" class="btn-upgrade">Log In</button>
-            <div id="cloud-message" class="sub-stat" style="margin-top:6px;"></div>
-        </div>
-        <div id="cloud-logged-in" style="display:none;">
-            <div id="cloud-user-label" class="sub-stat"></div>
-            <div style="margin-top:10px;">
-                <div class="sub-stat" style="margin-bottom:4px;">Public Username (shown in Chat)</div>
-                <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                    <input id="username-input" type="text" maxlength="20" placeholder="3-20 letters, numbers, _ or -" style="flex:1; min-width:180px; padding:8px; border-radius:8px; border:1px solid #555; background:#111; color:white; box-sizing:border-box;">
-                    <button type="button" id="username-save-btn" class="btn-upgrade" style="width:auto; min-width:100px; margin:0;">Save Username</button>
-                </div>
-                <div id="username-status" class="sub-stat" style="margin-top:4px;"></div>
-            </div>
-            <button id="cloud-save-btn" class="btn-upgrade">Save to Cloud</button>
-            <button id="cloud-load-btn" class="btn-upgrade">Load from Cloud</button>
-            <button id="cloud-logout-btn" class="btn-upgrade">Log Out</button>
-            <div id="cloud-status" class="sub-stat" style="margin-top:6px;"></div>
-        </div>
-    </div>
 
     <script>
         // Supabase project settings. Replace these two values with your project's
