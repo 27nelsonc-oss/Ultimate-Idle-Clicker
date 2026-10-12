@@ -1834,41 +1834,56 @@ body {
 }
 
         let cloudLoadInProgress = false;
+        let cloudSaveInProgress = false;
+        let lastCloudSyncAt = null;
 
         async function cloudSaveGame(showStatus = true) {
-            if (!supabaseClient || !cloudUser || cloudLoadInProgress) return false;
+            if (!supabaseClient || !cloudUser || cloudLoadInProgress || cloudSaveInProgress) return false;
+            cloudSaveInProgress = true;
+            try {
+                const { data: currentSave, error: checkError } = await supabaseClient
+                    .from('game_saves')
+                    .select('reset_version, updated_at')
+                    .eq('user_id', cloudUser.id)
+                    .maybeSingle();
+                if (checkError) {
+                    console.error('Cloud save check error:', checkError);
+                    if (showStatus) setCloudStatus(`Cloud save failed: ${checkError.message}`, true);
+                    return false;
+                }
 
-            const { data: currentSave, error: checkError } = await supabaseClient
-                .from('game_saves')
-                .select('reset_version')
-                .eq('user_id', cloudUser.id)
-                .maybeSingle();
-            if (checkError) {
-                console.error('Cloud save check error:', checkError);
-                if (showStatus) setCloudStatus(`Cloud save failed: ${checkError.message}`, true);
-                return false;
-            }
+                const serverResetVersion = Number(currentSave?.reset_version ?? 0);
+                const serverResetIsNewer = serverResetVersion > cloudResetVersion;
+                if (serverResetIsNewer) {
+                    await applyServerReset(serverResetVersion, showStatus);
+                } else if (
+                    (lastCloudSyncAt && currentSave?.updated_at && currentSave.updated_at !== lastCloudSyncAt) ||
+                    (!lastCloudSyncAt && currentSave?.updated_at)
+                ) {
+                    if (showStatus) setCloudStatus('A newer cloud save exists. Load the cloud save before saving again.', true);
+                    return false;
+                }
 
-            const serverResetVersion = Number(currentSave?.reset_version ?? 0);
-            if (serverResetVersion > cloudResetVersion) {
-                await applyServerReset(serverResetVersion, showStatus);
+                const savedAt = new Date().toISOString();
+                const { error } = await supabaseClient
+                    .from('game_saves')
+                    .upsert({
+                        user_id: cloudUser.id,
+                        save_data: game,
+                        reset_version: cloudResetVersion,
+                        updated_at: savedAt
+                    }, { onConflict: 'user_id' });
+                if (error) {
+                    console.error('Cloud save error:', error);
+                    if (showStatus) setCloudStatus(`Cloud save failed: ${error.message}`, true);
+                    return false;
+                }
+                lastCloudSyncAt = savedAt;
+                if (showStatus) setCloudStatus('Saved to cloud.');
+                return true;
+            } finally {
+                cloudSaveInProgress = false;
             }
-
-            const { error } = await supabaseClient
-                .from('game_saves')
-                .upsert({
-                    user_id: cloudUser.id,
-                    save_data: game,
-                    reset_version: cloudResetVersion,
-                    updated_at: new Date().toISOString()
-                }, { onConflict: 'user_id' });
-            if (error) {
-                console.error('Cloud save error:', error);
-                if (showStatus) setCloudStatus(`Cloud save failed: ${error.message}`, true);
-                return false;
-            }
-            if (showStatus) setCloudStatus('Saved to cloud.');
-            return true;
         }
 
         async function cloudLoadGame(showStatus = true) {
@@ -1878,7 +1893,7 @@ body {
             if (!supabaseClient || !cloudUser) return false;
             const { data, error } = await supabaseClient
                 .from('game_saves')
-                .select('save_data, reset_version')
+                .select('save_data, reset_version, updated_at')
                 .eq('user_id', cloudUser.id)
                 .maybeSingle();
             if (error) {
@@ -1887,6 +1902,7 @@ body {
                 return false;
             }
             if (!data) {
+                lastCloudSyncAt = null;
                 cloudResetVersion = Number(localStorage.getItem('ultimateIdleClicker_cloud_reset_version') || 0);
                 if (showStatus) setCloudStatus('No cloud save exists yet.');
                 return false;
@@ -1901,6 +1917,7 @@ body {
             }
 
             cloudResetVersion = serverResetVersion;
+            lastCloudSyncAt = data.updated_at || null;
             if (data.save_data && typeof data.save_data === 'object') {
                 game = { ...game, ...data.save_data };
                 if (!Number.isFinite(Number(game.clickOverdriveLevel))) game.clickOverdriveLevel = 0;
