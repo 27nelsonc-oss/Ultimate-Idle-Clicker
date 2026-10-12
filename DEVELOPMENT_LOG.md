@@ -61,6 +61,17 @@ These entries are brief historical summaries. Verify actual diffs in GitHub befo
 
 ## Change record
 
+### 2026-10-12 — Cloud-save ordering and stale-write protection
+- **Request/problem:** Improve cross-device cloud saving without changing gameplay, UI, or the Supabase schema.
+- **Root cause confirmed in source:** `cloudSaveGame()` used a separate timestamp check followed by an unconditional upsert, leaving a race window where another device could write newer progress. Save attempts were dropped when either a load or save was already active. `cloudLoadGame()` called cloud save before its own loading lock was released, so that save attempt was refused. The auth-state listener also initialized account features without first loading that account's cloud save.
+- **Change made:** Replaced the upsert with a conditional update matching the exact `updated_at` and `reset_version` just read, and uses insert-only when no row exists. A zero-row conditional update is treated as a conflict, not success. Save requests that overlap load/save are queued and retried after the active operation releases its lock. Offline-progress and reset-related save requests are deferred until loading completes. Auth-state changes now load the signed-in account's cloud save before the remaining account setup continues.
+- **Files/functions touched:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`; `cloudSaveGame()`, `cloudLoadGame()`, auth-state listener.
+- **Preserved behavior / compatibility:** Kept the existing `game_saves` table and its `user_id`, `save_data`, `reset_version`, and `updated_at` fields; retained the existing local-save key, reset-version protections, save data shape, UI, and gameplay. No database schema changes.
+- **Tests run and results:** Re-fetched the committed HTML from `game-development` and confirmed the new queued-save and conditional-write code is present. Source flow reviewed for the changed branches.
+- **Not tested / user testing needed:** The live Supabase account was not available for a real two-device test; browser/runtime syntax and concurrent-session behavior still need verification. Do not consider cross-device sync fully proven until that test passes.
+- **Commit SHA:** Game code `66873d21996ba0d0a260a7e6edec37befadeacfc`; this log and changelog are separate follow-up documentation commits.
+- **Rollback instructions:** Revert the cloud-save code commit on `game-development` to restore the prior HTML. The prior game version remains in Git history; `main` was not modified.
+
 ### 2026-10-12 — Add persistent development documentation
 - **Problem/request:** Preserve the user's editing rules, priorities, and change-history expectations in GitHub so future chats do not need to carry the entire rules list.
 - **Change:** Added `DEVELOPMENT_RULES.md`, `CHANGELOG.md`, `DEVELOPMENT_LOG.md`, and a root `README.md` index.
