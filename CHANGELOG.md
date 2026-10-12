@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### 2026-10-12 — Halloween title collection and claim testing
+- **Request:** Add title ownership controls for testing, a player title collection under Chat, activate/deactivate controls, and a claim-popup preview that does not consume the limited public claim.
+- **Change:** Added the orange/black My Titles panel directly beneath Chat, with ownership display and active-title toggles. Active titles appear before usernames in global chat. The owner can preview the claim popup and test-claim The Spookyest without reserving the real one-time claim. Owner-only Admin Panel controls can grant or remove the title for the currently selected player.
+- **Claim rules:** The normal claim is an atomic server-side operation requiring 10 rebirths in the player's cloud save; only the first successful claimant reserves the title. Owner test claims and Admin Panel grants are recorded as test grants and do not reserve that claim. Test-granted titles behave normally in the collection and chat; if a qualified recipient claims the real title while it remains available, the server upgrades their record to earned ownership.
+- **Server security:** Added RLS-protected title ownership, active-title preferences, and the one-time claim record, plus RPCs for atomic claim, title activation, owner-only grant/removal, and non-sensitive claim status. The owner identity is checked server-side using the existing owner email. No service-role key was added to the browser.
+- **Verification:** The database migration applied successfully. HTML checks confirmed one HTML root, balanced style/script tags, one title panel, and no new duplicate element IDs. The source already contains a duplicate `owner-player-list-admin-mode` ID; it was left unchanged as unrelated existing markup.
+- **Not tested:** No browser execution or downloaded standalone Chrome-tab test has been performed yet. Please test title panel placement in a separate tab, owner preview/test claim, activation in chat, real claim race behavior with a second account, and owner grant/removal.
+- **Code commit:** 10fab29dc8b291a808ec39b7ef80f149f6032c62.
+- **Database migration:** `add_halloween_title_collection_and_test_claims`, followed by `allow_chat_to_display_active_titles`.
+- **Rollback:** Revert the HTML commit on `Halloween`; remove the title SQL objects only after confirming no other branch uses them. Do not change `game-development` or `main`.
+
 ### 2026-10-12 — Halloween Admin Abuse event (initial testing build)
 - **Request:** Add a powerful, temporary server-wide Admin Abuse event to the Halloween branch only, with owner-controlled settings.
 - **Change:** Added an Admin Abuse section visible only to the owner account after the Admin Panel is unlocked. Defaults are inactive, ×10 for both manual clicks and regular auto-clickers, and 50% off eligible upgrade costs. The multiplier and discount can be edited independently; the same multiplier controls both clicking and auto-clicking. Eligible click-priced and gem-priced upgrade costs use the event discount, with a minimum price of 1. Added an active banner and a popup when a client detects the event starting. Clients poll shared settings every 5 seconds.
