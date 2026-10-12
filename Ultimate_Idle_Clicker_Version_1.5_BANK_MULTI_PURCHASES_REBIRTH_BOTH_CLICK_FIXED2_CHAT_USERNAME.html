@@ -2072,8 +2072,10 @@ body {
                 updateCloudUI();
                 updateChatAuthUI();
                 if (cloudUser) {
-                    // Load the account's cloud save before background autosaves can write local state.
-                    cloudLoadGame(false).then(() => loadUsername()).then(async () => {
+                    // Load cloud data only when the signed-in account changes; token refreshes must not
+                    // replace progress that is currently being played on this device.
+                    const cloudLoad = userChanged ? cloudLoadGame(false) : Promise.resolve(true);
+                    cloudLoad.then(() => loadUsername()).then(async () => {
                         await applyPendingAdminGrants();
                         updateChatAuthUI();
                         await loadChatMessages();
