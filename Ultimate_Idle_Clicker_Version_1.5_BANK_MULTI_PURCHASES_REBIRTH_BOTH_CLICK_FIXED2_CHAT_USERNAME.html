@@ -2150,6 +2150,12 @@ body {
             if (!supabaseClient || !cloudUser || titleRefreshInProgress) {
                 const loginStatus = document.getElementById('titles-login-status');
                 if (loginStatus) loginStatus.textContent = cloudUser ? 'Title services are unavailable.' : 'Sign in to view and manage your titles.';
+                if (!cloudUser || !isGameOwner()) {
+                    const testTools = document.getElementById('owner-title-test-tools');
+                    const ownerTools = document.getElementById('owner-title-tools');
+                    if (testTools) testTools.style.display = 'none';
+                    if (ownerTools) ownerTools.style.display = 'none';
+                }
                 return;
             }
             titleRefreshInProgress = true;
