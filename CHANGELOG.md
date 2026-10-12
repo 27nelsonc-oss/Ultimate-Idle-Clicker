@@ -4,6 +4,15 @@ This file records user-visible behavior changes and meaningful project changes. 
 
 ## Unreleased
 
+### 2026-10-12 — Halloween theme colors
+- **Request:** Apply a Halloween orange-and-black color theme to the separate `Halloween` branch only, preserving the regular game layout and gameplay.
+- **Change:** Updated the existing theme palette, main-button glow/accent, upgrade and rebirth button colors, panel/input borders, and related decorative colors. Kept the current layout, wording, game mechanics, save format, and semantic success/error colors unchanged.
+- **Files:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`
+- **Verification:** Source-level checks and GitHub re-fetch pending; no browser rendering test performed.
+- **Not tested:** Downloaded standalone Chrome-tab appearance and mobile appearance need user verification.
+- **Commit:** `1534f76c158b7b6a22830709b9618cbeba2a254d` (HTML theme change).
+- **Rollback:** Revert this commit on the `Halloween` branch only. The `game-development` and `main` branches were not edited by this change.
+
 ### 2026-10-12 — Improve cloud-save reliability
 - **Problem/request:** Make progress sync more reliable between devices and prevent stale saves from replacing newer cloud progress.
 - **Change:** Queue save attempts that overlap a load/save; defer load-related saves until loading finishes; load cloud data when the signed-in account changes (not on token refresh); replace check-then-upsert with a conditional update or insert so a concurrent cloud change is not silently overwritten.
