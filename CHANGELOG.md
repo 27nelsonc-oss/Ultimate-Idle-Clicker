@@ -1,5 +1,18 @@
 # Ultimate Idle Clicker — Changelog
 
+## Unreleased
+
+### 2026-10-12 — Halloween Admin Abuse event (initial testing build)
+- **Request:** Add a powerful, temporary server-wide Admin Abuse event to the Halloween branch only, with owner-controlled settings.
+- **Change:** Added an Admin Abuse section visible only to the owner account after the Admin Panel is unlocked. Defaults are inactive, ×10 for both manual clicks and regular auto-clickers, and 50% off eligible upgrade costs. The multiplier and discount can be edited independently; the same multiplier controls both clicking and auto-clicking. Eligible click-priced and gem-priced upgrade costs use the event discount, with a minimum price of 1. Added an active banner and a popup when a client detects the event starting. Clients poll shared settings every 5 seconds.
+- **Server security:** Added public.game_admin_abuse to the connected Supabase project. RLS allows public read access to the single event row but restricts updates to the owner's authenticated email at the database policy level. The row starts inactive. The Halloween HTML is the only branch wired to this setting; the regular game remains unchanged.
+- **Files:** Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html
+- **Verification:** Confirmed the database row exists with active=false, multiplier 10, and discount 50; verified RLS policies for public reads and owner-only updates. Re-fetched the committed HTML and confirmed balanced HTML/style/script tags and the new event controls/helpers are present.
+- **Not tested:** No browser execution or downloaded standalone Chrome-tab test was performed. Owner login/update behavior, popup timing, cross-client polling, discount coverage, and turning the event off need real browser testing.
+- **Code commit:** 185b7b77c75cba4aabcaef6b3ea6cef22b04b550.
+- **Database rollback:** To disable the feature without deleting schema, set active=false on row id=1. To fully remove the feature after reverting the HTML, drop public.game_admin_abuse only if no branch uses it.
+- **Code rollback:** Revert the HTML commit on Halloween only. Do not change game-development or main.
+
 This file records user-visible behavior changes and meaningful project changes. New entries go at the top. Do not invent history or claim tests that were not performed. Detailed implementation and rollback notes belong in [DEVELOPMENT_LOG.md](DEVELOPMENT_LOG.md). The editing contract is in [DEVELOPMENT_RULES.md](DEVELOPMENT_RULES.md).
 
 ## Unreleased
