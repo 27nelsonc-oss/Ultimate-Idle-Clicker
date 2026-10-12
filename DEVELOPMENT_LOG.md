@@ -16,6 +16,18 @@ Read [DEVELOPMENT_RULES.md](DEVELOPMENT_RULES.md) before making edits. Record us
 
 ## Current active task
 
+### 2026-10-12 — Place Cloud Save directly below the main interface
+- **Request/problem:** The Cloud Save panel was at the bottom after Hard Reset and Admin, so future features above it would make players scroll farther to reach it.
+- **Root cause:** The Cloud Save markup followed the bottom-of-page controls rather than the main game panel.
+- **Change made:** Moved the existing `#cloud-save-panel` markup into `.main-panel`, after the rebirth control and before the main panel closes. This keeps Cloud Save anchored directly under the main game interface as separate sections are added elsewhere. No Cloud Save handlers, IDs, or save logic were changed.
+- **Files/functions touched:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`; markup move only.
+- **Preserved behavior / compatibility:** Kept the existing Cloud Save panel contents and IDs intact; one instance remains. Main/Hard Reset/Admin logic unchanged.
+- **Tests run and results:** Source-level checks confirmed the panel appears once, follows the rebirth button, precedes the Gem Station section, and the document still has its closing HTML tag.
+- **Not tested / user testing needed:** Not opened in a real standalone browser tab; verify panel width/spacing in the downloaded GitHub HTML.
+- **Commit SHA:** `5fcc9d356233ccfe56ad67db7cd93ca50db2df5e`.
+- **Rollback instructions:** Revert that HTML commit on `game-development`; the previous file version remains in Git history.
+
+
 ### Cross-device cloud saving — not yet fixed by this documentation commit
 
 **Desired result:** After a player saves progress on one device and signs into the same account on another device, the second device loads the latest cloud progress. An older local state or overlapping save must not overwrite newer progress.
