@@ -1857,7 +1857,7 @@ body {
                 if (serverResetIsNewer) {
                     await applyServerReset(serverResetVersion, showStatus);
                 } else if (
-                    (lastCloudSyncAt && currentSave?.updated_at && currentSave.updated_at !== lastCloudSyncAt) ||
+                    (lastCloudSyncAt && currentSave?.updated_at && Date.parse(currentSave.updated_at) !== Date.parse(lastCloudSyncAt)) ||
                     (!lastCloudSyncAt && currentSave?.updated_at)
                 ) {
                     if (showStatus) setCloudStatus('A newer cloud save exists. Load the cloud save before saving again.', true);
