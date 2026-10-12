@@ -1835,54 +1835,98 @@ body {
 
         let cloudLoadInProgress = false;
         let cloudSaveInProgress = false;
+        let cloudSaveQueued = false;
         let lastCloudSyncAt = null;
 
         async function cloudSaveGame(showStatus = true) {
-            if (!supabaseClient || !cloudUser || cloudLoadInProgress || cloudSaveInProgress) return false;
+            if (!supabaseClient || !cloudUser) return false;
+            if (cloudLoadInProgress || cloudSaveInProgress) {
+                cloudSaveQueued = true;
+                return false;
+            }
+
             cloudSaveInProgress = true;
             try {
+                const saveUserId = cloudUser.id;
                 const { data: currentSave, error: checkError } = await supabaseClient
                     .from('game_saves')
                     .select('reset_version, updated_at')
-                    .eq('user_id', cloudUser.id)
+                    .eq('user_id', saveUserId)
                     .maybeSingle();
+
                 if (checkError) {
                     console.error('Cloud save check error:', checkError);
                     if (showStatus) setCloudStatus(`Cloud save failed: ${checkError.message}`, true);
                     return false;
                 }
 
+                // Do not let a session that has not loaded the existing cloud save overwrite it.
                 const serverResetVersion = Number(currentSave?.reset_version ?? 0);
                 const serverResetIsNewer = serverResetVersion > cloudResetVersion;
                 if (serverResetIsNewer) {
                     await applyServerReset(serverResetVersion, showStatus);
                 } else if (
-                    (lastCloudSyncAt && currentSave?.updated_at && Date.parse(currentSave.updated_at) !== Date.parse(lastCloudSyncAt)) ||
-                    (!lastCloudSyncAt && currentSave?.updated_at)
+                    currentSave &&
+                    (!lastCloudSyncAt || !currentSave.updated_at ||
+                     Date.parse(currentSave.updated_at) !== Date.parse(lastCloudSyncAt))
                 ) {
                     if (showStatus) setCloudStatus('A newer cloud save exists. Load the cloud save before saving again.', true);
                     return false;
                 }
 
                 const savedAt = new Date().toISOString();
-                const { error } = await supabaseClient
-                    .from('game_saves')
-                    .upsert({
-                        user_id: cloudUser.id,
-                        save_data: game,
-                        reset_version: cloudResetVersion,
-                        updated_at: savedAt
-                    }, { onConflict: 'user_id' });
-                if (error) {
-                    console.error('Cloud save error:', error);
-                    if (showStatus) setCloudStatus(`Cloud save failed: ${error.message}`, true);
+                const savePayload = {
+                    user_id: saveUserId,
+                    save_data: game,
+                    reset_version: cloudResetVersion,
+                    updated_at: savedAt
+                };
+
+                let writeResult;
+                if (currentSave) {
+                    // Compare-and-swap: update only the exact cloud version we just checked.
+                    // If another device changed it meanwhile, zero rows are updated and we refuse
+                    // to overwrite that newer progress.
+                    writeResult = await supabaseClient
+                        .from('game_saves')
+                        .update({
+                            save_data: savePayload.save_data,
+                            reset_version: savePayload.reset_version,
+                            updated_at: savePayload.updated_at
+                        })
+                        .eq('user_id', saveUserId)
+                        .eq('updated_at', currentSave.updated_at)
+                        .eq('reset_version', currentSave.reset_version)
+                        .select('updated_at')
+                        .maybeSingle();
+                } else {
+                    // Insert only when the row was absent; avoid upsert overwriting a concurrent insert.
+                    writeResult = await supabaseClient
+                        .from('game_saves')
+                        .insert(savePayload)
+                        .select('updated_at')
+                        .maybeSingle();
+                }
+
+                if (writeResult.error) {
+                    console.error('Cloud save error:', writeResult.error);
+                    if (showStatus) setCloudStatus(`Cloud save failed: ${writeResult.error.message}`, true);
                     return false;
                 }
-                lastCloudSyncAt = savedAt;
+                if (!writeResult.data) {
+                    if (showStatus) setCloudStatus('A newer cloud save exists. Load the cloud save before saving again.', true);
+                    return false;
+                }
+
+                lastCloudSyncAt = writeResult.data.updated_at || savedAt;
                 if (showStatus) setCloudStatus('Saved to cloud.');
                 return true;
             } finally {
                 cloudSaveInProgress = false;
+                if (cloudSaveQueued) {
+                    cloudSaveQueued = false;
+                    setTimeout(() => { cloudSaveGame(false); }, 0);
+                }
             }
         }
 
@@ -1890,55 +1934,63 @@ body {
             if (cloudLoadInProgress) return false;
             cloudLoadInProgress = true;
             try {
-            if (!supabaseClient || !cloudUser) return false;
-            const { data, error } = await supabaseClient
-                .from('game_saves')
-                .select('save_data, reset_version, updated_at')
-                .eq('user_id', cloudUser.id)
-                .maybeSingle();
-            if (error) {
-                console.error('Cloud load error:', error);
-                if (showStatus) setCloudStatus(`Cloud load failed: ${error.message}`, true);
-                return false;
-            }
-            if (!data) {
-                lastCloudSyncAt = null;
-                cloudResetVersion = Number(localStorage.getItem('ultimateIdleClicker_cloud_reset_version') || 0);
-                if (showStatus) setCloudStatus('No cloud save exists yet.');
-                return false;
-            }
+                if (!supabaseClient || !cloudUser) return false;
+                const loadUserId = cloudUser.id;
+                const { data, error } = await supabaseClient
+                    .from('game_saves')
+                    .select('save_data, reset_version, updated_at')
+                    .eq('user_id', loadUserId)
+                    .maybeSingle();
 
-            const serverResetVersion = Number(data.reset_version ?? 0);
-            const localResetVersion = Number(localStorage.getItem('ultimateIdleClicker_cloud_reset_version') || 0);
-            if (serverResetVersion > localResetVersion) {
-                await applyServerReset(serverResetVersion, showStatus);
-                await cloudSaveGame(false);
-                return true;
-            }
-
-            cloudResetVersion = serverResetVersion;
-            lastCloudSyncAt = data.updated_at || null;
-            if (data.save_data && typeof data.save_data === 'object') {
-                game = { ...game, ...data.save_data };
-                if (!Number.isFinite(Number(game.clickOverdriveLevel))) game.clickOverdriveLevel = 0;
-                const offlineSeconds = applyOfflineProgress(game.lastActiveAt);
-                game.lastActiveAt = Date.now();
-                localStorage.setItem('ultimateIdleClicker_scaled_clean_save', JSON.stringify(game));
-                localStorage.setItem('ultimateIdleClicker_cloud_reset_version', String(cloudResetVersion));
-                updateUI();
-                if (offlineSeconds > 0) {
-                    const offlineHours = offlineSeconds / 3600;
-                    if (showStatus) setCloudStatus(`Cloud save loaded. Offline progress: ${offlineHours.toFixed(1)} hours.`);
-                    await cloudSaveGame(false);
-                } else if (showStatus) {
-                    setCloudStatus('Cloud save loaded.');
+                if (error) {
+                    console.error('Cloud load error:', error);
+                    if (showStatus) setCloudStatus(`Cloud load failed: ${error.message}`, true);
+                    return false;
                 }
-                return true;
-            }
-            if (showStatus) setCloudStatus('Cloud save was empty.', true);
-            return false;
+                if (!data) {
+                    lastCloudSyncAt = null;
+                    cloudResetVersion = Number(localStorage.getItem('ultimateIdleClicker_cloud_reset_version') || 0);
+                    if (showStatus) setCloudStatus('No cloud save exists yet.');
+                    return false;
+                }
+
+                const serverResetVersion = Number(data.reset_version ?? 0);
+                const localResetVersion = Number(localStorage.getItem('ultimateIdleClicker_cloud_reset_version') || 0);
+                if (serverResetVersion > localResetVersion) {
+                    await applyServerReset(serverResetVersion, showStatus);
+                    lastCloudSyncAt = data.updated_at || null;
+                    cloudSaveQueued = true;
+                    return true;
+                }
+
+                cloudResetVersion = serverResetVersion;
+                lastCloudSyncAt = data.updated_at || null;
+                if (data.save_data && typeof data.save_data === 'object') {
+                    game = { ...game, ...data.save_data };
+                    if (!Number.isFinite(Number(game.clickOverdriveLevel))) game.clickOverdriveLevel = 0;
+                    const offlineSeconds = applyOfflineProgress(game.lastActiveAt);
+                    game.lastActiveAt = Date.now();
+                    localStorage.setItem('ultimateIdleClicker_scaled_clean_save', JSON.stringify(game));
+                    localStorage.setItem('ultimateIdleClicker_cloud_reset_version', String(cloudResetVersion));
+                    updateUI();
+                    if (offlineSeconds > 0) {
+                        const offlineHours = offlineSeconds / 3600;
+                        if (showStatus) setCloudStatus(`Cloud save loaded. Offline progress: ${offlineHours.toFixed(1)} hours.`);
+                        // Queue the updated timestamp/progress until the load lock has been released.
+                        cloudSaveQueued = true;
+                    } else if (showStatus) {
+                        setCloudStatus('Cloud save loaded.');
+                    }
+                    return true;
+                }
+                if (showStatus) setCloudStatus('Cloud save was empty.', true);
+                return false;
             } finally {
                 cloudLoadInProgress = false;
+                if (cloudSaveQueued) {
+                    cloudSaveQueued = false;
+                    setTimeout(() => { cloudSaveGame(false); }, 0);
+                }
             }
         }
 
@@ -2013,11 +2065,15 @@ body {
                 await refreshDmUnreadCount();
             }
             supabaseClient.auth.onAuthStateChange((_event, session) => {
-                cloudUser = session ? session.user : null;
+                const nextCloudUser = session ? session.user : null;
+                const userChanged = (cloudUser?.id || null) !== (nextCloudUser?.id || null);
+                cloudUser = nextCloudUser;
+                if (userChanged) lastCloudSyncAt = null;
                 updateCloudUI();
                 updateChatAuthUI();
                 if (cloudUser) {
-                    loadUsername().then(async () => {
+                    // Load the account's cloud save before background autosaves can write local state.
+                    cloudLoadGame(false).then(() => loadUsername()).then(async () => {
                         await applyPendingAdminGrants();
                         updateChatAuthUI();
                         await loadChatMessages();
