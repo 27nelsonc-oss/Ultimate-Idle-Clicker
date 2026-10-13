@@ -487,7 +487,7 @@ body {
 
 </style>
 <style>
-.titles-panel{width:min(92%,320px);max-width:320px;min-width:0;box-sizing:border-box;margin:4px auto 0}.title-card{border:1px solid #6b3a1d;border-radius:8px;padding:10px;margin:8px 0;background:#17110d}.title-name{color:#ff7518;font-weight:800;letter-spacing:.2px}.title-action-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.title-action-row .btn-upgrade{flex:1;min-width:110px}.title-modal-backdrop{position:fixed;inset:0;z-index:10000;display:none;align-items:center;justify-content:center;padding:18px;box-sizing:border-box;background:rgba(0,0,0,.82)}.title-modal-card{width:min(440px,100%);box-sizing:border-box;background:#1b1714;border:2px solid #ff7518;border-radius:14px;padding:22px;text-align:center;box-shadow:0 0 28px rgba(255,117,24,.25)}.title-modal-card h2{color:#ff7518;margin-top:0}.title-chat-badge{color:#ff7518;font-weight:800;margin-right:5px}#owner-title-tools{border:1px solid #ff7518;border-radius:8px;padding:10px;margin:12px 0}#owner-title-tools button{margin:4px 4px 4px 0}
+.titles-panel{width:min(92%,320px);max-width:320px;min-width:0;box-sizing:border-box;margin:4px auto 0}.titles-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:8px}.titles-panel-heading .section-title{margin:0}.titles-minimize-btn{flex:0 0 auto;padding:6px 10px;font-size:.85rem}.title-card{border:1px solid #6b3a1d;border-radius:8px;padding:10px;margin:8px 0;background:#17110d}.title-name{color:#ff7518;font-weight:800;letter-spacing:.2px}.title-action-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.title-action-row .btn-upgrade{flex:1;min-width:110px}.title-modal-backdrop{position:fixed;inset:0;z-index:10000;display:none;align-items:center;justify-content:center;padding:18px;box-sizing:border-box;background:rgba(0,0,0,.82)}.title-modal-card{width:min(440px,100%);box-sizing:border-box;background:#1b1714;border:2px solid #ff7518;border-radius:14px;padding:22px;text-align:center;box-shadow:0 0 28px rgba(255,117,24,.25)}.title-modal-card h2{color:#ff7518;margin-top:0}.title-chat-badge{color:#ff7518;font-weight:800;margin-right:5px}#owner-title-tools{border:1px solid #ff7518;border-radius:8px;padding:10px;margin:12px 0}#owner-title-tools button{margin:4px 4px 4px 0}
  .spookyest-gradient{background:linear-gradient(110deg,#ff7518 0%,#ffb347 35%,#ff7518 65%,#6c2a12 100%);-webkit-background-clip:text;background-clip:text;color:transparent!important;-webkit-text-fill-color:transparent;display:inline-block;font-weight:900}.headless-gradient{background:linear-gradient(105deg,#ffae39 0%,#ff7518 42%,#8d3a0b 72%,#16100e 100%);-webkit-background-clip:text;background-clip:text;color:transparent!important;-webkit-text-fill-color:transparent;display:inline-block;font-weight:900}.pumpkin-secret{position:absolute;right:9px;bottom:8px;width:27px;height:27px;padding:0;margin:0;border:0;background:transparent;opacity:.19;cursor:pointer;font-size:19px;line-height:27px;z-index:2}.pumpkin-secret:hover,.pumpkin-secret:focus-visible{opacity:.65}
 </style>
 </head>
@@ -701,7 +701,8 @@ body {
 
     <!-- Halloween Titles Panel: directly beneath Chat -->
     <div class="panel titles-panel" id="titles-panel">
-        <h2 class="section-title">🏷️ My Titles</h2>
+        <div class="titles-panel-heading"><h2 class="section-title">🏷️ My Titles</h2><button type="button" class="btn-upgrade titles-minimize-btn" id="titles-minimize-btn" aria-expanded="true" aria-controls="titles-panel-content">Minimize</button></div>
+        <div id="titles-panel-content">
         <div class="sub-stat" id="titles-login-status">Sign in to view and manage your titles.</div>
         <div id="titles-owned-list"></div>
         <div class="title-card" id="spookyest-discovery-card"><div class="title-name spookyest-gradient">The Spookyest</div><div class="sub-stat" id="titles-status" style="margin-top:8px;">Requires 10 rebirths. First successful claim wins.</div><button type="button" id="title-claim-btn" class="btn-upgrade" style="display:none;width:100%;margin-top:8px;">Claim The Spookyest</button></div>
@@ -710,6 +711,7 @@ body {
             <strong>🧪 Owner Title Testing</strong>
             <label style="display:flex;align-items:center;gap:8px;margin-top:8px;"><input type="checkbox" id="title-test-mode" checked style="width:18px;height:18px;">Test mode — claiming will NOT reserve the real title</label>
             <button type="button" id="title-preview-popup-btn" class="btn-upgrade" style="width:100%;margin-top:8px;">Preview Claim Popup</button><div style="margin-top:10px;font-weight:bold;">Test any limited title (does not use the public claim)</div><select id="owner-test-title-select" style="width:100%;margin-top:6px;padding:8px;background:#222;color:#fff;border-radius:6px;"><option value="the_spookyest">The Spookyest</option><option value="the_headless">The Headless</option></select><div style="display:flex;gap:8px;margin-top:8px;"><button type="button" id="owner-test-title-grant" class="btn-upgrade" style="flex:1;">Add Test Title</button><button type="button" id="owner-test-title-remove" class="btn-upgrade" style="flex:1;">Remove Selected Title</button></div><div class="sub-stat" id="owner-test-title-status" style="margin-top:6px;"></div>
+        </div>
         </div>
         <div class="title-modal-backdrop" id="title-claim-modal" role="dialog" aria-modal="true" aria-labelledby="title-modal-heading">
             <div class="title-modal-card"><h2 id="title-modal-heading">🎃 A Rare Title Awaits!</h2><div class="title-name spookyest-gradient" style="font-size:1.35rem;margin:12px 0;">The Spookyest</div><p id="title-modal-description">You have reached 10 rebirths. Be the first player to claim this limited title!</p><div class="title-action-row"><button type="button" id="title-modal-claim-btn" class="btn-upgrade">Claim Title</button><button type="button" id="title-modal-close-btn" class="btn-upgrade">Not Now</button></div><div class="sub-stat" id="title-modal-status" style="margin-top:10px;"></div></div>
@@ -2276,6 +2278,16 @@ body {
             closeTitleClaimPopup(); await refreshTitlePanel(); await refreshChatTitleBadges();
             const status = document.getElementById('titles-status');
             if (status) status.textContent = isTestClaim ? 'Test title added! The real one-time public claim remains available.' : 'Title claimed successfully!';
+        }
+        const titlesMinimizeButton = document.getElementById('titles-minimize-btn');
+        const titlesPanelContent = document.getElementById('titles-panel-content');
+        if (titlesMinimizeButton && titlesPanelContent) {
+            titlesMinimizeButton.addEventListener('click', () => {
+                const isExpanded = titlesMinimizeButton.getAttribute('aria-expanded') === 'true';
+                titlesPanelContent.style.display = isExpanded ? 'none' : '';
+                titlesMinimizeButton.setAttribute('aria-expanded', String(!isExpanded));
+                titlesMinimizeButton.textContent = isExpanded ? 'Expand' : 'Minimize';
+            });
         }
         let headlessClaimInProgress = false;
         document.getElementById('owner-test-title-grant')?.addEventListener('click', () => ownerTestLimitedTitle('grant'));
