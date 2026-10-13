@@ -488,6 +488,7 @@ body {
 </style>
 <style>
 .titles-panel{width:min(92%,320px);max-width:320px;min-width:0;box-sizing:border-box;margin:4px auto 0}.title-card{border:1px solid #6b3a1d;border-radius:8px;padding:10px;margin:8px 0;background:#17110d}.title-name{color:#ff7518;font-weight:800;letter-spacing:.2px}.title-action-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.title-action-row .btn-upgrade{flex:1;min-width:110px}.title-modal-backdrop{position:fixed;inset:0;z-index:10000;display:none;align-items:center;justify-content:center;padding:18px;box-sizing:border-box;background:rgba(0,0,0,.82)}.title-modal-card{width:min(440px,100%);box-sizing:border-box;background:#1b1714;border:2px solid #ff7518;border-radius:14px;padding:22px;text-align:center;box-shadow:0 0 28px rgba(255,117,24,.25)}.title-modal-card h2{color:#ff7518;margin-top:0}.title-chat-badge{color:#ff7518;font-weight:800;margin-right:5px}#owner-title-tools{border:1px solid #ff7518;border-radius:8px;padding:10px;margin:12px 0}#owner-title-tools button{margin:4px 4px 4px 0}
+ .headless-gradient{background:linear-gradient(105deg,#ffae39 0%,#ff7518 42%,#8d3a0b 72%,#16100e 100%);-webkit-background-clip:text;background-clip:text;color:transparent!important;-webkit-text-fill-color:transparent;display:inline-block;font-weight:900}.pumpkin-secret{position:absolute;right:9px;bottom:8px;width:27px;height:27px;padding:0;margin:0;border:0;background:transparent;opacity:.19;cursor:pointer;font-size:19px;line-height:27px;z-index:2}.pumpkin-secret:hover,.pumpkin-secret:focus-visible{opacity:.65}
 </style>
 </head>
 <body>
@@ -580,7 +581,8 @@ body {
 
     <!-- Gem Station + Player List -->
     <div class="gem-station-player-list">
-    <div class="panel gem-station-panel" style="width:92%; max-width:620px; box-sizing:border-box; margin:0 auto;">
+    <div class="panel gem-station-panel" style="width:92%; max-width:620px; box-sizing:border-box; margin:0 auto; position:relative;">
+        <button type="button" class="pumpkin-secret" id="headless-pumpkin" aria-label="Mysterious pumpkin" title="🎃">🎃</button>
         <h2 class="section-title">💎 Gem Station</h2>
         <div class="gem-display">Gems: <span id="gem-display">0</span></div>
         <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 15px;">
@@ -703,6 +705,7 @@ body {
         <div class="sub-stat" id="titles-login-status">Sign in to view and manage your titles.</div>
         <div id="titles-owned-list"></div>
         <div class="sub-stat" id="titles-status" style="margin-top:8px;">The Spookyest: requires 10 rebirths. First successful claim wins.</div>
+        <div class="title-card"><div class="title-name headless-gradient">The Headless</div><div class="sub-stat">Hint: Spooky scary pumpkins</div><div class="sub-stat" id="headless-status">A secret awaits discovery...</div></div>
         <button type="button" id="title-claim-btn" class="btn-upgrade" style="display:none;width:100%;margin-top:8px;">Claim The Spookyest</button>
         <div id="owner-title-test-tools" style="display:none;margin-top:12px;padding:10px;border:1px solid #ff7518;border-radius:8px;">
             <strong>🧪 Owner Title Testing</strong>
@@ -1361,7 +1364,7 @@ body {
                 const activeTitleId = activeTitlesByUser.get(String(message.user_id || ''));
                 if (activeTitleId) {
                     const titleBadge = document.createElement('span');
-                    titleBadge.className = 'title-chat-badge';
+                    titleBadge.className = 'title-chat-badge' + (activeTitleId === 'the_headless' ? ' headless-gradient' : '');
                     titleBadge.textContent = '[' + titleDisplayName(activeTitleId) + '] ';
                     header.appendChild(titleBadge);
                 }
@@ -2121,13 +2124,14 @@ body {
         // --- HALLOWEEN TITLE SYSTEM ---
         const SPOOKIEST_TITLE_ID = 'the_spookyest';
         const SPOOKIEST_TITLE_NAME = 'The Spookyest';
+        const HEADLESS_TITLE_ID = 'the_headless';
         let titleClaimStatus = { claimed: false, claimed_by_me: false };
         let titlePopupOpen = false;
         let titlePopupTestOverride = false;
         let titlePopupShownForQualification = false;
         let titleRefreshInProgress = false;
         function isGameOwner() { return (cloudUser?.email || '').toLowerCase() === CHAT_OWNER_EMAIL; }
-        function titleDisplayName(titleId) { return titleId === SPOOKIEST_TITLE_ID ? SPOOKIEST_TITLE_NAME : ''; }
+        function titleDisplayName(titleId) { return titleId === SPOOKIEST_TITLE_ID ? SPOOKIEST_TITLE_NAME : titleId === HEADLESS_TITLE_ID ? 'The Headless' : ''; }
         function showTitleClaimPopup(testPreview = false) {
             const modal = document.getElementById('title-claim-modal');
             if (!modal || !cloudUser) return;
@@ -2160,14 +2164,18 @@ body {
             }
             titleRefreshInProgress = true;
             try {
-                const [ownedResult, preferenceResult, statusResult] = await Promise.all([
+                const [ownedResult, preferenceResult, statusResult, headlessResult] = await Promise.all([
                     supabaseClient.from('game_player_titles').select('title_id,source,granted_at').eq('user_id', cloudUser.id),
                     supabaseClient.from('game_title_preferences').select('active_title_id').eq('user_id', cloudUser.id).maybeSingle(),
-                    supabaseClient.rpc('get_spookyest_title_status')
+                    supabaseClient.rpc('get_spookyest_title_status'),
+                    supabaseClient.rpc('get_headless_title_status')
                 ]);
                 if (ownedResult.error) throw ownedResult.error;
                 if (preferenceResult.error) throw preferenceResult.error;
                 if (statusResult.error) throw statusResult.error;
+                if (headlessResult.error) throw headlessResult.error;
+                const headlessStatus = document.getElementById('headless-status');
+                if (headlessStatus) headlessStatus.textContent = headlessResult.data?.claimed ? (headlessResult.data.claimed_by_me ? 'You discovered the pumpkin first!' : 'The pumpkin has already been discovered.') : 'The first player to find it wins.';
                 const owned = ownedResult.data || [];
                 const activeTitle = preferenceResult.data?.active_title_id || null;
                 titleClaimStatus = statusResult.data || { claimed: false, claimed_by_me: false };
@@ -2182,7 +2190,7 @@ body {
                     }
                     owned.forEach(item => {
                         const card = document.createElement('div'); card.className = 'title-card';
-                        const name = document.createElement('div'); name.className = 'title-name'; name.textContent = titleDisplayName(item.title_id); card.appendChild(name);
+                        const name = document.createElement('div'); name.className = 'title-name' + (item.title_id === HEADLESS_TITLE_ID ? ' headless-gradient' : ''); name.textContent = titleDisplayName(item.title_id); card.appendChild(name);
                         const state = document.createElement('div'); state.className = 'sub-stat'; state.textContent = activeTitle === item.title_id ? 'Currently active in chat' : 'Owned • not currently active'; card.appendChild(state);
                         const action = document.createElement('button'); action.type = 'button'; action.className = 'btn-upgrade'; action.style.width = '100%'; action.style.marginTop = '8px';
                         action.textContent = activeTitle === item.title_id ? 'Deactivate Title' : 'Activate Title';
@@ -2236,6 +2244,19 @@ body {
             closeTitleClaimPopup(); await refreshTitlePanel(); await refreshChatTitleBadges();
             const status = document.getElementById('titles-status');
             if (status) status.textContent = isTestClaim ? 'Test title added! The real one-time public claim remains available.' : 'Title claimed successfully!';
+        }
+        let headlessClaimInProgress = false;
+        async function claimHeadlessPumpkin() {
+            if (headlessClaimInProgress) return;
+            if (!supabaseClient || !cloudUser) { alert('Sign in to hunt for The Headless!'); return; }
+            headlessClaimInProgress = true;
+            try {
+                const { data, error } = await supabaseClient.rpc('claim_headless_title');
+                if (error) { alert('Could not check the pumpkin right now. Please try again.'); return; }
+                alert(data?.success ? '🎃 You found it first! The Headless is now in My Titles!' : data?.reason === 'already_claimed' ? '🎃 Someone else has already found the pumpkin!' : 'Please sign in first.');
+                await refreshTitlePanel();
+                if (data?.success) await refreshChatTitleBadges();
+            } finally { headlessClaimInProgress = false; }
         }
         async function refreshChatTitleBadges() { if (supabaseClient && cloudUser) await loadChatMessages(); }
         async function refreshOwnerTitleTools() {
@@ -3884,6 +3905,7 @@ body {
         loadAdminAbuseSettings();
         setInterval(loadAdminAbuseSettings, 5000);
 
+        document.getElementById('headless-pumpkin')?.addEventListener('click', claimHeadlessPumpkin);
         document.getElementById('title-claim-btn')?.addEventListener('click', () => {
             if (isGameOwner() && document.getElementById('title-test-mode')?.checked) showTitleClaimPopup(true); else showTitleClaimPopup(false);
         });
