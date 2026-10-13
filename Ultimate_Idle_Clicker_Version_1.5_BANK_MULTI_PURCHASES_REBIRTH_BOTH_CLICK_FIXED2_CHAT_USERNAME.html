@@ -969,8 +969,8 @@ body {
                 </div>
                 <div id="username-status" class="sub-stat" style="margin-top:4px;"></div>
             </div>
-            <button id="cloud-save-btn" class="btn-upgrade">Save to Cloud</button>
-            <button id="cloud-load-btn" class="btn-upgrade">Load from Cloud</button>
+            <button id="cloud-save-btn" class="btn-upgrade">Save Named Save</button>
+            <button id="cloud-load-btn" class="btn-upgrade">Load Save</button>
             <button id="cloud-logout-btn" class="btn-upgrade">Log Out</button>
             <div id="cloud-status" class="sub-stat" style="margin-top:6px;"></div>
         </div>
@@ -2451,8 +2451,185 @@ body {
             if (event.key === 'Enter') { event.preventDefault(); loadPlayerList(event.target.value); }
         });
 
-        document.getElementById('cloud-save-btn').addEventListener('click', () => cloudSaveGame());
-        document.getElementById('cloud-load-btn').addEventListener('click', () => cloudLoadGame());
+        // Manual save creates or replaces the account's one named cloud snapshot.
+        async function saveNamedCloudGame() {
+            if (!supabaseClient || !cloudUser) {
+                alert('Please log in before creating a named cloud save.');
+                return false;
+            }
+
+            while (cloudLoadInProgress || cloudSaveInProgress) {
+                await new Promise(resolve => setTimeout(resolve, 25));
+                if (!supabaseClient || !cloudUser) return false;
+            }
+
+            cloudSaveInProgress = true;
+            try {
+                const saveUserId = cloudUser.id;
+                const { data: existing, error: readError } = await supabaseClient
+                    .from('game_saves')
+                    .select('user_id, named_save_name, named_save_data, updated_at, reset_version')
+                    .eq('user_id', saveUserId)
+                    .maybeSingle();
+
+                if (cloudUser?.id !== saveUserId) return false;
+                if (readError) {
+                    alert('Could not check your named save: ' + readError.message);
+                    return false;
+                }
+
+                const suggestedName = existing?.named_save_name || '';
+                const enteredName = prompt('Name your save (1–40 characters):', suggestedName);
+                if (enteredName === null) return false;
+                const saveName = enteredName.trim();
+                if (!saveName || saveName.length > 40) {
+                    alert('Please enter a name between 1 and 40 characters.');
+                    return false;
+                }
+
+                if (existing?.named_save_data && !confirm(
+                    'Replace your existing named save "' + (existing.named_save_name || 'Unnamed save') + '" with "' + saveName + '"?'
+                )) return false;
+
+                // Recheck the account after the prompt before writing account-owned data.
+                if (cloudUser?.id !== saveUserId) return false;
+                const snapshot = JSON.parse(JSON.stringify({ ...game, lastActiveAt: Date.now() }));
+                const savedAt = new Date().toISOString();
+                let result;
+
+                if (existing) {
+                    result = await supabaseClient
+                        .from('game_saves')
+                        .update({ named_save_name: saveName, named_save_data: snapshot })
+                        .eq('user_id', saveUserId)
+                        .select('updated_at')
+                        .maybeSingle();
+                } else {
+                    result = await supabaseClient
+                        .from('game_saves')
+                        .insert({
+                            user_id: saveUserId,
+                            save_data: snapshot,
+                            named_save_name: saveName,
+                            named_save_data: snapshot,
+                            reset_version: cloudResetVersion,
+                            updated_at: savedAt
+                        })
+                        .select('updated_at')
+                        .maybeSingle();
+                }
+
+                if (cloudUser?.id !== saveUserId) return false;
+                if (result.error || !result.data) {
+                    alert('Named save failed: ' + (result.error?.message || 'The save could not be confirmed.'));
+                    return false;
+                }
+
+                if (!existing) lastCloudSyncAt = result.data.updated_at || savedAt;
+                setCloudStatus('Named save "' + saveName + '" saved to your account.');
+                return true;
+            } catch (error) {
+                console.error('Named cloud save error:', error);
+                setCloudStatus('Named save failed: ' + error.message, true);
+                return false;
+            } finally {
+                cloudSaveInProgress = false;
+                if (cloudSaveQueued) {
+                    cloudSaveQueued = false;
+                    setTimeout(() => { cloudSaveGame(false); }, 0);
+                }
+            }
+        }
+
+        async function loadNamedCloudGame() {
+            while (cloudLoadInProgress || cloudSaveInProgress) {
+                await new Promise(resolve => setTimeout(resolve, 25));
+                if (!supabaseClient || !cloudUser) return false;
+            }
+            if (!supabaseClient || !cloudUser) return false;
+
+            cloudLoadInProgress = true;
+            try {
+                const loadUserId = cloudUser.id;
+                const { data, error } = await supabaseClient
+                    .from('game_saves')
+                    .select('named_save_name, named_save_data, reset_version, updated_at')
+                    .eq('user_id', loadUserId)
+                    .maybeSingle();
+
+                if (cloudUser?.id !== loadUserId) return false;
+                if (error) {
+                    setCloudStatus('Named save could not be loaded: ' + error.message, true);
+                    return false;
+                }
+                if (!data?.named_save_data || typeof data.named_save_data !== 'object') {
+                    setCloudStatus('No named save exists for this account.', true);
+                    return false;
+                }
+
+                const serverResetVersion = Number(data.reset_version ?? 0);
+                const localResetVersion = Number(localStorage.getItem('ultimateIdleClicker_cloud_reset_version') || 0);
+                if (serverResetVersion > localResetVersion) {
+                    await applyServerReset(serverResetVersion, true);
+                    lastCloudSyncAt = data.updated_at || null;
+                    return false;
+                }
+
+                game = { ...game, ...data.named_save_data, lastActiveAt: Date.now() };
+                if (!Number.isFinite(Number(game.clickOverdriveLevel))) game.clickOverdriveLevel = 0;
+                cloudResetVersion = serverResetVersion;
+                localStorage.setItem('ultimateIdleClicker_scaled_clean_save', JSON.stringify(game));
+                localStorage.setItem('ultimateIdleClicker_cloud_reset_version', String(cloudResetVersion));
+                lastCloudSyncAt = data.updated_at || null;
+                cloudConflictDetected = false;
+                updateUI();
+                setCloudStatus('Named save "' + (data.named_save_name || 'Unnamed save') + '" loaded.');
+                // Make the selected snapshot the new active autosave without touching the named copy.
+                cloudSaveQueued = true;
+                return true;
+            } catch (error) {
+                console.error('Named cloud load error:', error);
+                setCloudStatus('Named save could not be loaded: ' + error.message, true);
+                return false;
+            } finally {
+                cloudLoadInProgress = false;
+                if (cloudSaveQueued) {
+                    cloudSaveQueued = false;
+                    setTimeout(() => { cloudSaveGame(false); }, 0);
+                }
+            }
+        }
+
+        async function chooseCloudSaveToLoad() {
+            if (!supabaseClient || !cloudUser) {
+                alert('Please log in before loading a cloud save.');
+                return false;
+            }
+
+            const { data, error } = await supabaseClient
+                .from('game_saves')
+                .select('named_save_name, named_save_data')
+                .eq('user_id', cloudUser.id)
+                .maybeSingle();
+
+            if (error) {
+                setCloudStatus('Could not check named save: ' + error.message, true);
+                return false;
+            }
+
+            if (!data?.named_save_data || typeof data.named_save_data !== 'object') {
+                return await cloudLoadGame();
+            }
+
+            const loadNamed = confirm(
+                'Choose a save to load:\n\nOK = Named save: "' + (data.named_save_name || 'Unnamed save') +
+                '"\nCancel = Latest autosave'
+            );
+            return loadNamed ? await loadNamedCloudGame() : await cloudLoadGame();
+        }
+
+        document.getElementById('cloud-save-btn').addEventListener('click', () => saveNamedCloudGame());
+        document.getElementById('cloud-load-btn').addEventListener('click', () => chooseCloudSaveToLoad());
         document.getElementById('cloud-logout-btn').addEventListener('click', async () => {
             await supabaseClient.auth.signOut();
             stopPlayerPresence();
@@ -3862,7 +4039,7 @@ body {
 
             try {
                 // Do not let an in-progress cloud load restore the old save after the reset.
-                while (cloudLoadInProgress) {
+                while (cloudLoadInProgress || cloudSaveInProgress) {
                     await new Promise(resolve => setTimeout(resolve, 50));
                 }
 
@@ -3906,7 +4083,20 @@ body {
                         alert('Save reset locally, but the cloud reset could not be confirmed.');
                         return;
                     }
-                    setCloudStatus('Save completely reset locally and in the cloud.');
+                    // Hard Reset also permanently removes this account's named save.
+                    const { error: namedResetError } = await supabaseClient
+                        .from('game_saves')
+                        .update({ named_save_data: null, named_save_name: null })
+                        .eq('user_id', cloudUser.id);
+                    if (namedResetError) {
+                        console.error('Named save reset error:', namedResetError);
+                        setCloudStatus('Progress reset, but the named save could not be deleted: ' + namedResetError.message, true);
+                        alert('Your game progress was reset, but the named cloud save could not be deleted. Please sign in and try Hard Reset again.');
+                        return;
+                    }
+                    setCloudStatus('Progress and named save completely reset locally and in the cloud.');
+                } else {
+                    setCloudStatus('Local progress reset. Sign in to the account that owns your named save and use Hard Reset to delete its cloud copy.', true);
                 }
 
                 alert('Save completely reset!');
