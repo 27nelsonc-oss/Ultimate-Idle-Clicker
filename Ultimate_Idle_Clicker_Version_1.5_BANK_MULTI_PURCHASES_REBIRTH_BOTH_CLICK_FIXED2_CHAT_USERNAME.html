@@ -704,9 +704,8 @@ body {
         <h2 class="section-title">🏷️ My Titles</h2>
         <div class="sub-stat" id="titles-login-status">Sign in to view and manage your titles.</div>
         <div id="titles-owned-list"></div>
-        <div class="sub-stat" id="titles-status" style="margin-top:8px;">The Spookyest: requires 10 rebirths. First successful claim wins.</div>
-        <div class="title-card"><div class="title-name headless-gradient">The Headless</div><div class="sub-stat">Hint: Spooky scary pumpkins</div><div class="sub-stat" id="headless-status">A secret awaits discovery...</div></div>
-        <button type="button" id="title-claim-btn" class="btn-upgrade" style="display:none;width:100%;margin-top:8px;">Claim The Spookyest</button>
+        <div class="title-card" id="spookyest-discovery-card"><div class="title-name spookyest-gradient">The Spookyest</div><div class="sub-stat" id="titles-status" style="margin-top:8px;">Requires 10 rebirths. First successful claim wins.</div><button type="button" id="title-claim-btn" class="btn-upgrade" style="display:none;width:100%;margin-top:8px;">Claim The Spookyest</button></div>
+        <div class="title-card" id="headless-discovery-card"><div class="title-name headless-gradient">The Headless</div><div class="sub-stat">Hint: Spooky scary pumpkins</div><div class="sub-stat" id="headless-status">A secret awaits discovery...</div></div>
         <div id="owner-title-test-tools" style="display:none;margin-top:12px;padding:10px;border:1px solid #ff7518;border-radius:8px;">
             <strong>🧪 Owner Title Testing</strong>
             <label style="display:flex;align-items:center;gap:8px;margin-top:8px;"><input type="checkbox" id="title-test-mode" checked style="width:18px;height:18px;">Test mode — claiming will NOT reserve the real title</label>
@@ -2176,10 +2175,17 @@ body {
                 if (statusResult.error) throw statusResult.error;
                 if (headlessResult.error) console.warn('Headless status unavailable:', headlessResult.error);
                 const headlessStatus = document.getElementById('headless-status');
-                if (headlessStatus) headlessStatus.textContent = headlessResult.error ? 'Pumpkin status temporarily unavailable.' : headlessResult.data?.claimed ? (headlessResult.data.claimed_by_me ? 'You discovered the pumpkin first!' : 'The pumpkin has already been discovered.') : 'The first player to find it wins.';
+                if (headlessStatus) headlessStatus.textContent = headlessResult.error ? 'Pumpkin status temporarily unavailable.' : 'The first player to find it wins.';
                 const owned = ownedResult.data || [];
                 const activeTitle = preferenceResult.data?.active_title_id || null;
                 titleClaimStatus = statusResult.data || { claimed: false, claimed_by_me: false };
+                const ownedIds = new Set(owned.map(item => item.title_id));
+                const headlessDiscovery = document.getElementById('headless-discovery-card');
+                const spookyestDiscovery = document.getElementById('spookyest-discovery-card');
+                if (headlessDiscovery) headlessDiscovery.style.display = ownedIds.has(HEADLESS_TITLE_ID) || headlessResult.data?.claimed ? 'none' : '';
+                if (spookyestDiscovery) spookyestDiscovery.style.display = ownedIds.has(SPOOKIEST_TITLE_ID) || titleClaimStatus.claimed ? 'none' : '';
+                const pumpkin = document.getElementById('headless-pumpkin');
+                if (pumpkin) pumpkin.style.display = headlessResult.data?.claimed ? 'none' : '';
                 const loginStatus = document.getElementById('titles-login-status');
                 if (loginStatus) loginStatus.textContent = owned.length ? 'Your title collection:' : 'You do not own any titles yet.';
                 const list = document.getElementById('titles-owned-list');
@@ -2207,14 +2213,12 @@ body {
                 const qualifies = Number(game.rebirths || 0) >= 10;
                 const hasEarnedTitle = owned.some(item => item.title_id === SPOOKIEST_TITLE_ID && item.source === 'earned');
                 if (claimButton) {
-                    claimButton.style.display = qualifies && !hasEarnedTitle && (!titleClaimStatus.claimed || titleClaimStatus.claimed_by_me) ? 'block' : 'none';
+                    claimButton.style.display = qualifies && !ownedIds.has(SPOOKIEST_TITLE_ID) && !titleClaimStatus.claimed ? 'block' : 'none';
                     claimButton.textContent = testMode ? 'Test Claim The Spookyest' : 'Claim The Spookyest';
                 }
-                if (titleStatus) titleStatus.textContent = titleClaimStatus.claimed
-                    ? (titleClaimStatus.claimed_by_me ? 'The public title claim is recorded to your account.' : 'The Spookyest has already been claimed by another player. Owner test grants do not affect that claim.')
-                    : (qualifies ? 'You qualify! The first successful claim wins.' : 'The Spookyest requires 10 rebirths. First successful claim wins.');
+                if (titleStatus) titleStatus.textContent = qualifies ? 'You qualify! The first successful claim wins.' : 'Requires 10 rebirths. First successful claim wins.';
                 if (isOwner) await refreshOwnerTitleTools();
-                if (qualifies && !hasEarnedTitle && !titleClaimStatus.claimed && !titlePopupShownForQualification) {
+                if (qualifies && !ownedIds.has(SPOOKIEST_TITLE_ID) && !titleClaimStatus.claimed && !titlePopupShownForQualification) {
                     titlePopupShownForQualification = true;
                     if (!isOwner || !testMode) showTitleClaimPopup(false);
                 }
