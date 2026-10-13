@@ -2320,10 +2320,6 @@ body {
         let headlessClaimInProgress = false;
         document.getElementById('owner-test-title-grant')?.addEventListener('click', () => ownerTestLimitedTitle('grant'));
         document.getElementById('owner-test-title-remove')?.addEventListener('click', () => ownerTestLimitedTitle('remove'));
-        document.getElementById('title-preview-popup-btn')?.addEventListener('click', () => {
-            const selectedTitle = document.getElementById('owner-test-title-select')?.value || SPOOKIEST_TITLE_ID;
-            showTitleClaimPopup(true, selectedTitle);
-        });
         async function claimHeadlessPumpkin() {
             if (headlessClaimInProgress) return;
             if (!supabaseClient || !cloudUser) { alert('Sign in to hunt for The Headless!'); return; }
