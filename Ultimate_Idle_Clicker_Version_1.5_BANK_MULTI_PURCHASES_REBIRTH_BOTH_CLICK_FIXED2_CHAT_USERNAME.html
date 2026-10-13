@@ -488,7 +488,7 @@ body {
 </style>
 <style>
 .titles-panel{width:min(92%,320px);max-width:320px;min-width:0;box-sizing:border-box;margin:4px auto 0}.title-card{border:1px solid #6b3a1d;border-radius:8px;padding:10px;margin:8px 0;background:#17110d}.title-name{color:#ff7518;font-weight:800;letter-spacing:.2px}.title-action-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.title-action-row .btn-upgrade{flex:1;min-width:110px}.title-modal-backdrop{position:fixed;inset:0;z-index:10000;display:none;align-items:center;justify-content:center;padding:18px;box-sizing:border-box;background:rgba(0,0,0,.82)}.title-modal-card{width:min(440px,100%);box-sizing:border-box;background:#1b1714;border:2px solid #ff7518;border-radius:14px;padding:22px;text-align:center;box-shadow:0 0 28px rgba(255,117,24,.25)}.title-modal-card h2{color:#ff7518;margin-top:0}.title-chat-badge{color:#ff7518;font-weight:800;margin-right:5px}#owner-title-tools{border:1px solid #ff7518;border-radius:8px;padding:10px;margin:12px 0}#owner-title-tools button{margin:4px 4px 4px 0}
- .headless-gradient{background:linear-gradient(105deg,#ffae39 0%,#ff7518 42%,#8d3a0b 72%,#16100e 100%);-webkit-background-clip:text;background-clip:text;color:transparent!important;-webkit-text-fill-color:transparent;display:inline-block;font-weight:900}.pumpkin-secret{position:absolute;right:9px;bottom:8px;width:27px;height:27px;padding:0;margin:0;border:0;background:transparent;opacity:.19;cursor:pointer;font-size:19px;line-height:27px;z-index:2}.pumpkin-secret:hover,.pumpkin-secret:focus-visible{opacity:.65}
+ .spookyest-gradient{background:linear-gradient(110deg,#ff7518 0%,#ffb347 35%,#ff7518 65%,#6c2a12 100%);-webkit-background-clip:text;background-clip:text;color:transparent!important;-webkit-text-fill-color:transparent;display:inline-block;font-weight:900}.headless-gradient{background:linear-gradient(105deg,#ffae39 0%,#ff7518 42%,#8d3a0b 72%,#16100e 100%);-webkit-background-clip:text;background-clip:text;color:transparent!important;-webkit-text-fill-color:transparent;display:inline-block;font-weight:900}.pumpkin-secret{position:absolute;right:9px;bottom:8px;width:27px;height:27px;padding:0;margin:0;border:0;background:transparent;opacity:.19;cursor:pointer;font-size:19px;line-height:27px;z-index:2}.pumpkin-secret:hover,.pumpkin-secret:focus-visible{opacity:.65}
 </style>
 </head>
 <body>
@@ -713,7 +713,7 @@ body {
             <button type="button" id="title-preview-popup-btn" class="btn-upgrade" style="width:100%;margin-top:8px;">Preview Claim Popup</button>
         </div>
         <div class="title-modal-backdrop" id="title-claim-modal" role="dialog" aria-modal="true" aria-labelledby="title-modal-heading">
-            <div class="title-modal-card"><h2 id="title-modal-heading">🎃 A Rare Title Awaits!</h2><div class="title-name" style="font-size:1.35rem;margin:12px 0;">The Spookyest</div><p id="title-modal-description">You have reached 10 rebirths. Be the first player to claim this limited title!</p><div class="title-action-row"><button type="button" id="title-modal-claim-btn" class="btn-upgrade">Claim Title</button><button type="button" id="title-modal-close-btn" class="btn-upgrade">Not Now</button></div><div class="sub-stat" id="title-modal-status" style="margin-top:10px;"></div></div>
+            <div class="title-modal-card"><h2 id="title-modal-heading">🎃 A Rare Title Awaits!</h2><div class="title-name spookyest-gradient" style="font-size:1.35rem;margin:12px 0;">The Spookyest</div><p id="title-modal-description">You have reached 10 rebirths. Be the first player to claim this limited title!</p><div class="title-action-row"><button type="button" id="title-modal-claim-btn" class="btn-upgrade">Claim Title</button><button type="button" id="title-modal-close-btn" class="btn-upgrade">Not Now</button></div><div class="sub-stat" id="title-modal-status" style="margin-top:10px;"></div></div>
         </div>
     </div>
 
@@ -1364,7 +1364,7 @@ body {
                 const activeTitleId = activeTitlesByUser.get(String(message.user_id || ''));
                 if (activeTitleId) {
                     const titleBadge = document.createElement('span');
-                    titleBadge.className = 'title-chat-badge' + (activeTitleId === 'the_headless' ? ' headless-gradient' : '');
+                    titleBadge.className = 'title-chat-badge' + (activeTitleId === 'the_headless' ? ' headless-gradient' : activeTitleId === 'the_spookyest' ? ' spookyest-gradient' : '');
                     titleBadge.textContent = '[' + titleDisplayName(activeTitleId) + '] ';
                     header.appendChild(titleBadge);
                 }
@@ -2151,7 +2151,8 @@ body {
             titlePopupOpen = false; titlePopupTestOverride = false;
         }
         async function refreshTitlePanel() {
-            if (!supabaseClient || !cloudUser || titleRefreshInProgress) {
+            if (titleRefreshInProgress) return;
+            if (!supabaseClient || !cloudUser) {
                 const loginStatus = document.getElementById('titles-login-status');
                 if (loginStatus) loginStatus.textContent = cloudUser ? 'Title services are unavailable.' : 'Sign in to view and manage your titles.';
                 if (!cloudUser || !isGameOwner()) {
@@ -2173,9 +2174,9 @@ body {
                 if (ownedResult.error) throw ownedResult.error;
                 if (preferenceResult.error) throw preferenceResult.error;
                 if (statusResult.error) throw statusResult.error;
-                if (headlessResult.error) throw headlessResult.error;
+                if (headlessResult.error) console.warn('Headless status unavailable:', headlessResult.error);
                 const headlessStatus = document.getElementById('headless-status');
-                if (headlessStatus) headlessStatus.textContent = headlessResult.data?.claimed ? (headlessResult.data.claimed_by_me ? 'You discovered the pumpkin first!' : 'The pumpkin has already been discovered.') : 'The first player to find it wins.';
+                if (headlessStatus) headlessStatus.textContent = headlessResult.error ? 'Pumpkin status temporarily unavailable.' : headlessResult.data?.claimed ? (headlessResult.data.claimed_by_me ? 'You discovered the pumpkin first!' : 'The pumpkin has already been discovered.') : 'The first player to find it wins.';
                 const owned = ownedResult.data || [];
                 const activeTitle = preferenceResult.data?.active_title_id || null;
                 titleClaimStatus = statusResult.data || { claimed: false, claimed_by_me: false };
@@ -2190,7 +2191,7 @@ body {
                     }
                     owned.forEach(item => {
                         const card = document.createElement('div'); card.className = 'title-card';
-                        const name = document.createElement('div'); name.className = 'title-name' + (item.title_id === HEADLESS_TITLE_ID ? ' headless-gradient' : ''); name.textContent = titleDisplayName(item.title_id); card.appendChild(name);
+                        const name = document.createElement('div'); name.className = 'title-name' + (item.title_id === HEADLESS_TITLE_ID ? ' headless-gradient' : item.title_id === SPOOKIEST_TITLE_ID ? ' spookyest-gradient' : ''); name.textContent = titleDisplayName(item.title_id); card.appendChild(name);
                         const state = document.createElement('div'); state.className = 'sub-stat'; state.textContent = activeTitle === item.title_id ? 'Currently active in chat' : 'Owned • not currently active'; card.appendChild(state);
                         const action = document.createElement('button'); action.type = 'button'; action.className = 'btn-upgrade'; action.style.width = '100%'; action.style.marginTop = '8px';
                         action.textContent = activeTitle === item.title_id ? 'Deactivate Title' : 'Activate Title';
