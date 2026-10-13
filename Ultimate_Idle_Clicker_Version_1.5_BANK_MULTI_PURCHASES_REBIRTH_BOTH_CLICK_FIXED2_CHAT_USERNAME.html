@@ -707,11 +707,11 @@ body {
         <div id="titles-owned-list"></div>
         <div class="title-card" id="spookyest-discovery-card"><div class="title-name spookyest-gradient">The Spookyest</div><div class="sub-stat" id="titles-status" style="margin-top:8px;">Requires 10 rebirths. First successful claim wins.</div><button type="button" id="title-claim-btn" class="btn-upgrade" style="display:none;width:100%;margin-top:8px;">Claim The Spookyest</button></div>
         <div class="title-card" id="headless-discovery-card"><div class="title-name headless-gradient">The Headless</div><div class="sub-stat">Hint: Spooky scary pumpkins</div><div class="sub-stat" id="headless-status">A secret awaits discovery...</div></div>
-        <div class="title-card" id="plauge-discovery-card"><div class="title-name plauge-gradient">The Plauge</div><div class="sub-stat">Hint: Deus lo vult</div><div class="sub-stat" id="plauge-status">Type the hint's meaning in global chat. First successful claim wins.</div></div>
+        <div class="title-card" id="plauge-discovery-card"><div class="title-name plauge-gradient">The Plauge</div><div class="sub-stat">Hint: Deus lo vult</div></div>
         <div id="owner-title-test-tools" style="display:none;margin-top:12px;padding:10px;border:1px solid #ff7518;border-radius:8px;">
             <strong>🧪 Owner Title Testing</strong>
             <label style="display:flex;align-items:center;gap:8px;margin-top:8px;"><input type="checkbox" id="title-test-mode" checked style="width:18px;height:18px;">Test mode — claiming will NOT reserve the real title</label>
-            <button type="button" id="title-preview-popup-btn" class="btn-upgrade" style="width:100%;margin-top:8px;">Preview Claim Popup</button><div style="margin-top:10px;font-weight:bold;">Test any limited title (does not use the public claim)</div><select id="owner-test-title-select" style="width:100%;margin-top:6px;padding:8px;background:#222;color:#fff;border-radius:6px;"><option value="the_spookyest">The Spookyest</option><option value="the_headless">The Headless</option></select><div style="display:flex;gap:8px;margin-top:8px;"><button type="button" id="owner-test-title-grant" class="btn-upgrade" style="flex:1;">Add Test Title</button><button type="button" id="owner-test-title-remove" class="btn-upgrade" style="flex:1;">Remove Selected Title</button></div><div class="sub-stat" id="owner-test-title-status" style="margin-top:6px;"></div>
+            <button type="button" id="title-preview-popup-btn" class="btn-upgrade" style="width:100%;margin-top:8px;">Preview Claim Popup</button><div style="margin-top:10px;font-weight:bold;">Test any limited title (does not use the public claim)</div><select id="owner-test-title-select" style="width:100%;margin-top:6px;padding:8px;background:#222;color:#fff;border-radius:6px;"><option value="the_spookyest">The Spookyest</option><option value="the_headless">The Headless</option><option value="the_plauge">The Plauge</option></select><div style="display:flex;gap:8px;margin-top:8px;"><button type="button" id="owner-test-title-grant" class="btn-upgrade" style="flex:1;">Add Test Title</button><button type="button" id="owner-test-title-remove" class="btn-upgrade" style="flex:1;">Remove Selected Title</button></div><div class="sub-stat" id="owner-test-title-status" style="margin-top:6px;"></div>
         </div>
         </div>
         <div class="title-modal-backdrop" id="title-claim-modal" role="dialog" aria-modal="true" aria-labelledby="title-modal-heading">
@@ -755,7 +755,7 @@ body {
                 <strong>🏷️ Title Management (Owner Only)</strong>
                 <div class="sub-stat" style="margin-top:6px;">Select a player by clicking their name in the player list while Owner Player List Mode is ON. Grants behave like owned titles, but test grants do not reserve the one-time public claim.</div>
                 <div class="sub-stat" id="admin-title-target-status" style="margin-top:8px;">No player selected.</div>
-                <label for="admin-title-select" style="display:block;margin-top:8px;">Choose title to manage</label><select id="admin-title-select" style="width:100%;padding:8px;background:#222;color:#fff;border-radius:6px;"><option value="the_spookyest">The Spookyest</option><option value="the_headless">The Headless</option></select>
+                <label for="admin-title-select" style="display:block;margin-top:8px;">Choose title to manage</label><select id="admin-title-select" style="width:100%;padding:8px;background:#222;color:#fff;border-radius:6px;"><option value="the_spookyest">The Spookyest</option><option value="the_headless">The Headless</option><option value="the_plauge">The Plauge</option></select>
                 <button type="button" id="admin-title-grant-btn" class="btn-upgrade">Grant Selected Title</button>
                 <button type="button" id="admin-title-remove-btn" class="btn-upgrade">Remove Selected Title</button>
                 <div class="sub-stat" id="admin-title-manage-status" style="margin-top:6px;"></div>
@@ -2176,15 +2176,21 @@ body {
         let titleRefreshInProgress = false;
         function isGameOwner() { return (cloudUser?.email || '').toLowerCase() === CHAT_OWNER_EMAIL; }
         function titleDisplayName(titleId) { return titleId === SPOOKIEST_TITLE_ID ? SPOOKIEST_TITLE_NAME : titleId === HEADLESS_TITLE_ID ? 'The Headless' : titleId === 'the_plauge' ? 'The Plauge' : ''; }
-        function showTitleClaimPopup(testPreview = false) {
+        let titlePopupTitleId = SPOOKIEST_TITLE_ID;
+        function showTitleClaimPopup(testPreview = false, requestedTitleId = SPOOKIEST_TITLE_ID) {
             const modal = document.getElementById('title-claim-modal');
             if (!modal || !cloudUser) return;
+            titlePopupTitleId = requestedTitleId;
             titlePopupOpen = true; titlePopupTestOverride = Boolean(testPreview);
             const testMode = isGameOwner() && (testPreview || document.getElementById('title-test-mode')?.checked);
             const description = document.getElementById('title-modal-description');
             const claimButton = document.getElementById('title-modal-claim-btn');
             const status = document.getElementById('title-modal-status');
-            if (description) description.textContent = testMode ? 'Testing preview: claiming here adds the title to your collection without reserving the one real public claim.' : 'You have reached 10 rebirths. Be the first player to claim this limited title!';
+            const heading = document.getElementById('title-modal-heading');
+            const titleName = modal.querySelector('.title-name');
+            if (heading) heading.textContent = testMode ? '🧪 Title Claim Test' : '🎃 A Rare Title Awaits!';
+            if (titleName) { titleName.textContent = titleDisplayName(requestedTitleId); titleName.className = 'title-name' + (requestedTitleId === 'the_plauge' ? ' plauge-gradient' : requestedTitleId === 'the_headless' ? ' headless-gradient' : ' spookyest-gradient'); }
+            if (description) description.textContent = testMode ? 'Testing preview: this adds the selected title to your collection without reserving its real public claim.' : 'Be the first player to claim this limited title!';
             if (claimButton) claimButton.textContent = testMode ? 'Test Claim (Does Not Reserve)' : 'Claim Title';
             if (status) status.textContent = testMode ? 'Owner test mode is active. This cannot block another player from earning the real title.' : '';
             modal.style.display = 'flex';
@@ -2314,7 +2320,10 @@ body {
         let headlessClaimInProgress = false;
         document.getElementById('owner-test-title-grant')?.addEventListener('click', () => ownerTestLimitedTitle('grant'));
         document.getElementById('owner-test-title-remove')?.addEventListener('click', () => ownerTestLimitedTitle('remove'));
-        document.getElementById('title-preview-popup-btn')?.addEventListener('click', () => showTitleClaimPopup(true));
+        document.getElementById('title-preview-popup-btn')?.addEventListener('click', () => {
+            const selectedTitle = document.getElementById('owner-test-title-select')?.value || SPOOKIEST_TITLE_ID;
+            showTitleClaimPopup(true, selectedTitle);
+        });
         async function claimHeadlessPumpkin() {
             if (headlessClaimInProgress) return;
             if (!supabaseClient || !cloudUser) { alert('Sign in to hunt for The Headless!'); return; }
@@ -4184,10 +4193,23 @@ body {
         document.getElementById('title-claim-btn')?.addEventListener('click', () => {
             if (isGameOwner() && document.getElementById('title-test-mode')?.checked) showTitleClaimPopup(true); else showTitleClaimPopup(false);
         });
-        document.getElementById('title-modal-claim-btn')?.addEventListener('click', () => claimSpookyestTitle(false));
+        document.getElementById('title-modal-claim-btn')?.addEventListener('click', () => {
+            const isTestClaim = isGameOwner() && (document.getElementById('title-test-mode')?.checked || titlePopupTestOverride);
+            if (isTestClaim) {
+                const selector = document.getElementById('owner-test-title-select');
+                if (selector) selector.value = titlePopupTitleId;
+                ownerTestLimitedTitle('grant').then(() => closeTitleClaimPopup());
+            } else if (titlePopupTitleId === SPOOKIEST_TITLE_ID) {
+                claimSpookyestTitle(false);
+            } else {
+                const status = document.getElementById('title-modal-status'); if (status) status.textContent = 'This title is discovered through its chat phrase.';
+            }
+        });
         document.getElementById('title-modal-close-btn')?.addEventListener('click', closeTitleClaimPopup);
         document.getElementById('title-preview-popup-btn')?.addEventListener('click', () => {
-            const toggle = document.getElementById('title-test-mode'); if (toggle) toggle.checked = true; showTitleClaimPopup(true);
+            const toggle = document.getElementById('title-test-mode'); if (toggle) toggle.checked = true;
+            const selectedTitle = document.getElementById('owner-test-title-select')?.value || SPOOKIEST_TITLE_ID;
+            showTitleClaimPopup(true, selectedTitle);
         });
         document.getElementById('title-test-mode')?.addEventListener('change', () => {
             if (isGameOwner() && document.getElementById('title-test-mode').checked) showTitleClaimPopup(true);
