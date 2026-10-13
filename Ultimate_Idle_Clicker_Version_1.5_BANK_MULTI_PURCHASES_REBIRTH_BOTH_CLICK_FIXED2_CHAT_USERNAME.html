@@ -1914,6 +1914,7 @@ body {
         let cloudSaveInProgress = false;
         let cloudSaveQueued = false;
         let lastCloudSyncAt = null;
+        let cloudConflictDetected = false;
 
         async function cloudSaveGame(showStatus = true) {
             if (!supabaseClient || !cloudUser) return false;
@@ -1950,7 +1951,12 @@ body {
                     (!lastCloudSyncAt || !currentSave.updated_at ||
                      Date.parse(currentSave.updated_at) !== Date.parse(lastCloudSyncAt))
                 ) {
-                    if (showStatus) setCloudStatus('A newer cloud save exists. Load the cloud save before saving again.', true);
+                    // Background autosaves normally stay quiet, but make a cloud conflict
+                    // visible once so the player knows why syncing paused.
+                    if (showStatus || !cloudConflictDetected) {
+                        setCloudStatus('Cloud save paused: a newer cloud save exists. Use “Load from Cloud” before saving again.', true);
+                    }
+                    cloudConflictDetected = true;
                     return false;
                 }
 
@@ -1994,10 +2000,14 @@ body {
                     return false;
                 }
                 if (!writeResult.data) {
-                    if (showStatus) setCloudStatus('A newer cloud save exists. Load the cloud save before saving again.', true);
+                    if (showStatus || !cloudConflictDetected) {
+                        setCloudStatus('Cloud save paused: another session changed the cloud save. Use “Load from Cloud” before saving again.', true);
+                    }
+                    cloudConflictDetected = true;
                     return false;
                 }
 
+                cloudConflictDetected = false;
                 lastCloudSyncAt = writeResult.data.updated_at || savedAt;
                 if (showStatus) setCloudStatus('Saved to cloud.');
                 return true;
@@ -2039,6 +2049,7 @@ body {
                     return false;
                 }
                 if (!data) {
+                    cloudConflictDetected = false;
                     lastCloudSyncAt = null;
                     cloudResetVersion = Number(localStorage.getItem('ultimateIdleClicker_cloud_reset_version') || 0);
                     if (showStatus) setCloudStatus('No cloud save exists yet.');
@@ -2054,6 +2065,7 @@ body {
                     return true;
                 }
 
+                cloudConflictDetected = false;
                 cloudResetVersion = serverResetVersion;
                 lastCloudSyncAt = data.updated_at || null;
                 if (data.save_data && typeof data.save_data === 'object') {
