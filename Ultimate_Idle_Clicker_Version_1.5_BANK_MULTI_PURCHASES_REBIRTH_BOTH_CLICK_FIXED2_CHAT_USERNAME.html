@@ -709,7 +709,7 @@ body {
         <div id="owner-title-test-tools" style="display:none;margin-top:12px;padding:10px;border:1px solid #ff7518;border-radius:8px;">
             <strong>🧪 Owner Title Testing</strong>
             <label style="display:flex;align-items:center;gap:8px;margin-top:8px;"><input type="checkbox" id="title-test-mode" checked style="width:18px;height:18px;">Test mode — claiming will NOT reserve the real title</label>
-            <button type="button" id="title-preview-popup-btn" class="btn-upgrade" style="width:100%;margin-top:8px;">Preview Claim Popup</button>
+            <button type="button" id="title-preview-popup-btn" class="btn-upgrade" style="width:100%;margin-top:8px;">Preview Claim Popup</button><div style="margin-top:10px;font-weight:bold;">Test any limited title (does not use the public claim)</div><select id="owner-test-title-select" style="width:100%;margin-top:6px;padding:8px;background:#222;color:#fff;border-radius:6px;"><option value="the_spookyest">The Spookyest</option><option value="the_headless">The Headless</option></select><div style="display:flex;gap:8px;margin-top:8px;"><button type="button" id="owner-test-title-grant" class="btn-upgrade" style="flex:1;">Add Test Title</button><button type="button" id="owner-test-title-remove" class="btn-upgrade" style="flex:1;">Remove Test Title</button></div><div class="sub-stat" id="owner-test-title-status" style="margin-top:6px;"></div>
         </div>
         <div class="title-modal-backdrop" id="title-claim-modal" role="dialog" aria-modal="true" aria-labelledby="title-modal-heading">
             <div class="title-modal-card"><h2 id="title-modal-heading">🎃 A Rare Title Awaits!</h2><div class="title-name spookyest-gradient" style="font-size:1.35rem;margin:12px 0;">The Spookyest</div><p id="title-modal-description">You have reached 10 rebirths. Be the first player to claim this limited title!</p><div class="title-action-row"><button type="button" id="title-modal-claim-btn" class="btn-upgrade">Claim Title</button><button type="button" id="title-modal-close-btn" class="btn-upgrade">Not Now</button></div><div class="sub-stat" id="title-modal-status" style="margin-top:10px;"></div></div>
@@ -2251,6 +2251,9 @@ body {
             if (status) status.textContent = isTestClaim ? 'Test title added! The real one-time public claim remains available.' : 'Title claimed successfully!';
         }
         let headlessClaimInProgress = false;
+        document.getElementById('owner-test-title-grant')?.addEventListener('click', () => ownerTestLimitedTitle('grant'));
+        document.getElementById('owner-test-title-remove')?.addEventListener('click', () => ownerTestLimitedTitle('remove'));
+        document.getElementById('title-preview-popup-btn')?.addEventListener('click', () => showTitleClaimPopup(true));
         async function claimHeadlessPumpkin() {
             if (headlessClaimInProgress) return;
             if (!supabaseClient || !cloudUser) { alert('Sign in to hunt for The Headless!'); return; }
@@ -2262,6 +2265,16 @@ body {
                 await refreshTitlePanel();
                 if (data?.success) await refreshChatTitleBadges();
             } finally { headlessClaimInProgress = false; }
+        }
+        async function ownerTestLimitedTitle(action) {
+            if (!isGameOwner() || !supabaseClient || !cloudUser) return;
+            const titleId = document.getElementById('owner-test-title-select')?.value;
+            const status = document.getElementById('owner-test-title-status');
+            if (status) status.textContent = 'Updating test title...';
+            const { data, error } = await supabaseClient.rpc('owner_test_game_title', { p_title_id: titleId, p_action: action });
+            if (error || !data?.success) { if (status) status.textContent = error?.message || 'Could not update test title.'; return; }
+            if (status) status.textContent = action === 'grant' ? 'Test title added. This does not reserve the public claim.' : 'Test title removed.';
+            await refreshTitlePanel(); await refreshChatTitleBadges();
         }
         async function refreshChatTitleBadges() { if (supabaseClient && cloudUser) await loadChatMessages(); }
         async function refreshOwnerTitleTools() {
