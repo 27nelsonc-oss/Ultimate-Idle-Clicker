@@ -1937,6 +1937,9 @@ body {
                     return false;
                 }
 
+                // The account may have changed while checking the current cloud version.
+                if (cloudUser?.id !== saveUserId) return false;
+
                 // Do not let a session that has not loaded the existing cloud save overwrite it.
                 const serverResetVersion = Number(currentSave?.reset_version ?? 0);
                 const serverResetIsNewer = serverResetVersion > cloudResetVersion;
@@ -2008,7 +2011,14 @@ body {
         }
 
         async function cloudLoadGame(showStatus = true) {
-            if (cloudLoadInProgress) return false;
+            if (!supabaseClient || !cloudUser) return false;
+
+            // Keep cloud loads and saves strictly sequential. A load must not replace the
+            // in-memory game while a save is preparing or writing its payload.
+            while (cloudLoadInProgress || cloudSaveInProgress) {
+                await new Promise(resolve => setTimeout(resolve, 25));
+                if (!supabaseClient || !cloudUser) return false;
+            }
             cloudLoadInProgress = true;
             try {
                 if (!supabaseClient || !cloudUser) return false;
@@ -2018,6 +2028,10 @@ body {
                     .select('save_data, reset_version, updated_at')
                     .eq('user_id', loadUserId)
                     .maybeSingle();
+
+                // The account may have changed while the request was in flight.
+                // Never apply one player's save to another player's session.
+                if (cloudUser?.id !== loadUserId) return false;
 
                 if (error) {
                     console.error('Cloud load error:', error);
@@ -2311,7 +2325,7 @@ body {
             updateCloudUI();
             updateChatAuthUI();
             if (cloudUser) {
-                await cloudLoadGame(false);
+                await cloudLoadGame(true);
                 await applyPendingAdminGrants();
                 await loadUsername();
                 updateChatAuthUI();
@@ -2332,7 +2346,7 @@ body {
                 if (cloudUser) {
                     // Load cloud data only when the signed-in account changes; token refreshes must not
                     // replace progress that is currently being played on this device.
-                    const cloudLoad = userChanged ? cloudLoadGame(false) : Promise.resolve(true);
+                    const cloudLoad = userChanged ? cloudLoadGame(true) : Promise.resolve(true);
                     cloudLoad.then(() => loadUsername()).then(async () => {
                         await applyPendingAdminGrants();
                         updateChatAuthUI();
@@ -2998,8 +3012,12 @@ body {
             updateUI();
         }, 100);
 
-        // Auto-save loop runs every 20 seconds
-        setInterval(saveGame, 20000);
+        // Keep local progress safe every 20 seconds without starting a second overlapping
+        // cloud request; cloud autosave has its own 10-second loop below.
+        setInterval(() => {
+            game.lastActiveAt = Date.now();
+            localStorage.setItem('ultimateIdleClicker_scaled_clean_save', JSON.stringify(game));
+        }, 20000);
 
         // --- ADMIN PANEL ---
         // Admin passwords are account-specific. The account must also be logged into the game's cloud account.
