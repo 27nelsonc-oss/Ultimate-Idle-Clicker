@@ -488,7 +488,7 @@ body {
 </style>
 <style>
 .titles-panel{width:min(92%,320px);max-width:320px;min-width:0;box-sizing:border-box;margin:4px auto 0}.titles-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:8px}.titles-panel-heading .section-title{margin:0}.titles-panel-heading .titles-minimize-btn{display:inline-flex;flex:0 0 28px;width:28px!important;height:28px;max-width:28px;min-width:28px;box-sizing:border-box;align-items:center;justify-content:center;padding:0;margin:0;border:1px solid #65452f;border-radius:6px;background:#35251c;color:inherit;font-size:1rem;font-weight:bold;line-height:1;cursor:pointer}.title-card{border:1px solid #6b3a1d;border-radius:8px;padding:10px;margin:8px 0;background:#17110d}.title-name{color:#ff7518;font-weight:800;letter-spacing:.2px}.title-action-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.title-action-row .btn-upgrade{flex:1;min-width:110px}.title-modal-backdrop{position:fixed;inset:0;z-index:10000;display:none;align-items:center;justify-content:center;padding:18px;box-sizing:border-box;background:rgba(0,0,0,.82)}.title-modal-card{width:min(440px,100%);box-sizing:border-box;background:#1b1714;border:2px solid #ff7518;border-radius:14px;padding:22px;text-align:center;box-shadow:0 0 28px rgba(255,117,24,.25)}.title-modal-card h2{color:#ff7518;margin-top:0}.title-chat-badge{color:#ff7518;font-weight:800;margin-right:5px}#owner-title-tools{border:1px solid #ff7518;border-radius:8px;padding:10px;margin:12px 0}#owner-title-tools button{margin:4px 4px 4px 0}
- .spookyest-gradient{background:linear-gradient(110deg,#ff7518 0%,#ffb347 35%,#ff7518 65%,#6c2a12 100%);-webkit-background-clip:text;background-clip:text;color:transparent!important;-webkit-text-fill-color:transparent;display:inline-block;font-weight:900}.headless-gradient{background:linear-gradient(105deg,#ffae39 0%,#ff7518 42%,#8d3a0b 72%,#16100e 100%);-webkit-background-clip:text;background-clip:text;color:transparent!important;-webkit-text-fill-color:transparent;display:inline-block;font-weight:900}.plauge-gradient{background:linear-gradient(110deg,#b7ffb7 0%,#55e65c 35%,#159b32 68%,#06451b 100%);-webkit-background-clip:text;background-clip:text;color:transparent!important;-webkit-text-fill-color:transparent;display:inline-block;font-weight:900}.pumpkin-secret{position:absolute;right:9px;bottom:8px;width:27px;height:27px;padding:0;margin:0;border:0;background:transparent;opacity:.19;cursor:pointer;font-size:19px;line-height:27px;z-index:2}.pumpkin-secret:hover,.pumpkin-secret:focus-visible{opacity:.65}
+ .spookyest-gradient{background:linear-gradient(110deg,#ff7518 0%,#ffb347 35%,#ff7518 65%,#6c2a12 100%);-webkit-background-clip:text;background-clip:text;color:transparent!important;-webkit-text-fill-color:transparent;display:inline-block;font-weight:900}.headless-gradient{background:linear-gradient(105deg,#ffae39 0%,#ff7518 42%,#8d3a0b 72%,#16100e 100%);-webkit-background-clip:text;background-clip:text;color:transparent!important;-webkit-text-fill-color:transparent;display:inline-block;font-weight:900}.plauge-gradient{background:linear-gradient(110deg,#b7ffb7 0%,#55e65c 35%,#159b32 68%,#06451b 100%);-webkit-background-clip:text;background-clip:text;color:transparent!important;-webkit-text-fill-color:transparent;display:inline-block;font-weight:900}.chaotic-gradient{background:linear-gradient(110deg,#bfeaff 0%,#68c5ff 35%,#2588ed 68%,#174bba 100%);-webkit-background-clip:text;background-clip:text;color:transparent!important;-webkit-text-fill-color:transparent;display:inline-block;font-weight:900}.pumpkin-secret{position:absolute;right:9px;bottom:8px;width:27px;height:27px;padding:0;margin:0;border:0;background:transparent;opacity:.19;cursor:pointer;font-size:19px;line-height:27px;z-index:2}.pumpkin-secret:hover,.pumpkin-secret:focus-visible{opacity:.65}
 </style>
 </head>
 <body>
@@ -708,10 +708,11 @@ body {
         <div class="title-card" id="spookyest-discovery-card"><div class="title-name spookyest-gradient">The Spookyest</div><div class="sub-stat" id="titles-status" style="margin-top:8px;">Requires 10 rebirths. First successful claim wins.</div><button type="button" id="title-claim-btn" class="btn-upgrade" style="display:none;width:100%;margin-top:8px;">Claim The Spookyest</button></div>
         <div class="title-card" id="headless-discovery-card"><div class="title-name headless-gradient">The Headless</div><div class="sub-stat">Hint: Spooky scary pumpkins</div><div class="sub-stat" id="headless-status">A secret awaits discovery...</div></div>
         <div class="title-card" id="plauge-discovery-card"><div class="title-name plauge-gradient">The Plauge</div><div class="sub-stat">Hint: Deus lo vult</div></div>
+        <div class="title-card" id="chaotic-discovery-card"><div class="title-name chaotic-gradient">Chaotic</div><div class="sub-stat">Hint: sppoky scary admin pumpkin</div></div>
         <div id="owner-title-test-tools" style="display:none;margin-top:12px;padding:10px;border:1px solid #ff7518;border-radius:8px;">
             <strong>🧪 Owner Title Testing</strong>
             <label style="display:flex;align-items:center;gap:8px;margin-top:8px;"><input type="checkbox" id="title-test-mode" checked style="width:18px;height:18px;">Test mode — claiming will NOT reserve the real title</label>
-            <button type="button" id="title-preview-popup-btn" class="btn-upgrade" style="width:100%;margin-top:8px;">Preview Claim Popup</button><div style="margin-top:10px;font-weight:bold;">Test any limited title (does not use the public claim)</div><select id="owner-test-title-select" style="width:100%;margin-top:6px;padding:8px;background:#222;color:#fff;border-radius:6px;"><option value="the_spookyest">The Spookyest</option><option value="the_headless">The Headless</option><option value="the_plauge">The Plauge</option></select><div style="display:flex;gap:8px;margin-top:8px;"><button type="button" id="owner-test-title-grant" class="btn-upgrade" style="flex:1;">Add Test Title</button><button type="button" id="owner-test-title-remove" class="btn-upgrade" style="flex:1;">Remove Selected Title</button></div><div class="sub-stat" id="owner-test-title-status" style="margin-top:6px;"></div>
+            <button type="button" id="title-preview-popup-btn" class="btn-upgrade" style="width:100%;margin-top:8px;">Preview Claim Popup</button><div style="margin-top:10px;font-weight:bold;">Test any limited title (does not use the public claim)</div><select id="owner-test-title-select" style="width:100%;margin-top:6px;padding:8px;background:#222;color:#fff;border-radius:6px;"><option value="the_spookyest">The Spookyest</option><option value="the_headless">The Headless</option><option value="the_plauge">The Plauge</option><option value="chaotic">Chaotic</option></select><div style="display:flex;gap:8px;margin-top:8px;"><button type="button" id="owner-test-title-grant" class="btn-upgrade" style="flex:1;">Add Test Title</button><button type="button" id="owner-test-title-remove" class="btn-upgrade" style="flex:1;">Remove Selected Title</button></div><div class="sub-stat" id="owner-test-title-status" style="margin-top:6px;"></div>
         </div>
         </div>
         <div class="title-modal-backdrop" id="title-claim-modal" role="dialog" aria-modal="true" aria-labelledby="title-modal-heading">
@@ -755,7 +756,7 @@ body {
                 <strong>🏷️ Title Management (Owner Only)</strong>
                 <div class="sub-stat" style="margin-top:6px;">Select a player by clicking their name in the player list while Owner Player List Mode is ON. Grants behave like owned titles, but test grants do not reserve the one-time public claim.</div>
                 <div class="sub-stat" id="admin-title-target-status" style="margin-top:8px;">No player selected.</div>
-                <label for="admin-title-select" style="display:block;margin-top:8px;">Choose title to manage</label><select id="admin-title-select" style="width:100%;padding:8px;background:#222;color:#fff;border-radius:6px;"><option value="the_spookyest">The Spookyest</option><option value="the_headless">The Headless</option><option value="the_plauge">The Plauge</option></select>
+                <label for="admin-title-select" style="display:block;margin-top:8px;">Choose title to manage</label><select id="admin-title-select" style="width:100%;padding:8px;background:#222;color:#fff;border-radius:6px;"><option value="the_spookyest">The Spookyest</option><option value="the_headless">The Headless</option><option value="the_plauge">The Plauge</option><option value="chaotic">Chaotic</option></select>
                 <button type="button" id="admin-title-grant-btn" class="btn-upgrade">Grant Selected Title</button>
                 <button type="button" id="admin-title-remove-btn" class="btn-upgrade">Remove Selected Title</button>
                 <div class="sub-stat" id="admin-title-manage-status" style="margin-top:6px;"></div>
@@ -1367,7 +1368,7 @@ body {
                 const activeTitleId = activeTitlesByUser.get(String(message.user_id || ''));
                 if (activeTitleId) {
                     const titleBadge = document.createElement('span');
-                    titleBadge.className = 'title-chat-badge' + (activeTitleId === 'the_headless' ? ' headless-gradient' : activeTitleId === 'the_spookyest' ? ' spookyest-gradient' : activeTitleId === 'the_plauge' ? ' plauge-gradient' : '');
+                    titleBadge.className = 'title-chat-badge' + (activeTitleId === 'the_headless' ? ' headless-gradient' : activeTitleId === 'the_spookyest' ? ' spookyest-gradient' : activeTitleId === 'the_plauge' ? ' plauge-gradient' : activeTitleId === 'chaotic' ? ' chaotic-gradient' : '');
                     titleBadge.textContent = '[' + titleDisplayName(activeTitleId) + '] ';
                     header.appendChild(titleBadge);
                 }
@@ -2175,7 +2176,7 @@ body {
         let titlePopupShownForQualification = false;
         let titleRefreshInProgress = false;
         function isGameOwner() { return (cloudUser?.email || '').toLowerCase() === CHAT_OWNER_EMAIL; }
-        function titleDisplayName(titleId) { return titleId === SPOOKIEST_TITLE_ID ? SPOOKIEST_TITLE_NAME : titleId === HEADLESS_TITLE_ID ? 'The Headless' : titleId === 'the_plauge' ? 'The Plauge' : ''; }
+        function titleDisplayName(titleId) { return titleId === SPOOKIEST_TITLE_ID ? SPOOKIEST_TITLE_NAME : titleId === HEADLESS_TITLE_ID ? 'The Headless' : titleId === 'the_plauge' ? 'The Plauge' : titleId === 'chaotic' ? 'Chaotic' : ''; }
         let titlePopupTitleId = SPOOKIEST_TITLE_ID;
         function showTitleClaimPopup(testPreview = false, requestedTitleId = SPOOKIEST_TITLE_ID) {
             const modal = document.getElementById('title-claim-modal');
@@ -2236,11 +2237,13 @@ body {
                 const headlessDiscovery = document.getElementById('headless-discovery-card');
                 const spookyestDiscovery = document.getElementById('spookyest-discovery-card');
                 const plaugeDiscovery = document.getElementById('plauge-discovery-card');
+                const chaoticDiscovery = document.getElementById('chaotic-discovery-card');
                 if (headlessDiscovery) headlessDiscovery.style.display = ownedIds.has(HEADLESS_TITLE_ID) || headlessResult.data?.claimed ? 'none' : '';
                 if (spookyestDiscovery) spookyestDiscovery.style.display = ownedIds.has(SPOOKIEST_TITLE_ID) || titleClaimStatus.claimed ? 'none' : '';
                 if (plaugeDiscovery) plaugeDiscovery.style.display = ownedIds.has('the_plauge') || plaugeResult.data?.claimed ? 'none' : '';
+                if (chaoticDiscovery) chaoticDiscovery.style.display = ownedIds.has('chaotic') ? 'none' : '';
                 const pumpkin = document.getElementById('headless-pumpkin');
-                if (pumpkin) pumpkin.style.display = headlessResult.data?.claimed ? 'none' : '';
+                if (pumpkin) pumpkin.style.display = headlessResult.data?.claimed && !adminAbuseSettings.active ? 'none' : '';
                 const loginStatus = document.getElementById('titles-login-status');
                 if (loginStatus) loginStatus.textContent = owned.length ? 'Your title collection:' : 'You do not own any titles yet.';
                 const list = document.getElementById('titles-owned-list');
@@ -2252,7 +2255,7 @@ body {
                     }
                     owned.forEach(item => {
                         const card = document.createElement('div'); card.className = 'title-card';
-                        const name = document.createElement('div'); name.className = 'title-name' + (item.title_id === HEADLESS_TITLE_ID ? ' headless-gradient' : item.title_id === SPOOKIEST_TITLE_ID ? ' spookyest-gradient' : item.title_id === 'the_plauge' ? ' plauge-gradient' : ''); name.textContent = titleDisplayName(item.title_id); card.appendChild(name);
+                        const name = document.createElement('div'); name.className = 'title-name' + (item.title_id === HEADLESS_TITLE_ID ? ' headless-gradient' : item.title_id === SPOOKIEST_TITLE_ID ? ' spookyest-gradient' : item.title_id === 'the_plauge' ? ' plauge-gradient' : item.title_id === 'chaotic' ? ' chaotic-gradient' : ''); name.textContent = titleDisplayName(item.title_id); card.appendChild(name);
                         const state = document.createElement('div'); state.className = 'sub-stat'; state.textContent = activeTitle === item.title_id ? 'Currently active in chat' : 'Owned • not currently active'; card.appendChild(state);
                         const action = document.createElement('button'); action.type = 'button'; action.className = 'btn-upgrade'; action.style.width = '100%'; action.style.marginTop = '8px';
                         action.textContent = activeTitle === item.title_id ? 'Deactivate Title' : 'Activate Title';
@@ -2322,9 +2325,17 @@ body {
         document.getElementById('owner-test-title-remove')?.addEventListener('click', () => ownerTestLimitedTitle('remove'));
         async function claimHeadlessPumpkin() {
             if (headlessClaimInProgress) return;
-            if (!supabaseClient || !cloudUser) { alert('Sign in to hunt for The Headless!'); return; }
+            if (!supabaseClient || !cloudUser) { alert('Sign in to hunt for the pumpkin!'); return; }
             headlessClaimInProgress = true;
             try {
+                if (adminAbuseSettings.active) {
+                    const { data, error } = await supabaseClient.rpc('claim_chaotic_title');
+                    if (error) { alert('Could not check the pumpkin right now. Please try again.'); return; }
+                    alert(data?.success ? '🎃 Chaotic unlocked! It is now in My Titles!' : data?.reason === 'admin_abuse_inactive' ? 'Admin Abuse is no longer active. Try again during the event.' : 'Could not unlock Chaotic. Please try again.');
+                    await refreshTitlePanel();
+                    if (data?.success) await refreshChatTitleBadges();
+                    return;
+                }
                 const { data, error } = await supabaseClient.rpc('claim_headless_title');
                 if (error) { alert('Could not check the pumpkin right now. Please try again.'); return; }
                 alert(data?.success ? '🎃 You found it first! The Headless is now in My Titles!' : data?.reason === 'already_claimed' ? '🎃 Someone else has already found the pumpkin!' : 'Please sign in first.');
@@ -4186,6 +4197,7 @@ body {
         setInterval(loadAdminAbuseSettings, 5000);
 
         document.getElementById('headless-pumpkin')?.addEventListener('click', claimHeadlessPumpkin);
+        setInterval(() => { const pumpkin = document.getElementById('headless-pumpkin'); if (pumpkin && adminAbuseSettings.active) pumpkin.style.display = ''; }, 1000);
         document.getElementById('title-claim-btn')?.addEventListener('click', () => {
             if (isGameOwner() && document.getElementById('title-test-mode')?.checked) showTitleClaimPopup(true); else showTitleClaimPopup(false);
         });
