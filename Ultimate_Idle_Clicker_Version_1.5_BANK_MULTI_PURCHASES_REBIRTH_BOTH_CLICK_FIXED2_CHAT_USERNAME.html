@@ -2190,7 +2190,7 @@ body {
             const heading = document.getElementById('title-modal-heading');
             const titleName = modal.querySelector('.title-name');
             if (heading) heading.textContent = testMode ? '🧪 Title Claim Test' : '🎃 A Rare Title Awaits!';
-            if (titleName) { titleName.textContent = titleDisplayName(requestedTitleId); titleName.className = 'title-name' + (requestedTitleId === 'the_plauge' ? ' plauge-gradient' : requestedTitleId === 'the_headless' ? ' headless-gradient' : ' spookyest-gradient'); }
+            if (titleName) { titleName.textContent = titleDisplayName(requestedTitleId); titleName.className = 'title-name' + (requestedTitleId === 'the_plauge' ? ' plauge-gradient' : requestedTitleId === 'chaotic' ? ' chaotic-gradient' : requestedTitleId === 'the_headless' ? ' headless-gradient' : ' spookyest-gradient'); }
             if (description) description.textContent = testMode ? 'Testing preview: this adds the selected title to your collection without reserving its real public claim.' : 'Be the first player to claim this limited title!';
             if (claimButton) claimButton.textContent = testMode ? 'Test Claim (Does Not Reserve)' : 'Claim Title';
             if (status) status.textContent = testMode ? 'Owner test mode is active. This cannot block another player from earning the real title.' : '';
@@ -2815,6 +2815,7 @@ body {
 
             if (showPopupOnActivation && !wasActive && adminAbuseSettings.active) showAdminAbusePopup();
             if (typeof updateUI === 'function') updateUI();
+            if (typeof refreshTitlePanel === 'function' && cloudUser) refreshTitlePanel();
         }
 
         async function loadAdminAbuseSettings() {
