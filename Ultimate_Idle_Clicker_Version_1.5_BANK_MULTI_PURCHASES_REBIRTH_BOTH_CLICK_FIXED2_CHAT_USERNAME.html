@@ -752,8 +752,9 @@ body {
                 <strong>🏷️ Title Management (Owner Only)</strong>
                 <div class="sub-stat" style="margin-top:6px;">Select a player by clicking their name in the player list while Owner Player List Mode is ON. Grants behave like owned titles, but test grants do not reserve the one-time public claim.</div>
                 <div class="sub-stat" id="admin-title-target-status" style="margin-top:8px;">No player selected.</div>
-                <button type="button" id="admin-title-grant-btn" class="btn-upgrade">Grant The Spookyest</button>
-                <button type="button" id="admin-title-remove-btn" class="btn-upgrade">Remove The Spookyest</button>
+                <label for="admin-title-select" style="display:block;margin-top:8px;">Choose title to manage</label><select id="admin-title-select" style="width:100%;padding:8px;background:#222;color:#fff;border-radius:6px;"><option value="the_spookyest">The Spookyest</option><option value="the_headless">The Headless</option></select>
+                <button type="button" id="admin-title-grant-btn" class="btn-upgrade">Grant Selected Title</button>
+                <button type="button" id="admin-title-remove-btn" class="btn-upgrade">Remove Selected Title</button>
                 <div class="sub-stat" id="admin-title-manage-status" style="margin-top:6px;"></div>
             </div>
             <div style="padding: 10px; border: 1px solid #8b0000; border-radius: 8px; margin-bottom: 12px;">
@@ -2283,18 +2284,20 @@ body {
             const targetStatus = document.getElementById('admin-title-target-status');
             if (!isGameOwner()) return;
             if (!ownerSelectedPlayer) { if (targetStatus) targetStatus.textContent = 'No player selected. Turn on Owner Player List Mode and click a player name.'; return; }
-            const { data, error } = await supabaseClient.from('game_player_titles').select('title_id,source').eq('user_id', ownerSelectedPlayer.userId).eq('title_id', SPOOKIEST_TITLE_ID).maybeSingle();
+            const { data, error } = await supabaseClient.from('game_player_titles').select('title_id,source').eq('user_id', ownerSelectedPlayer.userId);
+            const ownedTitleNames = (data || []).map(item => titleDisplayName(item.title_id));
             if (error) { if (targetStatus) targetStatus.textContent = 'Could not check selected player title ownership.'; return; }
-            if (targetStatus) targetStatus.textContent = ownerSelectedPlayer.username + (data ? ' currently has The Spookyest.' : ' does not currently have The Spookyest.');
+            if (targetStatus) targetStatus.textContent = ownerSelectedPlayer.username + (ownedTitleNames.length ? ' has: ' + ownedTitleNames.join(', ') + '.' : ' has no titles.');
         }
         async function manageSelectedPlayerTitle(action) {
             if (!isGameOwner() || !ownerSelectedPlayer || !supabaseClient) {
                 const status = document.getElementById('admin-title-manage-status'); if (status) status.textContent = 'Select a player first. Owner access is required.'; return;
             }
-            const { data, error } = await supabaseClient.rpc('owner_manage_game_title', { p_target_user_id: ownerSelectedPlayer.userId, p_action: action });
+            const selectedTitleId = document.getElementById('admin-title-select')?.value || SPOOKIEST_TITLE_ID;
+            const { data, error } = await supabaseClient.rpc('owner_manage_game_title', { p_target_user_id: ownerSelectedPlayer.userId, p_title_id: selectedTitleId, p_action: action });
             const status = document.getElementById('admin-title-manage-status');
             if (error || !data?.success) { if (status) status.textContent = error?.message || 'Could not update this player title.'; return; }
-            if (status) status.textContent = action === 'grant' ? 'Title granted.' : 'Title removed.';
+            if (status) status.textContent = action === 'grant' ? titleDisplayName(selectedTitleId) + ' granted.' : titleDisplayName(selectedTitleId) + ' removed.';
             await refreshOwnerTitleTools();
         }
 
