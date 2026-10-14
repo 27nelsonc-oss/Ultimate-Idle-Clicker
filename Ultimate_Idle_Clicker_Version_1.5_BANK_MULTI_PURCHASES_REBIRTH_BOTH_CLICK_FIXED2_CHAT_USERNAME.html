@@ -1014,6 +1014,8 @@ body {
         const CHAT_OWNER_EMAIL = '27nelsonc@student.harrisburg.k12.or.us';
         const CHAT_TESTER_EMAIL = '27costat@student.harrisburg.k12.or.us';
         const CHAT_ADMIN_EMAIL = '27costak@student.harrisburg.k12.or.us';
+        const CHAT_MODERATOR_EMAILS = [CHAT_OWNER_EMAIL, 'caydenking949' + '@' + 'gmail.com'];
+        function canModerateChat() { return CHAT_MODERATOR_EMAILS.includes((cloudUser?.email || '').toLowerCase()); }
 
         function getChatRank(email) {
             const normalized = (email || '').toLowerCase();
@@ -1120,7 +1122,7 @@ body {
                     name.textContent = player.username || 'Player';
                     name.title = 'Direct message ' + (player.username || 'Player');
                     name.addEventListener('click', () => {
-                        if ((cloudUser?.email || '').toLowerCase() === CHAT_OWNER_EMAIL && ownerPlayerListAdminMode) {
+                        if (canModerateChat() && ownerPlayerListAdminMode) {
                             ownerSelectedPlayer = { userId: String(player.user_id), username: player.username || 'Player' };
                             syncOwnerSelectedPlayerUI();
                         } else {
@@ -2384,13 +2386,13 @@ body {
         async function refreshOwnerChatBanTools() {
             const section = document.getElementById('owner-chat-ban-tools');
             if (!section) return;
-            section.style.display = adminUnlocked && isGameOwner() ? 'block' : 'none';
+            section.style.display = adminUnlocked && canModerateChat() ? 'block' : 'none';
             const target = document.getElementById('owner-chat-ban-target');
             if (target) target.textContent = ownerSelectedPlayer ? 'Selected: ' + ownerSelectedPlayer.username : 'No player selected.';
         }
         async function manageSelectedPlayerChatBan(action) {
             const status = document.getElementById('owner-chat-ban-status');
-            if (!adminUnlocked || !isGameOwner() || !ownerSelectedPlayer) { if (status) status.textContent = 'Select a player first (Owner Player List Mode).'; return; }
+            if (!adminUnlocked || !canModerateChat() || !ownerSelectedPlayer) { if (status) status.textContent = 'Select a player first (Chat Moderator Player List Mode).'; return; }
             if (!confirm((action === 'ban' ? 'Chat ban ' : 'Unban ') + ownerSelectedPlayer.username + '?')) return;
             const { data, error } = await supabaseClient.rpc('owner_manage_chat_ban',{p_target_user_id:ownerSelectedPlayer.userId,p_action:action});
             if (status) status.textContent = error?.message || (!data?.success ? data?.reason || 'Request failed.' : ownerSelectedPlayer.username + (action === 'ban' ? ' is now chat banned.' : ' is now unbanned.'));
@@ -3551,7 +3553,9 @@ body {
         function updateOwnerPlayerListAdminMode() {
             const toggle = document.getElementById('owner-player-list-admin-mode');
             const isOwner = (cloudUser?.email || '').toLowerCase() === CHAT_OWNER_EMAIL;
-            ownerPlayerListAdminMode = Boolean(toggle?.checked) && isOwner;
+            const canModerate = canModerateChat();
+            ownerPlayerListAdminMode = Boolean(toggle?.checked) && canModerate;
+            if (toggle) toggle.disabled = !canModerate;
             if (!ownerPlayerListAdminMode) {
                 ownerSelectedPlayer = null;
                 const label = document.getElementById('admin-selected-player');
