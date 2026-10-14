@@ -753,6 +753,14 @@ body {
                 <div class="sub-stat" style="flex-basis:100%;">OFF = player names open DMs. ON = player names select a player for your Admin tools.</div>
             </div>
 
+            <div id="owner-chat-ban-tools" style="display:none;margin:12px 0;padding:10px;border:1px solid #8b0000;border-radius:8px;">
+                <strong>Chat Moderation (Owner Only)</strong>
+                <div class="sub-stat">Turn on Owner Player List Mode and select a player. A ban blocks sending global chat and direct messages, not reading chat or playing the game.</div>
+                <div id="owner-chat-ban-target" class="sub-stat" style="margin:8px 0;">No player selected.</div>
+                <button type="button" id="owner-chat-ban-btn" class="btn-upgrade">Chat Ban Selected Player</button>
+                <button type="button" id="owner-chat-unban-btn" class="btn-upgrade">Unban Selected Player</button>
+                <div id="owner-chat-ban-status" class="sub-stat" style="margin-top:6px;"></div>
+            </div>
             <div id="owner-title-tools" style="display:none;margin:12px 0;">
                 <strong>🏷️ Title Management (Owner Only)</strong>
                 <div class="sub-stat" style="margin-top:6px;">Select a player by clicking their name in the player list while Owner Player List Mode is ON. Grants behave like owned titles, but test grants do not reserve the one-time public claim.</div>
@@ -1633,6 +1641,7 @@ body {
             const loggedIn = !!cloudUser;
             input.disabled = !loggedIn;
             send.disabled = !loggedIn;
+            if (loggedIn) refreshMyChatBanStatus();
 
             if (!loggedIn) {
                 dmTargetUserId = null;
@@ -1710,11 +1719,26 @@ body {
             refreshDmUnreadCount();
         }
 
+        let myChatBanned = false;
+        async function refreshMyChatBanStatus() {
+            if (!supabaseClient || !cloudUser) { myChatBanned = false; return; }
+            const { data, error } = await supabaseClient.rpc('get_my_chat_ban_status');
+            if (error) return;
+            myChatBanned = Boolean(data);
+            const input = document.getElementById('chat-input');
+            const send = document.getElementById('chat-send-btn');
+            if (input) input.disabled = myChatBanned;
+            if (send) send.disabled = myChatBanned;
+            if (myChatBanned) document.getElementById('chat-status').textContent = 'You are banned from sending chat messages.';
+        }
         async function sendChatMessage() {
             if (!supabaseClient || !cloudUser) return;
 
             const input = document.getElementById('chat-input');
             const status = document.getElementById('chat-status');
+            const { data: banned, error: banCheckError } = await supabaseClient.rpc('get_my_chat_ban_status');
+            if (banCheckError) { status.textContent = 'Could not check chat access. Please try again.'; return; }
+            if (banned) { myChatBanned = true; input.disabled = true; document.getElementById('chat-send-btn').disabled = true; status.textContent = 'You are banned from sending chat messages.'; return; }
             const message = input.value.trim();
             const remaining = 1000 - (Date.now() - chatLastSentAt);
 
@@ -2357,7 +2381,22 @@ body {
             await refreshTitlePanel(); await refreshChatTitleBadges();
         }
         async function refreshChatTitleBadges() { if (supabaseClient && cloudUser) await loadChatMessages(); }
+        async function refreshOwnerChatBanTools() {
+            const section = document.getElementById('owner-chat-ban-tools');
+            if (!section) return;
+            section.style.display = adminUnlocked && isGameOwner() ? 'block' : 'none';
+            const target = document.getElementById('owner-chat-ban-target');
+            if (target) target.textContent = ownerSelectedPlayer ? 'Selected: ' + ownerSelectedPlayer.username : 'No player selected.';
+        }
+        async function manageSelectedPlayerChatBan(action) {
+            const status = document.getElementById('owner-chat-ban-status');
+            if (!adminUnlocked || !isGameOwner() || !ownerSelectedPlayer) { if (status) status.textContent = 'Select a player first (Owner Player List Mode).'; return; }
+            if (!confirm((action === 'ban' ? 'Chat ban ' : 'Unban ') + ownerSelectedPlayer.username + '?')) return;
+            const { data, error } = await supabaseClient.rpc('owner_manage_chat_ban',{p_target_user_id:ownerSelectedPlayer.userId,p_action:action});
+            if (status) status.textContent = error?.message || (!data?.success ? data?.reason || 'Request failed.' : ownerSelectedPlayer.username + (action === 'ban' ? ' is now chat banned.' : ' is now unbanned.'));
+        }
         async function refreshOwnerTitleTools() {
+            refreshOwnerChatBanTools();
             const section = document.getElementById('owner-title-tools'); if (!section) return;
             section.style.display = adminUnlocked && isGameOwner() ? 'block' : 'none';
             const targetStatus = document.getElementById('admin-title-target-status');
@@ -4244,6 +4283,8 @@ body {
             if (isGameOwner() && document.getElementById('title-test-mode').checked) showTitleClaimPopup(true);
             refreshTitlePanel();
         });
+        document.getElementById('owner-chat-ban-btn')?.addEventListener('click', () => manageSelectedPlayerChatBan('ban'));
+        document.getElementById('owner-chat-unban-btn')?.addEventListener('click', () => manageSelectedPlayerChatBan('unban'));
         document.getElementById('admin-title-grant-btn')?.addEventListener('click', () => manageSelectedPlayerTitle('grant'));
         document.getElementById('admin-title-remove-btn')?.addEventListener('click', () => manageSelectedPlayerTitle('remove'));
         document.getElementById('title-claim-modal')?.addEventListener('click', event => { if (event.target.id === 'title-claim-modal') closeTitleClaimPopup(); });
