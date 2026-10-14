@@ -707,12 +707,12 @@ body {
         <div id="titles-owned-list"></div>
         <div class="title-card" id="spookyest-discovery-card"><div class="title-name spookyest-gradient">The Spookyest</div><div class="sub-stat" id="titles-status" style="margin-top:8px;">Requires 10 rebirths. First successful claim wins.</div><button type="button" id="title-claim-btn" class="btn-upgrade" style="display:none;width:100%;margin-top:8px;">Claim The Spookyest</button></div>
         <div class="title-card" id="headless-discovery-card"><div class="title-name headless-gradient">The Headless</div><div class="sub-stat">Hint: Spooky scary pumpkins</div><div class="sub-stat" id="headless-status">A secret awaits discovery...</div></div>
-        <div class="title-card" id="plauge-discovery-card"><div class="title-name plauge-gradient">The Plauge</div><div class="sub-stat">Hint: Deus lo vult</div></div>
+        <div class="title-card" id="plauge-discovery-card"><div class="title-name plauge-gradient">The Plague</div><div class="sub-stat">Hint: Deus lo vult</div></div>
         <div class="title-card" id="chaotic-discovery-card"><div class="title-name chaotic-gradient">Chaotic</div><div class="sub-stat">Hint: sppoky scary admin pumpkin</div></div>
         <div id="owner-title-test-tools" style="display:none;margin-top:12px;padding:10px;border:1px solid #ff7518;border-radius:8px;">
             <strong>🧪 Owner Title Testing</strong>
             <label style="display:flex;align-items:center;gap:8px;margin-top:8px;"><input type="checkbox" id="title-test-mode" checked style="width:18px;height:18px;">Test mode — claiming will NOT reserve the real title</label>
-            <button type="button" id="title-preview-popup-btn" class="btn-upgrade" style="width:100%;margin-top:8px;">Preview Claim Popup</button><div style="margin-top:10px;font-weight:bold;">Test any limited title (does not use the public claim)</div><select id="owner-test-title-select" style="width:100%;margin-top:6px;padding:8px;background:#222;color:#fff;border-radius:6px;"><option value="the_spookyest">The Spookyest</option><option value="the_headless">The Headless</option><option value="the_plauge">The Plauge</option><option value="chaotic">Chaotic</option></select><div style="display:flex;gap:8px;margin-top:8px;"><button type="button" id="owner-test-title-grant" class="btn-upgrade" style="flex:1;">Add Test Title</button><button type="button" id="owner-test-title-remove" class="btn-upgrade" style="flex:1;">Remove Selected Title</button></div><div class="sub-stat" id="owner-test-title-status" style="margin-top:6px;"></div>
+            <button type="button" id="title-preview-popup-btn" class="btn-upgrade" style="width:100%;margin-top:8px;">Preview Claim Popup</button><div style="margin-top:10px;font-weight:bold;">Test any limited title (does not use the public claim)</div><select id="owner-test-title-select" style="width:100%;margin-top:6px;padding:8px;background:#222;color:#fff;border-radius:6px;"><option value="the_spookyest">The Spookyest</option><option value="the_headless">The Headless</option><option value="the_plauge">The Plague</option><option value="chaotic">Chaotic</option></select><div style="display:flex;gap:8px;margin-top:8px;"><button type="button" id="owner-test-title-grant" class="btn-upgrade" style="flex:1;">Add Test Title</button><button type="button" id="owner-test-title-remove" class="btn-upgrade" style="flex:1;">Remove Selected Title</button></div><div class="sub-stat" id="owner-test-title-status" style="margin-top:6px;"></div>
         </div>
         </div>
         <div class="title-modal-backdrop" id="title-claim-modal" role="dialog" aria-modal="true" aria-labelledby="title-modal-heading">
@@ -756,7 +756,7 @@ body {
                 <strong>🏷️ Title Management (Owner Only)</strong>
                 <div class="sub-stat" style="margin-top:6px;">Select a player by clicking their name in the player list while Owner Player List Mode is ON. Grants behave like owned titles, but test grants do not reserve the one-time public claim.</div>
                 <div class="sub-stat" id="admin-title-target-status" style="margin-top:8px;">No player selected.</div>
-                <label for="admin-title-select" style="display:block;margin-top:8px;">Choose title to manage</label><select id="admin-title-select" style="width:100%;padding:8px;background:#222;color:#fff;border-radius:6px;"><option value="the_spookyest">The Spookyest</option><option value="the_headless">The Headless</option><option value="the_plauge">The Plauge</option><option value="chaotic">Chaotic</option></select>
+                <label for="admin-title-select" style="display:block;margin-top:8px;">Choose title to manage</label><select id="admin-title-select" style="width:100%;padding:8px;background:#222;color:#fff;border-radius:6px;"><option value="the_spookyest">The Spookyest</option><option value="the_headless">The Headless</option><option value="the_plauge">The Plague</option><option value="chaotic">Chaotic</option></select>
                 <button type="button" id="admin-title-grant-btn" class="btn-upgrade">Grant Selected Title</button>
                 <button type="button" id="admin-title-remove-btn" class="btn-upgrade">Remove Selected Title</button>
                 <div class="sub-stat" id="admin-title-manage-status" style="margin-top:6px;"></div>
@@ -1765,13 +1765,13 @@ body {
             if (!dmTargetUserId && message === 'God wills it') {
                 const { data: plaugeClaim, error: plaugeClaimError } = await supabaseClient.rpc('claim_the_plauge_title');
                 if (plaugeClaimError) {
-                    status.innerText = 'The Plauge claim could not be checked. Please try again later.';
+                    status.innerText = 'The Plague claim could not be checked. Please try again later.';
                 } else if (plaugeClaim?.success) {
-                    status.innerText = 'You discovered The Plauge! Deus lo vult.';
+                    status.innerText = 'You discovered The Plague! Deus lo vult.';
                     await refreshTitlePanel();
                     await refreshChatTitleBadges();
                 } else if (plaugeClaim?.reason === 'already_claimed') {
-                    status.innerText = 'The Plauge has already been claimed.';
+                    status.innerText = 'The Plague has already been claimed.';
                 } else if (plaugeClaim?.reason === 'phrase_not_found') {
                     status.innerText = 'The chat phrase could not be verified. Please try again.';
                 }
@@ -2176,7 +2176,7 @@ body {
         let titlePopupShownForQualification = false;
         let titleRefreshInProgress = false;
         function isGameOwner() { return (cloudUser?.email || '').toLowerCase() === CHAT_OWNER_EMAIL; }
-        function titleDisplayName(titleId) { return titleId === SPOOKIEST_TITLE_ID ? SPOOKIEST_TITLE_NAME : titleId === HEADLESS_TITLE_ID ? 'The Headless' : titleId === 'the_plauge' ? 'The Plauge' : titleId === 'chaotic' ? 'Chaotic' : ''; }
+        function titleDisplayName(titleId) { return titleId === SPOOKIEST_TITLE_ID ? SPOOKIEST_TITLE_NAME : titleId === HEADLESS_TITLE_ID ? 'The Headless' : titleId === 'the_plauge' ? 'The Plague' : titleId === 'chaotic' ? 'Chaotic' : ''; }
         let titlePopupTitleId = SPOOKIEST_TITLE_ID;
         function showTitleClaimPopup(testPreview = false, requestedTitleId = SPOOKIEST_TITLE_ID) {
             const modal = document.getElementById('title-claim-modal');
