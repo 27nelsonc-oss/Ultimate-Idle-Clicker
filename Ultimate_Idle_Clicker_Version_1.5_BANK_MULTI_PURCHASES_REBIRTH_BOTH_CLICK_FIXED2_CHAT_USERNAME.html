@@ -3339,6 +3339,7 @@ body {
             if (section) section.style.display = adminUnlocked && email === CHAT_OWNER_EMAIL ? 'block' : 'none';
             if (eventSection) eventSection.style.display = adminUnlocked && email === CHAT_OWNER_EMAIL ? 'block' : 'none';
             if (email !== CHAT_OWNER_EMAIL) ownerPlayerListAdminMode = false;
+            updateOwnerPlayerListAdminMode();
             refreshOwnerTitleTools();
         }
 
