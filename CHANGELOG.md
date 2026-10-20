@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### 2026-10-20 — Add $$$ title
+- Added a solid dark-green $$$ title for reaching 100 million current clicks, with only the hint “My Economic Rain has Begun”. Added owner testing/management and cloud-backed claim. Halloween branch only.
+- HTML commit: `98b094ee5c45224a01722f8c78eac2d9ac6a4388`. Browser testing pending.
+
+
 ### 2026-10-12 — Release The Spookyest when owner removes it
 - **Request:** Ensure removing the title from its holder makes the limited public title available again.
 - **Change:** Updated the server-side `owner_manage_game_title` RPC so removing The Spookyest also deletes the one-time claim record only when that selected player is the recorded claimant. Removing a test grant from someone else does not release or affect the actual claimant's title.
