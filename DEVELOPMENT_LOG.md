@@ -1,3 +1,7 @@
+### 2026-10-20 — $$$ title
+- Halloween HTML adds discovery card, solid green styling, chat/collection/popup display, admin/test selectors and a periodic threshold check. Supabase migration `add_halloween_money_title` adds authenticated `claim_money_title()` verifying 100 million current clicks in cloud save, and extends owner test/manage RPC allowlists.
+- No main or game-development changes. Browser testing pending. Rollback HTML commit `98b094ee5c45224a01722f8c78eac2d9ac6a4388`; review migration dependencies before database rollback.
+
 # Ultimate Idle Clicker — Development and Rollback Log
 
 This is the durable engineering record for future work across chats. It should contain enough context for another developer or assistant to understand what changed, what was checked, and how to reverse it safely.
