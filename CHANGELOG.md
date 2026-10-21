@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-10-21 — Editable login-screen Update Log
+- Added a right-side expandable Update Log to the Halloween login screen, with a responsive below-card layout on narrow screens. Populated it with the recent login screen and title additions. Text is editable directly in a clearly marked HTML section; no database changes.
+- HTML commit `5634b6f38e06cdf0ff085aaf22d1f51f874a5aea`. Browser layout testing pending; revert this commit to remove it.
+
 ### 2026-10-20 — Reversible login entry screen
 - Added a full-screen Ultimate Idle Clicker welcome/login view on Halloween only. Reuses the existing cloud email/password, Create Account and Log In controls; game becomes visible after sign-in and the entry screen returns after logout. Existing sessions are recognized. No authentication schema or save format changes.
 - HTML commit `ba05004a4e4e92edb4bffe40f4c86276db78dae9`; browser login/logout testing pending. Revert this single HTML commit to remove the screen.
