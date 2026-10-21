@@ -1,3 +1,6 @@
+### 2026-10-21 — Public update-log spoiler rule
+- Halloween login Update Log now says only that Insomniac and $$$ were added. Never reveal title unlock methods in public update notes unless explicitly requested; retain exact mechanics privately in development documentation. Revert the dedicated HTML commit to roll back this wording change.
+
 ### 2026-10-21 — Editable Update Log on login screen
 - Added native `<details id="game-update-log">` beside the existing entry card, responsive CSS, and a plainly marked `EDITABLE UPDATE LOG` HTML section containing latest update text. No JavaScript/auth/save changes. On narrow screens the log moves below login card. HTML commit `5634b6f38e06cdf0ff085aaf22d1f51f874a5aea` on Halloween; revert this single commit for rollback. Source verification done; real Chrome layout test pending.
 
