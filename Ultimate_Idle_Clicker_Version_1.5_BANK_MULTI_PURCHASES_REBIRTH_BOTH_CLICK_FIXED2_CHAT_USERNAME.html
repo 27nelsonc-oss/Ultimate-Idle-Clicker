@@ -490,8 +490,16 @@ body {
 .titles-panel{width:min(92%,320px);max-width:320px;min-width:0;box-sizing:border-box;margin:4px auto 0}.titles-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:8px}.titles-panel-heading .section-title{margin:0}.titles-panel-heading .titles-minimize-btn{display:inline-flex;flex:0 0 28px;width:28px!important;height:28px;max-width:28px;min-width:28px;box-sizing:border-box;align-items:center;justify-content:center;padding:0;margin:0;border:1px solid #65452f;border-radius:6px;background:#35251c;color:inherit;font-size:1rem;font-weight:bold;line-height:1;cursor:pointer}.title-card{border:1px solid #6b3a1d;border-radius:8px;padding:10px;margin:8px 0;background:#17110d}.title-name{color:#ff7518;font-weight:800;letter-spacing:.2px}.title-action-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.title-action-row .btn-upgrade{flex:1;min-width:110px}.title-modal-backdrop{position:fixed;inset:0;z-index:10000;display:none;align-items:center;justify-content:center;padding:18px;box-sizing:border-box;background:rgba(0,0,0,.82)}.title-modal-card{width:min(440px,100%);box-sizing:border-box;background:#1b1714;border:2px solid #ff7518;border-radius:14px;padding:22px;text-align:center;box-shadow:0 0 28px rgba(255,117,24,.25)}.title-modal-card h2{color:#ff7518;margin-top:0}.title-chat-badge{color:#ff7518;font-weight:800;margin-right:5px}#owner-title-tools{border:1px solid #ff7518;border-radius:8px;padding:10px;margin:12px 0}#owner-title-tools button{margin:4px 4px 4px 0}
  .spookyest-gradient{background:linear-gradient(110deg,#ff7518 0%,#ffb347 35%,#ff7518 65%,#6c2a12 100%);-webkit-background-clip:text;background-clip:text;color:transparent!important;-webkit-text-fill-color:transparent;display:inline-block;font-weight:900}.headless-gradient{background:linear-gradient(105deg,#ffae39 0%,#ff7518 42%,#8d3a0b 72%,#16100e 100%);-webkit-background-clip:text;background-clip:text;color:transparent!important;-webkit-text-fill-color:transparent;display:inline-block;font-weight:900}.plauge-gradient{background:linear-gradient(110deg,#b7ffb7 0%,#55e65c 35%,#159b32 68%,#06451b 100%);-webkit-background-clip:text;background-clip:text;color:transparent!important;-webkit-text-fill-color:transparent;display:inline-block;font-weight:900}.crazy-glow{color:#68c5ff!important;text-shadow:0 0 5px #68c5ff,0 0 11px #2588ed,0 0 19px #174bba;font-weight:900;display:inline-block}.insomniac-gradient{background:linear-gradient(110deg,#08245e 0%,#438dd7 35%,#fff3a1 68%,#b98500 100%);-webkit-background-clip:text;background-clip:text;color:transparent!important;-webkit-text-fill-color:transparent;display:inline-block;font-weight:900}.money-title{color:#075c20!important;font-weight:900;display:inline-block}.addict-gradient{background:linear-gradient(105deg,#ffb3b3 0%,#ff3333 30%,#c40000 65%,#650000 100%);-webkit-background-clip:text;background-clip:text;color:transparent!important;-webkit-text-fill-color:transparent;display:inline-block;font-weight:900}.chaotic-gradient{background:linear-gradient(110deg,#bfeaff 0%,#68c5ff 35%,#2588ed 68%,#174bba 100%);-webkit-background-clip:text;background-clip:text;color:transparent!important;-webkit-text-fill-color:transparent;display:inline-block;font-weight:900}.pumpkin-secret{position:absolute;right:9px;bottom:8px;width:27px;height:27px;padding:0;margin:0;border:0;background:transparent;opacity:.19;cursor:pointer;font-size:19px;line-height:27px;z-index:2}.pumpkin-secret:hover,.pumpkin-secret:focus-visible{opacity:.65}
 </style>
+<style>
+/* Reversible entry screen: existing cloud authentication controls are reused. */
+#game-entry-gate{position:fixed;inset:0;z-index:20000;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;background:#0d0b0a;overflow:auto}
+#game-entry-card{width:min(100%,410px);padding:28px 22px;box-sizing:border-box;text-align:center;background:#1b1714;border:2px solid #ff7518;border-radius:16px;box-shadow:0 0 35px rgba(255,117,24,.2)}
+#game-entry-card h1{font-size:2rem;margin-bottom:24px}#game-entry-card input{width:100%;max-width:100%;box-sizing:border-box;padding:11px!important;margin:5px 0!important;border-radius:8px;background:#111;color:#fff;border:1px solid #65452f}#game-entry-card .btn-upgrade{width:100%}
+body.game-entry-locked> :not(#game-entry-gate):not(script){visibility:hidden}body:not(.game-entry-locked) #game-entry-gate{display:none}
+</style>
 </head>
-<body>
+<body class="game-entry-locked">
+<div id="game-entry-gate"><div id="game-entry-card"><h1>Ultimate Idle Clicker</h1><div id="game-entry-loading" class="sub-stat">Checking login...</div><div id="game-entry-auth"></div></div></div>
 
     <!-- Main Game Panel -->
     <div class="panel main-panel">
@@ -1904,6 +1912,9 @@ body {
         }
 
         function updateCloudUI() {
+            document.body.classList.toggle('game-entry-locked', !cloudUser);
+            const entryLoading = document.getElementById('game-entry-loading');
+            if (entryLoading) entryLoading.style.display = 'none';
             const loggedOut = document.getElementById('cloud-logged-out');
             const loggedIn = document.getElementById('cloud-logged-in');
             if (!supabaseConfigured) {
@@ -2474,6 +2485,9 @@ body {
         }
 
         async function initializeCloudSave() {
+            const entryAuth = document.getElementById('game-entry-auth');
+            const existingLogin = document.getElementById('cloud-logged-out');
+            if (entryAuth && existingLogin && existingLogin.parentElement !== entryAuth) entryAuth.appendChild(existingLogin);
             updateCloudUI();
             if (!supabaseClient) return;
             await loadGlobalAnnouncement();
