@@ -1,3 +1,7 @@
+### 2026-10-21 — Align sidebar top with login card
+- Fixed vertical alignment by adding `#game-entry-layout` as a flex wrapper around the login/menu card and the right sidebar. Wrapper is centered in the gate, with children aligned to the top edge; this reproduces the original Update Log placement next to the login card rather than pinning the sidebar to the top of the viewport.
+- Sidebar details remain normal-flow, so opening Update Log pushes Suggestions down. Mobile breakpoint still stacks sidebar beneath the card. Log Out button and all auth/game/save logic unchanged. Static verification and browser test status to be recorded after commit.
+
 ### 2026-10-21 — Restore right-side login/menu sidebar
 - User preference: Update Log and Suggestions should remain to the right of the login/menu card on desktop, while expanded details must not overlap Suggestions. Kept game-menu-logout unchanged beneath Resume Game.
 - HTML: moved both details elements into #game-entry-sidebar; desktop gate uses a horizontal flex row, sidebar width 250px; under 850px it stacks below the card. Both details remain normal-flow elements so opening Update Log pushes Suggestions down.
