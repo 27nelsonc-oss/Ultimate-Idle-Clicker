@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-10-20 — Reversible login entry screen
+- Added a full-screen Ultimate Idle Clicker welcome/login view on Halloween only. Reuses the existing cloud email/password, Create Account and Log In controls; game becomes visible after sign-in and the entry screen returns after logout. Existing sessions are recognized. No authentication schema or save format changes.
+- HTML commit `ba05004a4e4e92edb4bffe40f4c86276db78dae9`; browser login/logout testing pending. Revert this single HTML commit to remove the screen.
+
 ### 2026-10-20 — Insomniac Halloween title
 - Added unlimited Insomniac title for signed-in players with the game open as local midnight arrives. Hint exactly: Sleep is a recommendation. Dark blue → lighter blue → light yellow → dark yellow text gradient. Added owner grant/remove and popup preview, and database ownership/equip support.
 - HTML commit: `58164235af414f09e61c7eabbf80cc5feb596c28`. Source and database definitions verified; real midnight browser test pending. Halloween branch only.
