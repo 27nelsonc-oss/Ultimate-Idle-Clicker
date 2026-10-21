@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 2026-10-21 — Add always-visible login announcements
+- Added a persistent Announcements panel on the left side of the Halloween login/menu screen. It is visible by default, including when no announcement is currently published.
+- The panel reuses the existing owner-managed global announcement stored in Supabase, so publishing or clearing the existing announcement updates the login panel too. No new database table or policy was needed.
+- The panel stacks below the centered login card on narrower screens to avoid pushing the card off-center or clipping the side panels.
+- **HTML commit:** `01626c8046efa10f7be2448b14b4aeff3fbdd132`.
+- **Verification:** Source anchors were checked before editing. Live browser/responsive-layout testing has not been performed.
+- **Rollback:** Revert HTML commit `01626c8046efa10f7be2448b14b4aeff3fbdd132` on `Halloween`; no other branch was changed.
+
 ### 2026-10-21 — Add Pulls player voting
 - Added a Pulls menu beneath Suggestions on the Halloween login/menu screen. The owner can release one active poll at a time with a question and 2–8 options, then close voting to preserve final results. Signed-in players can vote once per poll and view option totals/percentages; a Refresh Results button reloads counts.
 - Added Supabase tables for polls, options, and votes with RLS policies. Vote rows are private to the voter; aggregate counts are exposed through `get_game_poll_results()`. Poll creation and closure are owner-only. No gameplay/save logic changed.
