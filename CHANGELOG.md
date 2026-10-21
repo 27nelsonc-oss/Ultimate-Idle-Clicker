@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-10-20 — Insomniac Halloween title
+- Added unlimited Insomniac title for signed-in players with the game open as local midnight arrives. Hint exactly: Sleep is a recommendation. Dark blue → lighter blue → light yellow → dark yellow text gradient. Added owner grant/remove and popup preview, and database ownership/equip support.
+- HTML commit: `58164235af414f09e61c7eabbf80cc5feb596c28`. Source and database definitions verified; real midnight browser test pending. Halloween branch only.
+
 ### 2026-10-20 — Add $$$ title
 - Added a solid dark-green $$$ title for reaching 100 million current clicks, with only the hint “My Economic Rain has Begun”. Added owner testing/management and cloud-backed claim. Halloween branch only.
 - HTML commit: `98b094ee5c45224a01722f8c78eac2d9ac6a4388`. Browser testing pending.
