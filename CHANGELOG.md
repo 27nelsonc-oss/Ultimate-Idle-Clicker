@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### 2026-10-21 — Add Pulls player voting
+- Added a Pulls menu beneath Suggestions on the Halloween login/menu screen. The owner can release one active poll at a time with a question and 2–8 options, then close voting to preserve final results. Signed-in players can vote once per poll and view option totals/percentages; a Refresh Results button reloads counts.
+- Added Supabase tables for polls, options, and votes with RLS policies. Vote rows are private to the voter; aggregate counts are exposed through `get_game_poll_results()`. Poll creation and closure are owner-only. No gameplay/save logic changed.
+- **HTML commit:** `b2f5a1df9d6faf366fd7d66d04c549f8846f46bd`; refresh button follow-up: `09a5658348276697a733132c0497880609606c87`. Supabase migrations: `add_player_polls_and_votes` and `qualify_poll_vote_policy`.
+- **Verification:** Confirmed all three tables have RLS enabled and policies (4 poll, 3 option, 2 vote); aggregate RPC is executable by authenticated users but not anon. Both inline JavaScript blocks compile and no duplicate HTML IDs were found. Browser-based end-to-end voting has not been tested.
+- **Rollback:** Revert the two HTML commits on `Halloween` and, if the feature is removed permanently, remove the poll tables/function through a separate reviewed Supabase migration. Do not touch `game-development` or `main`.
+
 ### 2026-10-21 — Update in-game player-facing Update Log
 - Updated the login-screen Update Log to reflect the implemented login screen, Update Log and Suggestions panels, Log Out button, centered desktop menu card, Insomniac title, and $$$ title. Title names are listed without revealing unlock methods.
 - **HTML commit:** `ca02b645600425c8414f0888884dfd9504e353c0`. Halloween branch only; no gameplay, authentication, save, or database logic changed.
