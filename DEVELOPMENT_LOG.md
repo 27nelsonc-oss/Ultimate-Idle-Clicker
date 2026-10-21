@@ -1,3 +1,8 @@
+### 2026-10-21 — Restore right-side login/menu sidebar
+- User preference: Update Log and Suggestions should remain to the right of the login/menu card on desktop, while expanded details must not overlap Suggestions. Kept game-menu-logout unchanged beneath Resume Game.
+- HTML: moved both details elements into #game-entry-sidebar; desktop gate uses a horizontal flex row, sidebar width 250px; under 850px it stacks below the card. Both details remain normal-flow elements so opening Update Log pushes Suggestions down.
+- No auth/session, game save, title, or database logic changed. Static source checks pending after commit; browser layout testing remains pending. Rollback: revert the focused HTML commit on Halloween.
+
 ### 2026-10-21 — Menu logout and login panel layout fix
 - Added `game-menu-logout` below Resume Game, delegates to existing `cloud-logout-btn` click handler (no duplicated logout flow). Replaced absolute positioning of `#game-update-log` and `#game-suggestions` with normal vertical flow, ensuring open details push later sections down on desktop and mobile. Halloween HTML commit `67433d1ad098c9feba199ee9798553a5978e0e1a`; source verified, browser testing pending. Revert that HTML commit to roll back.
 
