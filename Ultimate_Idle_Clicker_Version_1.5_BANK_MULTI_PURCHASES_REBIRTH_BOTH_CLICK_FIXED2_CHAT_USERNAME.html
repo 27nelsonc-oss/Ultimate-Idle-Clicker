@@ -494,12 +494,25 @@ body {
 /* Reversible entry screen: existing cloud authentication controls are reused. */
 #game-entry-gate{position:fixed;inset:0;z-index:20000;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;background:#0d0b0a;overflow:auto}
 #game-entry-card{width:min(100%,410px);padding:28px 22px;box-sizing:border-box;text-align:center;background:#1b1714;border:2px solid #ff7518;border-radius:16px;box-shadow:0 0 35px rgba(255,117,24,.2)}
+#game-entry-card{position:relative}#game-update-log{position:absolute;left:calc(100% + 12px);top:0;width:250px;box-sizing:border-box;text-align:left;border:1px solid #ff7518;border-radius:9px;background:#1b1714;color:#fff;overflow:hidden}#game-update-log summary{cursor:pointer;list-style:none;padding:12px 14px;color:#ffb347;font-weight:800;white-space:nowrap}#game-update-log summary::-webkit-details-marker{display:none}#game-update-log summary::after{content:' ▸'}#game-update-log[open] summary::after{content:' ▾'}#game-update-log-content{padding:0 14px 12px;font-size:.9rem;line-height:1.5;max-height:55vh;overflow:auto}#game-update-log-content ul{padding-left:19px;margin:8px 0 0}#game-update-log-content li{margin:6px 0}@media(max-width:850px){#game-entry-gate{align-items:flex-start}#game-entry-card{margin:auto}#game-update-log{position:static;width:100%;margin-top:14px}}
 #game-entry-card h1{font-size:2rem;margin-bottom:24px}#game-entry-card input{width:100%;max-width:100%;box-sizing:border-box;padding:11px!important;margin:5px 0!important;border-radius:8px;background:#111;color:#fff;border:1px solid #65452f}#game-entry-card .btn-upgrade{width:100%}
 body.game-entry-locked> :not(#game-entry-gate):not(script){visibility:hidden}body:not(.game-entry-locked) #game-entry-gate{display:none}
 </style>
 </head>
 <body class="game-entry-locked">
-<div id="game-entry-gate"><div id="game-entry-card"><h1>Ultimate Idle Clicker</h1><div id="game-entry-loading" class="sub-stat">Checking login...</div><div id="game-entry-auth"></div></div></div>
+<div id="game-entry-gate"><div id="game-entry-card"><h1>Ultimate Idle Clicker</h1><div id="game-entry-loading" class="sub-stat">Checking login...</div><div id="game-entry-auth"></div>
+<!-- EDITABLE UPDATE LOG: Change the heading and list items below when releasing a new update. -->
+<details id="game-update-log"><summary>Update Log</summary><div id="game-update-log-content">
+<strong>Latest update — October 21, 2026</strong>
+<ul>
+<li>Added a new login screen before entering Ultimate Idle Clicker.</li>
+<li>Added the Update Log panel to the login screen.</li>
+<li>Added the unlimited Insomniac title, earned by being in the game at midnight.</li>
+<li>Added the unlimited $$ title for reaching 100 million clicks.</li>
+</ul>
+</div></details>
+<!-- END EDITABLE UPDATE LOG -->
+</div></div>
 
     <!-- Main Game Panel -->
     <div class="panel main-panel">
