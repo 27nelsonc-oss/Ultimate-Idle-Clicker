@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### 2026-10-21 — Menu logout and stacked login panels
+- Added a Log Out button beneath Resume Game in the signed-in menu, reusing the existing logout handler. Update Log and Suggestions now stack vertically inside the login/menu card, so opening either expands the card and pushes the next section down instead of overlapping it. Halloween only; no auth/save/database changes. HTML commit `67433d1ad098c9feba199ee9798553a5978e0e1a`. Browser testing pending.
+
 ### 2026-10-21 — Return to menu without logout
 - Signed-in players can press Esc to reopen the existing menu and Resume Game to return without logging out. Added a small fixed ☰ Menu button for mobile/touch users. Existing Update Log and Suggestions remain accessible. No save/auth/database changes. HTML commit `5be09ab9e31f1aa0e04d330b8a7cb504031e6d5e`; browser testing pending.
 
