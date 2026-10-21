@@ -1,3 +1,13 @@
+### 2026-10-21 — Add Pulls player voting
+- **Request:** Add a Pulls button beneath Suggestions where the owner can release a poll and players can vote for an option.
+- **UI:** Added a collapsible Pulls panel under Suggestions. Owner-only form accepts a 3–240 character question and 2–8 unique options (one per line, up to 120 characters each). Only one poll can be active at once; owner closes voting before releasing another. Players must be signed in, can vote once per poll, and see counts/percentages and closed-poll results. Added manual Refresh Results.
+- **Database:** Added `game_polls`, `game_poll_options`, and `game_poll_votes` with RLS. The primary key on (poll_id,user_id) enforces one vote per account per poll; composite FK ensures the selected option belongs to that poll. A partial unique index limits active polls to one. `get_game_poll_results()` exposes aggregate counts only and is executable by authenticated users, not anon. Vote rows are readable only by the voter. Owner-only writes are restricted using the same verified owner-email claim used by existing game policies.
+- **Verification:** Supabase confirms all three tables have RLS enabled and policies; the aggregate function is not executable by anon. Both inline JavaScript blocks compile, no duplicate IDs found, and expected UI/update-log elements are present.
+- **Not tested:** No live browser, multiple-account, or end-to-end voting test was run. Owner should test creating a poll, voting from another account, duplicate-vote prevention, closing a poll, and releasing the next one.
+- **HTML commits:** `b2f5a1df9d6faf366fd7d66d04c549f8846f46bd` (Pulls UI/logic), `09a5658348276697a733132c0497880609606c87` (Refresh Results).
+- **Supabase migrations:** `add_player_polls_and_votes`; `qualify_poll_vote_policy`.
+- **Rollback:** Revert the two HTML commits on `Halloween`; drop the three poll tables and aggregate function only if the feature is intentionally removed, via a reviewed migration. Do not touch `game-development` or `main`.
+
 ### 2026-10-21 — Refresh in-game player-facing Update Log
 - **Request:** Update the actual Update Log players see in the game, not only project documentation.
 - **Change:** Listed the login screen, Update Log and Suggestions panels, Log Out button, centered desktop menu card, Insomniac title, and $$$ title. Unlock conditions remain secret in the player-facing log.
