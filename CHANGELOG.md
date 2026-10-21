@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### 2026-10-21 — Player suggestions
+- Added expandable Suggestions under Update Log on Halloween login screen. Visitors can submit 3–1000 character ideas; owner can privately review the newest 100 in the Cloud Save panel and mark them reviewed. No title discovery spoilers added. Database table has row-level security; other players cannot read submissions. HTML commit `9adeb8dd96abc38053b41f7d3349957514b50b7e`. Browser submission/review testing pending.
+
 ### 2026-10-21 — Keep title discoveries secret in public Update Log
 - Changed public login-screen Update Log title entries to names only, without unlock conditions. Future player-facing update notes should not reveal title discovery requirements.
 
