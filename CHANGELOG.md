@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### 2026-10-21 — Keep title discoveries secret in public Update Log
+- Changed public login-screen Update Log title entries to names only, without unlock conditions. Future player-facing update notes should not reveal title discovery requirements.
+
 ### 2026-10-21 — Editable login-screen Update Log
 - Added a right-side expandable Update Log to the Halloween login screen, with a responsive below-card layout on narrow screens. Populated it with the recent login screen and title additions. Text is editable directly in a clearly marked HTML section; no database changes.
 - HTML commit `5634b6f38e06cdf0ff085aaf22d1f51f874a5aea`. Browser layout testing pending; revert this commit to remove it.
