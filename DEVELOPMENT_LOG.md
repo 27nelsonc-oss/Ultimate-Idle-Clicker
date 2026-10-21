@@ -1,3 +1,7 @@
+### 2026-10-20 — Insomniac title
+- Added `insomniac` discovery, text gradient, owned/chat badges, owner test and selected-player management, and local-midnight interval detection to Halloween HTML. Midnight crossing must occur while the page remains open and signed in; a delayed timer over two minutes is not counted. Unlimited claims: no global claim row.
+- Added `claim_insomniac_title` RPC, ownership and active-title check-constraint entries, and owner RPC whitelists. Verified committed HTML and database definitions, but not live browser midnight behavior. HTML commit `58164235af414f09e61c7eabbf80cc5feb596c28`. Roll back HTML commit on Halloween and separately reverse the additive database changes if needed. Main and game-development untouched.
+
 ### 2026-10-20 — $$$ title
 - Halloween HTML adds discovery card, solid green styling, chat/collection/popup display, admin/test selectors and a periodic threshold check. Supabase migration `add_halloween_money_title` adds authenticated `claim_money_title()` verifying 100 million current clicks in cloud save, and extends owner test/manage RPC allowlists.
 - No main or game-development changes. Browser testing pending. Rollback HTML commit `98b094ee5c45224a01722f8c78eac2d9ac6a4388`; review migration dependencies before database rollback.
