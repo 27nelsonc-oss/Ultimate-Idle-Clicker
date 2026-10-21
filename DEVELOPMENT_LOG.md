@@ -1,3 +1,6 @@
+### 2026-10-21 — Suggestions submission and owner inbox
+- Halloween HTML adds native Suggestions details below Update Log, text form, 30-second client-side submit cooldown, and owner-only inbox in signed-in Cloud Save panel with Refresh and Mark Reviewed. Submissions stored in new `public.game_suggestions` (3–1000 chars; new/reviewed status), with anonymous/authenticated insert-only, authenticated owner-email-gated select/update RLS. UI escapes submissions with textContent. No save format changes. HTML commit `9adeb8dd96abc38053b41f7d3349957514b50b7e`; reverse HTML commit for UI rollback; database table can remain unused or be separately reviewed for removal, preserving submitted ideas. Browser end-to-end testing pending. Client cooldown is not server-side anti-spam.
+
 ### 2026-10-21 — Public update-log spoiler rule
 - Halloween login Update Log now says only that Insomniac and $$$ were added. Never reveal title unlock methods in public update notes unless explicitly requested; retain exact mechanics privately in development documentation. Revert the dedicated HTML commit to roll back this wording change.
 
