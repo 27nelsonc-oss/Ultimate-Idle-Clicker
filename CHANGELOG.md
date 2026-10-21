@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### 2026-10-21 — Move announcement editing to the login panel
+- Moved the owner-only announcement editor from the in-game Admin panel into the left-side login Announcements panel. Publishing and clearing are now available directly in that section.
+- Removed the announcement banner from the gameplay screen. Announcements now appear on the login menu only; the existing Supabase announcement record, owner-only write checks, and realtime updates are reused.
+- **HTML commit:** `5922407a3323ba21b2c0983d6d4496032d1851ef`.
+- **Verification:** Source-level checks are recorded after the edit; live browser and owner/non-owner account testing have not been performed.
+- **Rollback:** Revert HTML commit `5922407a3323ba21b2c0983d6d4496032d1851ef` on `Halloween`; no other branch was changed.
+
 ### 2026-10-21 — Add always-visible login announcements
 - Added a persistent Announcements panel on the left side of the Halloween login/menu screen. It is visible by default, including when no announcement is currently published.
 - The panel reuses the existing owner-managed global announcement stored in Supabase, so publishing or clearing the existing announcement updates the login panel too. No new database table or policy was needed.
