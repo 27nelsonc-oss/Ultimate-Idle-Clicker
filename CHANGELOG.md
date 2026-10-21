@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### 2026-10-21 — Upgrade announcements into a long-term notice board
+- Increased announcement text size and redesigned the panel with warm, pinned-notice styling to distinguish persistent notices from temporary gameplay messages.
+- Replaced the single-message editor with a multi-announcement list. Each notice remains until the owner clicks it and confirms deletion; additions and removals sync to other players through Supabase Realtime.
+- Added the `game_announcements` table with row-level security: announcements are readable publicly, while only the existing owner account can add or delete them. Migrated any existing published message into the new table.
+- **HTML commit:** `6bcb2ec41c5dc2fed2fcf534c4afb9ab9dfc809f`.
+- **Database migration:** `add_long_term_game_announcements`; existing `game_global_announcement` table was left in place.
+- **Verification:** Both JavaScript blocks compile, no duplicate IDs, key HTML tag counts balance, and database policies were checked. Live browser testing was not performed.
+- **Rollback:** Revert HTML commit `6bcb2ec41c5dc2fed2fcf534c4afb9ab9dfc809f` on `Halloween`; the new table can remain unused. No other Git branch was changed.
+
 ### 2026-10-21 — Move announcement editing to the login panel
 - Moved the owner-only announcement editor from the in-game Admin panel into the left-side login Announcements panel. Publishing and clearing are now available directly in that section.
 - Removed the announcement banner from the gameplay screen. Announcements now appear on the login menu only; the existing Supabase announcement record, owner-only write checks, and realtime updates are reused.
