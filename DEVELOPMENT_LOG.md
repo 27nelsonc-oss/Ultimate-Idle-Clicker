@@ -1,3 +1,12 @@
+### 2026-10-21 — Keep login/menu card centered
+- **Request:** Ensure the main menu card stays centered even with the Update Log and Suggestions panels beside it.
+- **Change:** Changed `#game-entry-layout` to use the login card’s own centered width; the desktop sidebar is positioned outside that width, so it does not shift the card’s horizontal center. At the 850px breakpoint, the sidebar becomes normal-flow content beneath the card.
+- **Preserved:** Existing login/logout handlers, auth/session flow, save logic, and panel content unchanged. Suggestions remains below Update Log in the sidebar; expanded Update Log pushes it down rather than overlapping.
+- **Verification:** Re-fetched committed HTML; confirmed one `game-entry-layout` wrapper, centered-width CSS, absolute desktop sidebar, mobile normal-flow sidebar, and balanced HTML/style/script tag counts (1/1, 6/6, 3/3).
+- **Not tested:** No live browser/standalone Chrome visual test performed. User should confirm desktop card centering and mobile stacking.
+- **Commit:** `37b1ec0250261abbdf59a126e4ddfc387dfb699a` (HTML).
+- **Rollback:** Revert this HTML commit on `Halloween` only; do not touch `game-development` or `main`.
+
 ### 2026-10-21 — Align sidebar top with login card
 - Fixed vertical alignment by adding `#game-entry-layout` as a flex wrapper around the login/menu card and the right sidebar. Wrapper is centered in the gate, with children aligned to the top edge; this reproduces the original Update Log placement next to the login card rather than pinning the sidebar to the top of the viewport.
 - Sidebar details remain normal-flow, so opening Update Log pushes Suggestions down. Mobile breakpoint still stacks sidebar beneath the card. Log Out button and all auth/game/save logic unchanged. Static verification and browser test status to be recorded after commit.
