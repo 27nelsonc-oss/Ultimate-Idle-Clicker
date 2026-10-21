@@ -495,7 +495,7 @@ body {
 #game-entry-gate{position:fixed;inset:0;z-index:20000;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;background:#0d0b0a;overflow:auto}
 #game-entry-card{width:min(100%,410px);padding:28px 22px;box-sizing:border-box;text-align:center;background:#1b1714;border:2px solid #ff7518;border-radius:16px;box-shadow:0 0 35px rgba(255,117,24,.2)}
 #game-entry-card{position:relative}#game-update-log{position:absolute;left:calc(100% + 12px);top:0;width:250px;box-sizing:border-box;text-align:left;border:1px solid #ff7518;border-radius:9px;background:#1b1714;color:#fff;overflow:hidden}#game-update-log summary{cursor:pointer;list-style:none;padding:12px 14px;color:#ffb347;font-weight:800;white-space:nowrap}#game-update-log summary::-webkit-details-marker{display:none}#game-update-log summary::after{content:' ▸'}#game-update-log[open] summary::after{content:' ▾'}#game-update-log-content{padding:0 14px 12px;font-size:.9rem;line-height:1.5;max-height:55vh;overflow:auto}#game-update-log-content ul{padding-left:19px;margin:8px 0 0}#game-update-log-content li{margin:6px 0}@media(max-width:850px){#game-entry-gate{align-items:flex-start}#game-entry-card{margin:auto}#game-update-log{position:static;width:100%;margin-top:14px}}
-#game-entry-card h1{font-size:2rem;margin-bottom:24px}#game-entry-card input{width:100%;max-width:100%;box-sizing:border-box;padding:11px!important;margin:5px 0!important;border-radius:8px;background:#111;color:#fff;border:1px solid #65452f}#game-entry-card .btn-upgrade{width:100%}
+#game-suggestions{position:absolute;left:calc(100% + 12px);top:55px;width:250px;box-sizing:border-box;text-align:left;border:1px solid #ff7518;border-radius:9px;background:#1b1714;color:#fff;overflow:hidden}#game-suggestions summary{cursor:pointer;padding:12px 14px;color:#ffb347;font-weight:800;list-style:none}#game-suggestions summary::-webkit-details-marker{display:none}#game-suggestions summary::after{content:' ▸'}#game-suggestions[open] summary::after{content:' ▾'}#game-suggestions form{padding:0 12px 12px}#game-suggestions textarea{box-sizing:border-box;width:100%;min-height:115px;resize:vertical;border:1px solid #65452f;border-radius:7px;padding:9px;background:#111;color:#fff;font:inherit}#game-suggestions button{margin-bottom:0}@media(max-width:850px){#game-suggestions{position:static;width:100%;margin-top:10px}}#game-entry-card h1{font-size:2rem;margin-bottom:24px}#game-entry-card input{width:100%;max-width:100%;box-sizing:border-box;padding:11px!important;margin:5px 0!important;border-radius:8px;background:#111;color:#fff;border:1px solid #65452f}#game-entry-card .btn-upgrade{width:100%}
 body.game-entry-locked> :not(#game-entry-gate):not(script){visibility:hidden}body:not(.game-entry-locked) #game-entry-gate{display:none}
 </style>
 </head>
@@ -512,6 +512,7 @@ body.game-entry-locked> :not(#game-entry-gate):not(script){visibility:hidden}bod
 </ul>
 </div></details>
 <!-- END EDITABLE UPDATE LOG -->
+<details id="game-suggestions"><summary>Suggestions</summary><form id="game-suggestion-form"><label for="game-suggestion-text" class="sub-stat">Have an idea for the game? Send it to the owner.</label><textarea id="game-suggestion-text" maxlength="1000" minlength="3" required placeholder="Type your suggestion here (3–1000 characters)"></textarea><button type="submit" class="btn-upgrade">Send Suggestion</button><div id="game-suggestion-status" class="sub-stat" role="status"></div></form></details>
 </div></div>
 
     <!-- Main Game Panel -->
@@ -1000,6 +1001,7 @@ body.game-entry-locked> :not(#game-entry-gate):not(script){visibility:hidden}bod
             <button id="cloud-save-btn" class="btn-upgrade">Save Named Save</button>
             <button id="cloud-load-btn" class="btn-upgrade">Load Save</button>
             <button id="cloud-logout-btn" class="btn-upgrade">Log Out</button>
+            <details id="owner-suggestions-inbox" style="display:none;text-align:left;margin-top:12px;border:1px solid #ff7518;border-radius:8px;padding:10px;"><summary style="cursor:pointer;color:#ffb347;font-weight:bold;">Player Suggestions (Owner)</summary><button id="owner-suggestions-refresh" type="button" class="btn-upgrade">Refresh Suggestions</button><div id="owner-suggestions-list" class="sub-stat">Open and refresh to view submissions.</div></details>
             <div id="cloud-status" class="sub-stat" style="margin-top:6px;"></div>
         </div>
     </div>
@@ -1926,6 +1928,8 @@ body.game-entry-locked> :not(#game-entry-gate):not(script){visibility:hidden}bod
 
         function updateCloudUI() {
             document.body.classList.toggle('game-entry-locked', !cloudUser);
+            const inbox = document.getElementById('owner-suggestions-inbox');
+            if (inbox) inbox.style.display = (cloudUser?.email || '').toLowerCase() === CHAT_OWNER_EMAIL ? 'block' : 'none';
             const entryLoading = document.getElementById('game-entry-loading');
             if (entryLoading) entryLoading.style.display = 'none';
             const loggedOut = document.getElementById('cloud-logged-out');
@@ -2497,6 +2501,59 @@ body.game-entry-locked> :not(#game-entry-gate):not(script){visibility:hidden}bod
             await refreshOwnerTitleTools();
         }
 
+        let lastSuggestionSubmitAt = 0;
+        document.getElementById('game-suggestion-form').addEventListener('submit', async event => {
+            event.preventDefault();
+            const field = document.getElementById('game-suggestion-text');
+            const status = document.getElementById('game-suggestion-status');
+            const button = event.currentTarget.querySelector('button');
+            const suggestion = field.value.trim();
+            if (suggestion.length < 3 || suggestion.length > 1000) { status.textContent = 'Please enter 3–1000 characters.'; return; }
+            if (Date.now() - lastSuggestionSubmitAt < 30000) { status.textContent = 'Please wait 30 seconds between suggestions.'; return; }
+            if (!supabaseClient) { status.textContent = 'Suggestions are unavailable right now.'; return; }
+            button.disabled = true;
+            try {
+                const { error } = await supabaseClient.from('game_suggestions').insert({ suggestion });
+                if (error) throw error;
+                lastSuggestionSubmitAt = Date.now();
+                field.value = '';
+                status.textContent = 'Suggestion sent. Thank you!';
+            } catch (error) { console.error('Suggestion submission failed:', error); status.textContent = 'Could not send your suggestion. Please try again.'; }
+            finally { button.disabled = false; }
+        });
+        async function refreshOwnerSuggestions() {
+            if (!isGameOwner() || !supabaseClient) return;
+            const list = document.getElementById('owner-suggestions-list');
+            list.textContent = 'Loading suggestions...';
+            const { data, error } = await supabaseClient.from('game_suggestions').select('id,suggestion,created_at,status').order('created_at',{ascending:false}).limit(100);
+            if (error) { list.textContent = 'Could not load suggestions.'; return; }
+            list.replaceChildren();
+            if (!data?.length) { list.textContent = 'No suggestions yet.'; return; }
+            for (const item of data) {
+                const card = document.createElement('div');
+                card.style.cssText = 'border-top:1px solid #65452f;padding:10px 0;white-space:pre-wrap;overflow-wrap:anywhere';
+                const meta = document.createElement('div');
+                meta.textContent = new Date(item.created_at).toLocaleString() + ' — ' + item.status;
+                const body = document.createElement('div');
+                body.textContent = item.suggestion;
+                card.append(meta,body);
+                if (item.status === 'new') {
+                    const button = document.createElement('button');
+                    button.className = 'btn-upgrade';
+                    button.textContent = 'Mark Reviewed';
+                    button.addEventListener('click', async () => {
+                        button.disabled = true;
+                        const { error } = await supabaseClient.from('game_suggestions').update({status:'reviewed'}).eq('id',item.id);
+                        if (error) { button.disabled = false; alert('Could not update suggestion.'); }
+                        else refreshOwnerSuggestions();
+                    });
+                    card.append(button);
+                }
+                list.append(card);
+            }
+        }
+        document.getElementById('owner-suggestions-refresh').addEventListener('click', refreshOwnerSuggestions);
+        document.getElementById('owner-suggestions-inbox').addEventListener('toggle', event => { if (event.currentTarget.open && isGameOwner()) refreshOwnerSuggestions(); });
         async function initializeCloudSave() {
             const entryAuth = document.getElementById('game-entry-auth');
             const existingLogin = document.getElementById('cloud-logged-out');
