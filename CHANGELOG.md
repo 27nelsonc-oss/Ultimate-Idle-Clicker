@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### 2026-10-21 — Keep login/menu card centered
+- Kept the main login/menu card centered in the viewport while placing Update Log and Suggestions to its right on desktop. The sidebar no longer contributes to the card’s centering calculation. On narrow screens, the sidebar returns to normal flow beneath the card. Log Out remains beneath Resume Game. No authentication, game, save, or database logic changed.
+- **HTML commit:** `37b1ec0250261abbdf59a126e4ddfc387dfb699a`. Static CSS/markup checks passed; browser rendering test still pending. Roll back by reverting this HTML commit on `Halloween` only.
+
 ### 2026-10-21 — Align right sidebar with login card
 - Adjusted the desktop layout wrapper so the Update Log and Suggestions sidebar begins level with the top of the login/menu card, restoring the original side-by-side placement rather than sitting too high. The two panels remain in normal flow and do not overlap when Update Log expands; narrow screens still stack them below. Log Out remains beneath Resume Game. Halloween only; no auth/save/database changes. Browser testing pending.
 
