@@ -494,7 +494,7 @@ body {
 /* Reversible entry screen: existing cloud authentication controls are reused. */
 #game-entry-gate{position:fixed;inset:0;z-index:20000;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;background:#0d0b0a;overflow:auto}#game-entry-layout{position:relative;display:block;width:min(410px,calc(100vw - 40px));max-width:100%;margin:0 auto}
 #game-entry-card{width:100%;padding:28px 22px;box-sizing:border-box;text-align:center;background:#1b1714;border:2px solid #ff7518;border-radius:16px;box-shadow:0 0 35px rgba(255,117,24,.2)}
-#game-entry-sidebar{position:absolute;left:calc(100% + 12px);top:0;width:250px;max-width:calc(100vw - 40px);box-sizing:border-box}#game-entry-announcements{position:absolute;right:calc(100% + 12px);top:0;width:230px;max-width:calc(100vw - 40px);box-sizing:border-box;padding:12px;border:1px solid #ff7518;border-radius:9px;background:#1b1714;color:#fff;text-align:left;overflow-wrap:anywhere;box-shadow:0 0 18px rgba(255,117,24,.12)}#game-entry-announcements strong{display:block;color:#ffb347;margin-bottom:7px}#game-entry-announcement-message{font-size:.92rem;line-height:1.5;white-space:pre-wrap;max-height:55vh;overflow:auto}#game-update-log{position:relative;width:100%;box-sizing:border-box;margin-top:0;text-align:left;border:1px solid #ff7518;border-radius:9px;background:#1b1714;color:#fff;overflow:hidden}#game-update-log summary{cursor:pointer;list-style:none;padding:12px 14px;color:#ffb347;font-weight:800;white-space:nowrap}#game-update-log summary::-webkit-details-marker{display:none}#game-update-log summary::after{content:' ▸'}#game-update-log[open] summary::after{content:' ▾'}#game-update-log-content{padding:0 14px 12px;font-size:.9rem;line-height:1.5;max-height:55vh;overflow:auto}#game-update-log-content ul{padding-left:19px;margin:8px 0 0}#game-update-log-content li{margin:6px 0}@media(max-width:1000px){#game-entry-gate{align-items:flex-start}#game-entry-layout{position:relative;display:flex;flex-direction:column;align-items:center;width:100%;max-width:410px;margin:auto}#game-entry-card{width:100%;margin:auto}#game-entry-announcements{position:relative;right:auto;top:auto;width:100%;max-width:100%;order:2;margin:10px auto 0}#game-entry-sidebar{position:relative;left:auto;top:auto;width:100%;max-width:100%;order:3;margin:10px auto 20px}}
+#game-entry-sidebar{position:absolute;left:calc(100% + 12px);top:0;width:250px;max-width:calc(100vw - 40px);box-sizing:border-box}#game-entry-announcements{position:absolute;right:calc(100% + 12px);top:0;width:270px;max-width:calc(100vw - 40px);box-sizing:border-box;padding:16px;border:2px solid #b87935;border-radius:12px;background:linear-gradient(155deg,#241a12 0%,#17110d 72%,#21170f 100%);color:#fff;text-align:left;overflow-wrap:anywhere;box-shadow:0 0 22px rgba(255,117,24,.16),inset 0 0 0 1px rgba(255,208,138,.07)}#game-entry-announcements>strong{display:block;color:#ffd18a;font-size:1.22rem;letter-spacing:.03em;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #76512f}#game-entry-announcement-message{font-size:1.08rem;line-height:1.65;white-space:pre-wrap;max-height:45vh;overflow:auto}.game-announcement-card{position:relative;margin:10px 0;padding:13px 14px;border:1px solid #89623a;border-left:4px solid #ffad4d;border-radius:8px;background:linear-gradient(135deg,rgba(255,176,77,.10),rgba(20,14,10,.96));box-shadow:0 3px 9px rgba(0,0,0,.28);font-size:1.08rem;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}.game-announcement-card::before{content:'📌  NOTICE';display:block;color:#ffd18a;font-size:.76rem;font-weight:800;letter-spacing:.1em;margin-bottom:6px}.game-announcement-card.owner-removable{cursor:pointer;transition:border-color .15s,background .15s}.game-announcement-card.owner-removable:hover{border-color:#ffbf72;background:linear-gradient(135deg,rgba(255,176,77,.18),rgba(20,14,10,.96))}.game-announcement-card .announcement-delete-hint{display:block;margin-top:8px;font-size:.78rem;line-height:1.35;color:#d5b58e;font-style:italic}.game-announcement-empty{font-size:1rem;line-height:1.6;color:#d9c6ad;padding:10px 2px}.game-announcement-editor-label{display:block;color:#ffd18a;font-size:1.05rem;font-weight:700;margin:12px 0 7px}.game-announcement-editor-help{font-size:.95rem;line-height:1.5;color:#ddc5a9;margin-bottom:8px}#game-update-log{position:relative;width:100%;box-sizing:border-box;margin-top:0;text-align:left;border:1px solid #ff7518;border-radius:9px;background:#1b1714;color:#fff;overflow:hidden}#game-update-log summary{cursor:pointer;list-style:none;padding:12px 14px;color:#ffb347;font-weight:800;white-space:nowrap}#game-update-log summary::-webkit-details-marker{display:none}#game-update-log summary::after{content:' ▸'}#game-update-log[open] summary::after{content:' ▾'}#game-update-log-content{padding:0 14px 12px;font-size:.9rem;line-height:1.5;max-height:55vh;overflow:auto}#game-update-log-content ul{padding-left:19px;margin:8px 0 0}#game-update-log-content li{margin:6px 0}@media(max-width:1000px){#game-entry-gate{align-items:flex-start}#game-entry-layout{position:relative;display:flex;flex-direction:column;align-items:center;width:100%;max-width:410px;margin:auto}#game-entry-card{width:100%;margin:auto}#game-entry-announcements{position:relative;right:auto;top:auto;width:100%;max-width:100%;order:2;margin:10px auto 0}#game-entry-sidebar{position:relative;left:auto;top:auto;width:100%;max-width:100%;order:3;margin:10px auto 20px}}
 #game-suggestions{position:relative;width:100%;box-sizing:border-box;margin-top:10px;text-align:left;border:1px solid #ff7518;border-radius:9px;background:#1b1714;color:#fff;overflow:hidden}#game-pulls-menu{position:relative;width:100%;box-sizing:border-box;margin-top:10px;text-align:left;border:1px solid #ff7518;border-radius:9px;background:#1b1714;color:#fff;overflow:hidden}#game-pulls-menu summary{cursor:pointer;padding:12px 14px;color:#ffb347;font-weight:800;list-style:none}#game-pulls-menu summary::-webkit-details-marker{display:none}#game-pulls-menu summary::after{content:' ▸'}#game-pulls-menu[open] summary::after{content:' ▾'}#game-pulls-menu button{max-width:100%;white-space:normal} .game-poll-card{margin:8px 0;padding:10px;border:1px solid #65452f;border-radius:8px;background:#14100e;overflow-wrap:anywhere}.game-poll-option{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:7px;padding:8px;border:1px solid #3d3028;border-radius:7px}.game-poll-option-label{min-width:0;flex:1;overflow-wrap:anywhere}.game-poll-option button{width:auto;min-width:64px;margin:0;padding:7px 9px}.game-poll-bar{height:5px;margin-top:5px;border-radius:4px;background:#3d3028;overflow:hidden}.game-poll-bar-fill{height:100%;background:#ff7518}#game-suggestions summary{cursor:pointer;padding:12px 14px;color:#ffb347;font-weight:800;list-style:none}#game-suggestions summary::-webkit-details-marker{display:none}#game-suggestions summary::after{content:' ▸'}#game-suggestions[open] summary::after{content:' ▾'}#game-suggestions form{padding:0 12px 12px}#game-suggestions textarea{box-sizing:border-box;width:100%;min-height:115px;resize:vertical;border:1px solid #65452f;border-radius:7px;padding:9px;background:#111;color:#fff;font:inherit}#game-suggestions button{margin-bottom:0}#game-entry-card h1{font-size:2rem;margin-bottom:24px}#game-entry-card input{width:100%;max-width:100%;box-sizing:border-box;padding:11px!important;margin:5px 0!important;border-radius:8px;background:#111;color:#fff;border:1px solid #65452f}#game-entry-card .btn-upgrade{width:100%}
 body.game-entry-locked> :not(#game-entry-gate):not(script){visibility:hidden}body:not(.game-entry-locked):not(.game-menu-open) #game-entry-gate{display:none}
 body.game-menu-open #game-entry-gate{display:flex}body.game-menu-open #game-entry-auth,body.game-menu-open #game-entry-loading{display:none!important}
@@ -506,14 +506,14 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
 </head>
 <body class="game-entry-locked">
 <div id="game-entry-gate"><div id="game-entry-layout"><div id="game-entry-card"><h1>Ultimate Idle Clicker</h1><div id="game-entry-loading" class="sub-stat">Checking login...</div><div id="game-entry-auth"></div><button type="button" id="game-menu-resume" class="btn-upgrade">Resume Game</button><button type="button" id="game-menu-logout" class="btn-upgrade">Log Out</button>
-</div><div id="game-entry-announcements" aria-live="polite"><strong>📢 Announcements</strong><div id="game-entry-announcement-message">No announcements right now. Check back for game news and events.</div><div id="game-entry-announcement-owner-tools" style="display:none;margin-top:12px;padding-top:10px;border-top:1px solid #65452f;"><strong style="font-size:.95rem;">Owner: Manage Announcement</strong><div class="sub-stat" style="margin:6px 0;">Publish a message for the login screen only (maximum 500 characters).</div><textarea id="admin-global-announcement" maxlength="500" rows="4" placeholder="Type an announcement for players..." style="width:100%;box-sizing:border-box;padding:8px;border-radius:8px;border:1px solid #5a3825;background:#111;color:white;resize:vertical;font:inherit;"></textarea><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;"><button type="button" id="admin-publish-announcement" class="btn-upgrade">Publish</button><button type="button" id="admin-clear-announcement" class="btn-upgrade">Clear</button></div><div id="admin-announcement-status" class="sub-stat" role="status" style="margin-top:8px;"></div></div></div><div id="game-entry-sidebar">
+</div><div id="game-entry-announcements" aria-live="polite"><strong>📢 Announcements</strong><div id="game-entry-announcement-message"><div class="game-announcement-empty">No announcements right now. Check back for game news and events.</div></div><div id="game-entry-announcement-owner-tools" style="display:none;margin-top:16px;padding-top:12px;border-top:1px solid #76512f;"><label class="game-announcement-editor-label" for="admin-global-announcement">📌 Add a Long-Term Announcement</label><div class="game-announcement-editor-help">Post an important notice for players to refer back to. Each announcement stays until you remove it.</div><textarea id="admin-global-announcement" maxlength="500" rows="5" placeholder="Write your announcement here (maximum 500 characters)..." style="width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:1px solid #89623a;background:#100c09;color:white;resize:vertical;font:inherit;font-size:1.02rem;line-height:1.55;"></textarea><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:9px;"><button type="button" id="admin-publish-announcement" class="btn-upgrade">Add Announcement</button></div><div id="admin-announcement-status" class="sub-stat" role="status" style="margin-top:8px;font-size:.95rem;"></div></div></div><div id="game-entry-sidebar">
 <!-- EDITABLE UPDATE LOG: Change the heading and list items below when releasing a new update. -->
 <details id="game-update-log"><summary>Update Log</summary><div id="game-update-log-content">
 <strong>Latest update — October 21, 2026</strong>
 <ul>
 <li>Added a login screen before entering Ultimate Idle Clicker.</li>
 <li>Added the Update Log, Suggestions, and player voting (Pulls) panels to the login screen.</li>
-<li>Added an always-visible Announcements panel on the left side of the login menu, with owner-only publishing controls; announcements appear on the login menu only.</li>
+<li>Added a long-term Announcements board to the login menu, with larger pinned-notice cards, multiple saved announcements, and owner-only click-to-delete confirmation.</li>
 <li>Added a Log Out button beneath Resume Game.</li>
 <li>Kept the main login/menu card centered while placing the side panels to its right on desktop.</li>
 <li>Added the Insomniac title.</li>
@@ -1846,43 +1846,66 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
         let autoClickFraction = 0;
         let ownerPlayerListAdminMode = false;
 
-        function renderGlobalAnnouncement(announcement) {
+        function renderGlobalAnnouncement(announcements) {
             const entryMessage = document.getElementById('game-entry-announcement-message');
-            const text = String(announcement?.message || '').trim();
-            if (entryMessage) {
-                entryMessage.textContent = text || 'No announcements right now. Check back for game news and events.';
+            if (!entryMessage) return;
+            const items = Array.isArray(announcements) ? announcements : [];
+            entryMessage.replaceChildren();
+            if (!items.length) {
+                const empty = document.createElement('div');
+                empty.className = 'game-announcement-empty';
+                empty.textContent = 'No announcements right now. Check back for game news and events.';
+                entryMessage.appendChild(empty);
+                return;
             }
+            const isOwnerAccount = (cloudUser?.email || '').toLowerCase() === CHAT_OWNER_EMAIL;
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'game-announcement-card' + (isOwnerAccount ? ' owner-removable' : '');
+                card.textContent = String(item.message || '');
+                if (isOwnerAccount) {
+                    const hint = document.createElement('span');
+                    hint.className = 'announcement-delete-hint';
+                    hint.textContent = 'Owner: click this notice to remove it';
+                    card.appendChild(hint);
+                    card.addEventListener('click', async () => {
+                        if (!window.confirm('Delete this announcement? This will remove it for all players.')) return;
+                        await deleteGameAnnouncement(item.id);
+                    });
+                    card.setAttribute('role', 'button');
+                    card.setAttribute('tabindex', '0');
+                    card.addEventListener('keydown', event => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            card.click();
+                        }
+                    });
+                }
+                entryMessage.appendChild(card);
+            });
         }
 
         async function loadGlobalAnnouncement() {
             if (!supabaseClient) return;
             const { data, error } = await supabaseClient
-                .from('game_global_announcement')
-                .select('id,message,updated_at')
-                .eq('id', 1)
-                .maybeSingle();
+                .from('game_announcements')
+                .select('id,message,created_at')
+                .order('created_at', { ascending: false });
             if (error) {
-                console.error('Global announcement load error:', error);
+                console.error('Announcements load error:', error);
+                const status = document.getElementById('admin-announcement-status');
+                if (status) { status.textContent = '❌ Could not load announcements: ' + error.message; status.style.color = '#ff7777'; }
                 return;
             }
-            renderGlobalAnnouncement(data);
-            const input = document.getElementById('admin-global-announcement');
-            if (input && !input.value.trim() && data?.message) input.value = data.message;
+            renderGlobalAnnouncement(data || []);
         }
 
         function setupGlobalAnnouncementRealtime() {
             if (!supabaseClient) return;
             if (globalAnnouncementChannel) supabaseClient.removeChannel(globalAnnouncementChannel);
             globalAnnouncementChannel = supabaseClient
-                .channel('game-global-announcement')
-                .on('postgres_changes', {
-                    event: '*',
-                    schema: 'public',
-                    table: 'game_global_announcement'
-                }, payload => {
-                    if (payload.eventType === 'DELETE') renderGlobalAnnouncement(null);
-                    else renderGlobalAnnouncement(payload.new);
-                })
+                .channel('game-announcements')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'game_announcements' }, () => loadGlobalAnnouncement())
                 .subscribe();
         }
 
@@ -1897,25 +1920,39 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
                 return;
             }
             const text = String(message || '').trim();
+            if (!text) {
+                if (status) { status.innerText = '❌ Type an announcement first.'; status.style.color = '#ff7777'; }
+                return;
+            }
             if (text.length > 500) {
                 if (status) { status.innerText = '❌ Announcement is too long. Maximum is 500 characters.'; status.style.color = '#ff7777'; }
                 return;
             }
-            const { error } = await supabaseClient
-                .from('game_global_announcement')
-                .upsert({
-                    id: 1,
-                    message: text || null,
-                    updated_by: cloudUser.id,
-                    updated_at: new Date().toISOString()
-                }, { onConflict: 'id' });
+            const { error } = await supabaseClient.from('game_announcements').insert({ message: text, created_by: cloudUser.id });
             if (error) {
-                console.error('Global announcement save error:', error);
+                console.error('Announcement publish error:', error);
                 if (status) { status.innerText = '❌ Announcement failed: ' + error.message; status.style.color = '#ff7777'; }
                 return;
             }
-            renderGlobalAnnouncement({ message: text });
-            if (status) { status.innerText = text ? '✅ Announcement published to all players.' : '✅ Announcement cleared.'; status.style.color = '#77ff77'; }
+            document.getElementById('admin-global-announcement').value = '';
+            await loadGlobalAnnouncement();
+            if (status) { status.innerText = '✅ Announcement added. It will stay until you delete it.'; status.style.color = '#77ff77'; }
+        }
+
+        async function deleteGameAnnouncement(id) {
+            const status = document.getElementById('admin-announcement-status');
+            if ((cloudUser?.email || '').toLowerCase() !== CHAT_OWNER_EMAIL || !supabaseClient || !cloudUser) {
+                if (status) { status.textContent = '❌ Owner account required.'; status.style.color = '#ff7777'; }
+                return;
+            }
+            const { error } = await supabaseClient.from('game_announcements').delete().eq('id', id);
+            if (error) {
+                console.error('Announcement delete error:', error);
+                if (status) { status.textContent = '❌ Could not delete announcement: ' + error.message; status.style.color = '#ff7777'; }
+                return;
+            }
+            await loadGlobalAnnouncement();
+            if (status) { status.textContent = '✅ Announcement deleted.'; status.style.color = '#77ff77'; }
         }
 
         function setCloudMessage(message, isError = false) {
@@ -3986,11 +4023,6 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
 
         document.getElementById('admin-publish-announcement').addEventListener('click', async () => {
             await saveGlobalAnnouncement(document.getElementById('admin-global-announcement').value);
-        });
-
-        document.getElementById('admin-clear-announcement').addEventListener('click', async () => {
-            document.getElementById('admin-global-announcement').value = '';
-            await saveGlobalAnnouncement('');
         });
 
         document.getElementById('admin-add-clicks').addEventListener('click', () => {
