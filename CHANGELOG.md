@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### 2026-10-21 — Restore right-side Update Log and Suggestions
+- Moved Update Log and Suggestions into a dedicated sidebar to the right of the login/menu card on desktop, preserving their vertical flow so opening Update Log pushes Suggestions down rather than overlapping it. On narrow screens the sidebar stacks below the card. Kept the Log Out button beneath Resume Game. Halloween only; no authentication, save, or database changes. HTML commit pending. Browser testing pending.
+
 ### 2026-10-21 — Menu logout and stacked login panels
 - Added a Log Out button beneath Resume Game in the signed-in menu, reusing the existing logout handler. Update Log and Suggestions now stack vertically inside the login/menu card, so opening either expands the card and pushes the next section down instead of overlapping it. Halloween only; no auth/save/database changes. HTML commit `67433d1ad098c9feba199ee9798553a5978e0e1a`. Browser testing pending.
 
