@@ -1,3 +1,12 @@
+### 2026-10-21 — Move announcement editing to the login panel
+- **Request:** Let the owner write announcements from the login Announcements section and prevent those announcements from appearing in the gameplay area.
+- **Change made:** Moved the existing announcement text box, Publish, Clear, and status message into the left-side login Announcements panel. The editor is shown only when the signed-in account matches the existing owner account. Removed the separate in-game announcement banner and updated the shared renderer to update only the login-menu announcement text.
+- **Database:** Reused `game_global_announcement` and existing owner-only save validation/realtime subscription; no database changes.
+- **Files:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`, `CHANGELOG.md`, `DEVELOPMENT_LOG.md`.
+- **Verification:** Confirmed the edit anchors before replacement. Post-edit source checks are recorded after fetching the committed HTML. No live browser or multi-account test was performed.
+- **HTML commit:** `5922407a3323ba21b2c0983d6d4496032d1851ef`.
+- **Rollback:** Revert HTML commit `5922407a3323ba21b2c0983d6d4496032d1851ef` on `Halloween`; no changes to `game-development` or `main`.
+
 ### 2026-10-21 — Add always-visible login announcements
 - **Request:** Add announcements to the left side of the login menu and keep the panel open/visible by default so players notice it.
 - **Change made:** Added a permanently visible orange/black Announcements panel to the left of the centered login card on desktop. It displays the current global announcement or a friendly empty-state message. On screens at or below 1000px wide, it stacks below the login card to avoid squeezing the center card. The existing in-game global announcement renderer now updates both the gameplay banner and login-menu panel.
