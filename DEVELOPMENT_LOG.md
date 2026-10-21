@@ -1,3 +1,12 @@
+### 2026-10-21 — Long-term multi-announcement board
+- **Request:** Make announcement text larger, support multiple persistent notices, allow deleting a notice by clicking it and confirming, and give the panel a more permanent look.
+- **Change made:** Styled the panel as a long-term notice board with larger text and pinned announcement cards. Added an owner-only “Add a Long-Term Announcement” editor. Each announcement stays published until individually deleted through a confirmation prompt. New notices and deletions reload the list and broadcast updates through Supabase Realtime.
+- **Database:** Added `public.game_announcements` with RLS, public read access, and owner-only insert/delete policies; migrated any current non-empty message from `game_global_announcement`. Explicitly limited table grants to read for `anon`/`authenticated` and insert/delete for `authenticated`.
+- **Files:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`, `CHANGELOG.md`, `DEVELOPMENT_LOG.md`.
+- **Verification:** Both JavaScript blocks compile; no duplicate IDs; div/details/form/textarea/button/script/style counts are balanced; required editor, table references, and delete-confirmation code are present. Database policy names/commands were checked. No live browser test was performed.
+- **HTML commit:** `6bcb2ec41c5dc2fed2fcf534c4afb9ab9dfc809f`.
+- **Rollback:** Revert the HTML commit on `Halloween`; leave the database table in place unless a separate database rollback is deliberately planned. `main` and `game-development` were not changed.
+
 ### 2026-10-21 — Move announcement editing to the login panel
 - **Request:** Let the owner write announcements from the login Announcements section and prevent those announcements from appearing in the gameplay area.
 - **Change made:** Moved the existing announcement text box, Publish, Clear, and status message into the left-side login Announcements panel. The editor is shown only when the signed-in account matches the existing owner account. Removed the separate in-game announcement banner and updated the shared renderer to update only the login-menu announcement text.
