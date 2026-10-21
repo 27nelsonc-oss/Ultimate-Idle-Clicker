@@ -495,7 +495,7 @@ body {
 #game-entry-gate{position:fixed;inset:0;z-index:20000;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;background:#0d0b0a;overflow:auto}#game-entry-layout{position:relative;display:block;width:min(410px,calc(100vw - 40px));max-width:100%;margin:0 auto}
 #game-entry-card{width:100%;padding:28px 22px;box-sizing:border-box;text-align:center;background:#1b1714;border:2px solid #ff7518;border-radius:16px;box-shadow:0 0 35px rgba(255,117,24,.2)}
 #game-entry-sidebar{position:absolute;left:calc(100% + 12px);top:0;width:250px;max-width:calc(100vw - 40px);box-sizing:border-box}#game-update-log{position:relative;width:100%;box-sizing:border-box;margin-top:0;text-align:left;border:1px solid #ff7518;border-radius:9px;background:#1b1714;color:#fff;overflow:hidden}#game-update-log summary{cursor:pointer;list-style:none;padding:12px 14px;color:#ffb347;font-weight:800;white-space:nowrap}#game-update-log summary::-webkit-details-marker{display:none}#game-update-log summary::after{content:' ▸'}#game-update-log[open] summary::after{content:' ▾'}#game-update-log-content{padding:0 14px 12px;font-size:.9rem;line-height:1.5;max-height:55vh;overflow:auto}#game-update-log-content ul{padding-left:19px;margin:8px 0 0}#game-update-log-content li{margin:6px 0}@media(max-width:850px){#game-entry-gate{align-items:flex-start}#game-entry-layout{position:relative;display:flex;flex-direction:column;align-items:center;width:100%;max-width:410px;margin:auto}#game-entry-card{width:100%;margin:auto}#game-entry-sidebar{position:relative;left:auto;top:auto;width:100%;max-width:100%;margin:0 auto 20px}}
-#game-suggestions{position:relative;width:100%;box-sizing:border-box;margin-top:10px;text-align:left;border:1px solid #ff7518;border-radius:9px;background:#1b1714;color:#fff;overflow:hidden}#game-suggestions summary{cursor:pointer;padding:12px 14px;color:#ffb347;font-weight:800;list-style:none}#game-suggestions summary::-webkit-details-marker{display:none}#game-suggestions summary::after{content:' ▸'}#game-suggestions[open] summary::after{content:' ▾'}#game-suggestions form{padding:0 12px 12px}#game-suggestions textarea{box-sizing:border-box;width:100%;min-height:115px;resize:vertical;border:1px solid #65452f;border-radius:7px;padding:9px;background:#111;color:#fff;font:inherit}#game-suggestions button{margin-bottom:0}#game-entry-card h1{font-size:2rem;margin-bottom:24px}#game-entry-card input{width:100%;max-width:100%;box-sizing:border-box;padding:11px!important;margin:5px 0!important;border-radius:8px;background:#111;color:#fff;border:1px solid #65452f}#game-entry-card .btn-upgrade{width:100%}
+#game-suggestions{position:relative;width:100%;box-sizing:border-box;margin-top:10px;text-align:left;border:1px solid #ff7518;border-radius:9px;background:#1b1714;color:#fff;overflow:hidden}#game-pulls-menu{position:relative;width:100%;box-sizing:border-box;margin-top:10px;text-align:left;border:1px solid #ff7518;border-radius:9px;background:#1b1714;color:#fff;overflow:hidden}#game-pulls-menu summary{cursor:pointer;padding:12px 14px;color:#ffb347;font-weight:800;list-style:none}#game-pulls-menu summary::-webkit-details-marker{display:none}#game-pulls-menu summary::after{content:' ▸'}#game-pulls-menu[open] summary::after{content:' ▾'}#game-pulls-menu button{max-width:100%;white-space:normal} .game-poll-card{margin:8px 0;padding:10px;border:1px solid #65452f;border-radius:8px;background:#14100e;overflow-wrap:anywhere}.game-poll-option{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:7px;padding:8px;border:1px solid #3d3028;border-radius:7px}.game-poll-option-label{min-width:0;flex:1;overflow-wrap:anywhere}.game-poll-option button{width:auto;min-width:64px;margin:0;padding:7px 9px}.game-poll-bar{height:5px;margin-top:5px;border-radius:4px;background:#3d3028;overflow:hidden}.game-poll-bar-fill{height:100%;background:#ff7518}#game-suggestions summary{cursor:pointer;padding:12px 14px;color:#ffb347;font-weight:800;list-style:none}#game-suggestions summary::-webkit-details-marker{display:none}#game-suggestions summary::after{content:' ▸'}#game-suggestions[open] summary::after{content:' ▾'}#game-suggestions form{padding:0 12px 12px}#game-suggestions textarea{box-sizing:border-box;width:100%;min-height:115px;resize:vertical;border:1px solid #65452f;border-radius:7px;padding:9px;background:#111;color:#fff;font:inherit}#game-suggestions button{margin-bottom:0}#game-entry-card h1{font-size:2rem;margin-bottom:24px}#game-entry-card input{width:100%;max-width:100%;box-sizing:border-box;padding:11px!important;margin:5px 0!important;border-radius:8px;background:#111;color:#fff;border:1px solid #65452f}#game-entry-card .btn-upgrade{width:100%}
 body.game-entry-locked> :not(#game-entry-gate):not(script){visibility:hidden}body:not(.game-entry-locked):not(.game-menu-open) #game-entry-gate{display:none}
 body.game-menu-open #game-entry-gate{display:flex}body.game-menu-open #game-entry-auth,body.game-menu-open #game-entry-loading{display:none!important}
 #game-menu-resume{display:none}body.game-menu-open #game-menu-resume{display:block}
@@ -512,7 +512,7 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
 <strong>Latest update — October 21, 2026</strong>
 <ul>
 <li>Added a login screen before entering Ultimate Idle Clicker.</li>
-<li>Added the Update Log and Suggestions panels to the login screen.</li>
+<li>Added the Update Log, Suggestions, and player voting (Pulls) panels to the login screen.</li>
 <li>Added a Log Out button beneath Resume Game.</li>
 <li>Kept the main login/menu card centered while placing the side panels to its right on desktop.</li>
 <li>Added the Insomniac title.</li>
@@ -521,6 +521,20 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
 </div></details>
 <!-- END EDITABLE UPDATE LOG -->
 <details id="game-suggestions"><summary>Suggestions</summary><form id="game-suggestion-form"><label for="game-suggestion-text" class="sub-stat">Have an idea for the game? Send it to the owner.</label><textarea id="game-suggestion-text" maxlength="1000" minlength="3" required placeholder="Type your suggestion here (3–1000 characters)"></textarea><button type="submit" class="btn-upgrade">Send Suggestion</button><div id="game-suggestion-status" class="sub-stat" role="status"></div></form></details>
+<details id="game-pulls-menu"><summary>Pulls</summary>
+<div id="game-pulls-content" style="padding:0 12px 12px;">
+<div id="game-pulls-status" class="sub-stat" role="status" style="margin-bottom:8px;">Open Pulls to load player polls.</div>
+<div id="game-pulls-current"></div>
+<div id="game-pulls-owner-tools" style="display:none;margin-top:12px;padding:10px;border:1px solid #65452f;border-radius:8px;text-align:left;">
+<strong style="color:#ffb347;">Create a Pull</strong>
+<label for="game-pulls-question" class="sub-stat" style="display:block;margin-top:8px;">Question</label>
+<textarea id="game-pulls-question" maxlength="240" rows="2" placeholder="What should players vote on?" style="box-sizing:border-box;width:100%;resize:vertical;border:1px solid #65452f;border-radius:7px;padding:8px;background:#111;color:#fff;font:inherit;"></textarea>
+<label for="game-pulls-options" class="sub-stat" style="display:block;margin-top:8px;">Options (one per line, 2–8 options)</label>
+<textarea id="game-pulls-options" maxlength="1000" rows="5" placeholder="Option 1&#10;Option 2&#10;Option 3" style="box-sizing:border-box;width:100%;resize:vertical;border:1px solid #65452f;border-radius:7px;padding:8px;background:#111;color:#fff;font:inherit;"></textarea>
+<button type="button" id="game-pulls-release" class="btn-upgrade" style="width:100%;margin-top:8px;">Release Pull</button>
+<div id="game-pulls-owner-status" class="sub-stat" role="status" style="margin-top:6px;"></div>
+</div>
+</div></details>
 </div></div></div>
 <button type="button" id="game-menu-button" aria-label="Open game menu">☰ Menu</button>
 
@@ -2548,6 +2562,165 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
                 status.textContent = 'Suggestion sent. Thank you!';
             } catch (error) { console.error('Suggestion submission failed:', error); status.textContent = 'Could not send your suggestion. Please try again.'; }
             finally { button.disabled = false; }
+        });
+        function setPullsStatus(message) {
+            const status = document.getElementById('game-pulls-status');
+            if (status) status.textContent = message || '';
+        }
+        function addPollText(parent, tag, text, className) {
+            const el = document.createElement(tag);
+            el.textContent = text;
+            if (className) el.className = className;
+            parent.appendChild(el);
+            return el;
+        }
+        async function refreshPullsMenu() {
+            const root = document.getElementById('game-pulls-current');
+            const ownerTools = document.getElementById('game-pulls-owner-tools');
+            const ownerStatus = document.getElementById('game-pulls-owner-status');
+            if (!root) return;
+            root.replaceChildren();
+            if (ownerTools) ownerTools.style.display = isGameOwner() ? 'block' : 'none';
+            if (!supabaseClient) { setPullsStatus('Pulls are unavailable right now.'); return; }
+            if (!cloudUser) { setPullsStatus('Log in to view polls and vote.'); return; }
+            setPullsStatus('Loading polls...');
+            try {
+                const { data: polls, error: pollError } = await supabaseClient
+                    .from('game_polls').select('id,question,status,created_at,closed_at')
+                    .in('status', ['active','closed']).order('created_at', {ascending:false}).limit(10);
+                if (pollError) throw pollError;
+                if (!polls || !polls.length) {
+                    setPullsStatus('No pulls have been released yet.');
+                    return;
+                }
+                const ids = polls.map(p => p.id);
+                const [{data: options, error: optionsError}, {data: results, error: resultsError}, {data: myVotes, error: votesError}] = await Promise.all([
+                    supabaseClient.from('game_poll_options').select('id,poll_id,label,position').in('poll_id', ids).order('position'),
+                    supabaseClient.rpc('get_game_poll_results'),
+                    supabaseClient.from('game_poll_votes').select('poll_id,option_id').eq('user_id', cloudUser.id).in('poll_id', ids)
+                ]);
+                if (optionsError) throw optionsError;
+                if (resultsError) throw resultsError;
+                if (votesError) throw votesError;
+                const optionRows = options || [];
+                const counts = new Map((results || []).map(r => [String(r.option_id), Number(r.vote_count) || 0]));
+                const myVoteByPoll = new Map((myVotes || []).map(v => [String(v.poll_id), String(v.option_id)]));
+                polls.forEach(poll => {
+                    const pollOptions = optionRows.filter(o => String(o.poll_id) === String(poll.id));
+                    const total = pollOptions.reduce((sum, option) => sum + (counts.get(String(option.id)) || 0), 0);
+                    const myVote = myVoteByPoll.get(String(poll.id));
+                    const card = document.createElement('div');
+                    card.className = 'game-poll-card';
+                    const heading = addPollText(card, 'strong', poll.question);
+                    heading.style.color = '#ffb347';
+                    const meta = addPollText(card, 'div', poll.status === 'active' ? 'Voting is open' : 'Voting closed · final results', 'sub-stat');
+                    meta.style.marginTop = '4px';
+                    pollOptions.forEach(option => {
+                        const count = counts.get(String(option.id)) || 0;
+                        const percent = total ? Math.round(count / total * 100) : 0;
+                        const line = document.createElement('div');
+                        line.className = 'game-poll-option';
+                        const side = document.createElement('div');
+                        side.className = 'game-poll-option-label';
+                        addPollText(side, 'div', option.label);
+                        addPollText(side, 'div', count + (count === 1 ? ' vote' : ' votes') + ' · ' + percent + '%', 'sub-stat');
+                        const bar = document.createElement('div');
+                        bar.className = 'game-poll-bar';
+                        const fill = document.createElement('div');
+                        fill.className = 'game-poll-bar-fill';
+                        fill.style.width = percent + '%';
+                        bar.appendChild(fill);
+                        side.appendChild(bar);
+                        line.appendChild(side);
+                        if (poll.status === 'active' && !myVote) {
+                            const voteButton = document.createElement('button');
+                            voteButton.type = 'button';
+                            voteButton.className = 'btn-upgrade';
+                            voteButton.textContent = 'Vote';
+                            voteButton.addEventListener('click', async () => {
+                                voteButton.disabled = true;
+                                setPullsStatus('Submitting your vote...');
+                                const {error} = await supabaseClient.from('game_poll_votes').insert({poll_id:poll.id, option_id:option.id, user_id:cloudUser.id});
+                                if (error) {
+                                    setPullsStatus(error.code === '23505' ? 'You have already voted in this pull.' : 'Could not submit your vote. Please try again.');
+                                } else setPullsStatus('Vote submitted!');
+                                await refreshPullsMenu();
+                            });
+                            line.appendChild(voteButton);
+                        } else if (String(myVote) === String(option.id)) {
+                            const chosen = addPollText(line, 'span', 'Your vote', 'sub-stat');
+                            chosen.style.color = '#ffb347';
+                        }
+                        card.appendChild(line);
+                    });
+                    addPollText(card, 'div', total + (total === 1 ? ' total vote' : ' total votes'), 'sub-stat');
+                    if (isGameOwner() && poll.status === 'active') {
+                        const closeButton = document.createElement('button');
+                        closeButton.type = 'button';
+                        closeButton.className = 'btn-upgrade';
+                        closeButton.textContent = 'Close Voting';
+                        closeButton.style.width = '100%';
+                        closeButton.style.marginTop = '8px';
+                        closeButton.addEventListener('click', async () => {
+                            closeButton.disabled = true;
+                            const {error} = await supabaseClient.from('game_polls').update({status:'closed',closed_at:new Date().toISOString()}).eq('id',poll.id).eq('status','active');
+                            if (error) {
+                                if (ownerStatus) ownerStatus.textContent = 'Could not close this pull.';
+                            } else if (ownerStatus) ownerStatus.textContent = 'Voting closed. Final results are saved.';
+                            await refreshPullsMenu();
+                        });
+                        card.appendChild(closeButton);
+                    }
+                    root.appendChild(card);
+                });
+                setPullsStatus('Showing the active pull and recent results.');
+                if (ownerStatus && !ownerStatus.textContent) ownerStatus.textContent = '';
+            } catch (error) {
+                console.error('Could not load pulls:', error);
+                setPullsStatus('Could not load pulls. Please try again.');
+            }
+        }
+        document.getElementById('game-pulls-menu').addEventListener('toggle', event => {
+            if (event.currentTarget.open) refreshPullsMenu();
+        });
+        document.getElementById('game-pulls-release').addEventListener('click', async () => {
+            const questionField = document.getElementById('game-pulls-question');
+            const optionsField = document.getElementById('game-pulls-options');
+            const status = document.getElementById('game-pulls-owner-status');
+            const button = document.getElementById('game-pulls-release');
+            const question = questionField.value.trim();
+            const labels = optionsField.value.split(/\r?\n/).map(value => value.trim()).filter(Boolean);
+            if (!isGameOwner() || !cloudUser) { status.textContent = 'Only the owner can release pulls.'; return; }
+            if (question.length < 3 || question.length > 240) { status.textContent = 'Enter a question between 3 and 240 characters.'; return; }
+            if (labels.length < 2 || labels.length > 8 || labels.some(label => label.length > 120) || new Set(labels.map(label => label.toLowerCase())).size !== labels.length) {
+                status.textContent = 'Enter 2–8 unique options, one per line (max 120 characters each).'; return;
+            }
+            const {data: activePoll, error: activeError} = await supabaseClient.from('game_polls').select('id').eq('status','active').limit(1);
+            if (activeError) { status.textContent = 'Could not check the current pull.'; return; }
+            if (activePoll && activePoll.length) { status.textContent = 'Close the active pull before releasing another one.'; return; }
+            button.disabled = true;
+            status.textContent = 'Releasing pull...';
+            let pollId = null;
+            try {
+                const {data: poll, error: createError} = await supabaseClient.from('game_polls').insert({question,status:'draft',created_by:cloudUser.id}).select('id').single();
+                if (createError) throw createError;
+                pollId = poll.id;
+                const optionRows = labels.map((label, position) => ({poll_id:pollId,label,position}));
+                const {error: optionError} = await supabaseClient.from('game_poll_options').insert(optionRows);
+                if (optionError) throw optionError;
+                const {error: releaseError} = await supabaseClient.from('game_polls').update({status:'active'}).eq('id',pollId);
+                if (releaseError) throw releaseError;
+                questionField.value = '';
+                optionsField.value = '';
+                status.textContent = 'Pull released! Players can now vote.';
+                await refreshPullsMenu();
+            } catch (error) {
+                console.error('Could not release pull:', error);
+                if (pollId) await supabaseClient.from('game_polls').delete().eq('id',pollId);
+                status.textContent = 'Could not release pull. Check that no other pull is active, then try again.';
+            } finally {
+                button.disabled = false;
+            }
         });
         async function refreshOwnerSuggestions() {
             if (!isGameOwner() || !supabaseClient) return;
