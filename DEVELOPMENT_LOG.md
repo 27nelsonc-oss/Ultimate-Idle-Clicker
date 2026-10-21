@@ -1,3 +1,10 @@
+### 2026-10-21 — Refresh in-game player-facing Update Log
+- **Request:** Update the actual Update Log players see in the game, not only project documentation.
+- **Change:** Listed the login screen, Update Log and Suggestions panels, Log Out button, centered desktop menu card, Insomniac title, and $$$ title. Unlock conditions remain secret in the player-facing log.
+- **Verification:** Confirmed the exact title spelling and the editable Update Log block in the committed HTML.
+- **HTML commit:** `ca02b645600425c8414f0888884dfd9504e353c0`.
+- **Scope:** Halloween branch only; no gameplay, authentication, saving, or database logic changed.
+
 ### 2026-10-21 — Keep login/menu card centered
 - **Request:** Ensure the main menu card stays centered even with the Update Log and Suggestions panels beside it.
 - **Change:** Changed `#game-entry-layout` to use the login card’s own centered width; the desktop sidebar is positioned outside that width, so it does not shift the card’s horizontal center. At the 850px breakpoint, the sidebar becomes normal-flow content beneath the card.
