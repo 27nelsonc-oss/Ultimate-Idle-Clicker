@@ -506,14 +506,14 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
 </head>
 <body class="game-entry-locked">
 <div id="game-entry-gate"><div id="game-entry-layout"><div id="game-entry-card"><h1>Ultimate Idle Clicker</h1><div id="game-entry-loading" class="sub-stat">Checking login...</div><div id="game-entry-auth"></div><button type="button" id="game-menu-resume" class="btn-upgrade">Resume Game</button><button type="button" id="game-menu-logout" class="btn-upgrade">Log Out</button>
-</div><div id="game-entry-announcements" aria-live="polite"><strong>📢 Announcements</strong><div id="game-entry-announcement-message">No announcements right now. Check back for game news and events.</div></div><div id="game-entry-sidebar">
+</div><div id="game-entry-announcements" aria-live="polite"><strong>📢 Announcements</strong><div id="game-entry-announcement-message">No announcements right now. Check back for game news and events.</div><div id="game-entry-announcement-owner-tools" style="display:none;margin-top:12px;padding-top:10px;border-top:1px solid #65452f;"><strong style="font-size:.95rem;">Owner: Manage Announcement</strong><div class="sub-stat" style="margin:6px 0;">Publish a message for the login screen only (maximum 500 characters).</div><textarea id="admin-global-announcement" maxlength="500" rows="4" placeholder="Type an announcement for players..." style="width:100%;box-sizing:border-box;padding:8px;border-radius:8px;border:1px solid #5a3825;background:#111;color:white;resize:vertical;font:inherit;"></textarea><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;"><button type="button" id="admin-publish-announcement" class="btn-upgrade">Publish</button><button type="button" id="admin-clear-announcement" class="btn-upgrade">Clear</button></div><div id="admin-announcement-status" class="sub-stat" role="status" style="margin-top:8px;"></div></div></div><div id="game-entry-sidebar">
 <!-- EDITABLE UPDATE LOG: Change the heading and list items below when releasing a new update. -->
 <details id="game-update-log"><summary>Update Log</summary><div id="game-update-log-content">
 <strong>Latest update — October 21, 2026</strong>
 <ul>
 <li>Added a login screen before entering Ultimate Idle Clicker.</li>
 <li>Added the Update Log, Suggestions, and player voting (Pulls) panels to the login screen.</li>
-<li>Added an always-visible Announcements panel on the left side of the login menu.</li>
+<li>Added an always-visible Announcements panel on the left side of the login menu, with owner-only publishing controls; announcements appear on the login menu only.</li>
 <li>Added a Log Out button beneath Resume Game.</li>
 <li>Kept the main login/menu card centered while placing the side panels to its right on desktop.</li>
 <li>Added the Insomniac title.</li>
@@ -543,10 +543,6 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
     <!-- Main Game Panel -->
     <div class="panel main-panel">
         <h1>Ultimate Idle Clicker</h1>
-        <div id="global-announcement-panel" style="display:none; margin:0 0 12px 0; padding:9px 10px; border:1px solid #ff7518; border-radius:8px; background:#171717; text-align:left; box-sizing:border-box;">
-            <strong>📢 Announcement</strong>
-            <div id="global-announcement-message" style="margin-top:4px; white-space:pre-wrap; overflow-wrap:anywhere;"></div>
-        </div>
         <div id="admin-abuse-active-banner" style="display:none; margin:0 0 12px 0; padding:10px; border:2px solid #ff7518; border-radius:8px; background:#24150e; color:#fff; text-align:center; box-sizing:border-box;">
             <strong>🎃 ADMIN ABUSE ACTIVE!</strong>
             <div id="admin-abuse-active-details" style="margin-top:4px;"></div>
@@ -933,17 +929,6 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
                 <div id="admin-selected-player" class="sub-stat" style="margin-top:8px;">No player selected.</div>
                 <div id="admin-view-player-status" class="sub-stat" style="margin-top:8px;"></div>
                 <div id="admin-view-player-results" style="display:none; margin-top:8px; padding:8px; border:1px solid #3a261b; border-radius:8px; line-height:1.6;"></div>
-            </div>
-
-            <div style="margin-top:12px; padding:10px; border:1px solid #ff7518; border-radius:8px;">
-                <strong>📢 Global Announcement</strong>
-                <div class="sub-stat" style="margin:6px 0;">This message is shown to every player. Maximum 500 characters.</div>
-                <textarea id="admin-global-announcement" maxlength="500" rows="3" placeholder="Type an announcement for all players..." style="width:100%; box-sizing:border-box; padding:8px; border-radius:8px; border:1px solid #5a3825; background:#111; color:white; resize:vertical;"></textarea>
-                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
-                    <button id="admin-publish-announcement" class="btn-upgrade">Publish Announcement</button>
-                    <button id="admin-clear-announcement" class="btn-upgrade">Clear Announcement</button>
-                </div>
-                <div id="admin-announcement-status" class="sub-stat" style="margin-top:8px;"></div>
             </div>
 
             <div id="admin-abuse-controls" style="display:none; margin-top:12px; padding:12px; border:2px solid #ff7518; border-radius:8px; background:#24150e;">
@@ -1862,21 +1847,11 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
         let ownerPlayerListAdminMode = false;
 
         function renderGlobalAnnouncement(announcement) {
-            const panel = document.getElementById('global-announcement-panel');
-            const message = document.getElementById('global-announcement-message');
             const entryMessage = document.getElementById('game-entry-announcement-message');
             const text = String(announcement?.message || '').trim();
             if (entryMessage) {
                 entryMessage.textContent = text || 'No announcements right now. Check back for game news and events.';
             }
-            if (!panel || !message) return;
-            if (!text) {
-                message.textContent = '';
-                panel.style.display = 'none';
-                return;
-            }
-            message.textContent = text;
-            panel.style.display = 'block';
         }
 
         async function loadGlobalAnnouncement() {
@@ -1958,8 +1933,11 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
         function updateCloudUI() {
             document.body.classList.toggle('game-entry-locked', !cloudUser);
             if (!cloudUser) document.body.classList.remove('game-menu-open');
+            const isOwnerAccount = (cloudUser?.email || '').toLowerCase() === CHAT_OWNER_EMAIL;
             const inbox = document.getElementById('owner-suggestions-inbox');
-            if (inbox) inbox.style.display = (cloudUser?.email || '').toLowerCase() === CHAT_OWNER_EMAIL ? 'block' : 'none';
+            if (inbox) inbox.style.display = isOwnerAccount ? 'block' : 'none';
+            const announcementTools = document.getElementById('game-entry-announcement-owner-tools');
+            if (announcementTools) announcementTools.style.display = isOwnerAccount ? 'block' : 'none';
             const entryLoading = document.getElementById('game-entry-loading');
             if (entryLoading) entryLoading.style.display = 'none';
             const loggedOut = document.getElementById('cloud-logged-out');
