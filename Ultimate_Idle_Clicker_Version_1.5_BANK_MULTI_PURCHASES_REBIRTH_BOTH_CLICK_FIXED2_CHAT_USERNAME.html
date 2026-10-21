@@ -524,6 +524,7 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
 <details id="game-pulls-menu"><summary>Pulls</summary>
 <div id="game-pulls-content" style="padding:0 12px 12px;">
 <div id="game-pulls-status" class="sub-stat" role="status" style="margin-bottom:8px;">Open Pulls to load player polls.</div>
+<button type="button" id="game-pulls-refresh" class="btn-upgrade" style="width:100%;margin:0 0 8px;">Refresh Results</button>
 <div id="game-pulls-current"></div>
 <div id="game-pulls-owner-tools" style="display:none;margin-top:12px;padding:10px;border:1px solid #65452f;border-radius:8px;text-align:left;">
 <strong style="color:#ffb347;">Create a Pull</strong>
@@ -2680,6 +2681,7 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
                 setPullsStatus('Could not load pulls. Please try again.');
             }
         }
+        document.getElementById('game-pulls-refresh').addEventListener('click', refreshPullsMenu);
         document.getElementById('game-pulls-menu').addEventListener('toggle', event => {
             if (event.currentTarget.open) refreshPullsMenu();
         });
