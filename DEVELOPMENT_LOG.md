@@ -1,3 +1,6 @@
+### 2026-10-21 — Editable Update Log on login screen
+- Added native `<details id="game-update-log">` beside the existing entry card, responsive CSS, and a plainly marked `EDITABLE UPDATE LOG` HTML section containing latest update text. No JavaScript/auth/save changes. On narrow screens the log moves below login card. HTML commit `5634b6f38e06cdf0ff085aaf22d1f51f874a5aea` on Halloween; revert this single commit for rollback. Source verification done; real Chrome layout test pending.
+
 ### 2026-10-20 — Reversible login entry screen
 - HTML-only Halloween change: `#game-entry-gate` overlay, scoped styling, `game-entry-locked` body state, move existing `#cloud-logged-out` controls into the entry card on initialization, toggle entry visibility from `updateCloudUI()`. No duplicate login handlers, account/save/schema changes, or layout moves to game panels.
 - Rollback: revert HTML commit `ba05004a4e4e92edb4bffe40f4c86276db78dae9` on Halloween; no database rollback needed. Source re-fetch verification performed; browser login, signup, session restoration and logout still need testing.
