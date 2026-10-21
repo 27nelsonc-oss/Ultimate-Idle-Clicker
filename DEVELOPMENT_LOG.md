@@ -1,3 +1,6 @@
+### 2026-10-21 — Menu logout and login panel layout fix
+- Added `game-menu-logout` below Resume Game, delegates to existing `cloud-logout-btn` click handler (no duplicated logout flow). Replaced absolute positioning of `#game-update-log` and `#game-suggestions` with normal vertical flow, ensuring open details push later sections down on desktop and mobile. Halloween HTML commit `67433d1ad098c9feba199ee9798553a5978e0e1a`; source verified, browser testing pending. Revert that HTML commit to roll back.
+
 ### 2026-10-21 — In-game menu access
 - Halloween HTML only: `game-menu-open` body class reuses login overlay for signed-in users, hides login controls and shows Resume Game; fixed ☰ Menu button allows mobile/touch access. Esc toggles menu unless an input or visible dialog is active; logout clears menu state through updateCloudUI. No changes to auth/session, saves, or database. Revert HTML commit `5be09ab9e31f1aa0e04d330b8a7cb504031e6d5e` for rollback. Source verification completed; browser/device testing pending.
 
