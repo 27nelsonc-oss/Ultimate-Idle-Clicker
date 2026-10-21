@@ -1,3 +1,6 @@
+### 2026-10-21 — In-game menu access
+- Halloween HTML only: `game-menu-open` body class reuses login overlay for signed-in users, hides login controls and shows Resume Game; fixed ☰ Menu button allows mobile/touch access. Esc toggles menu unless an input or visible dialog is active; logout clears menu state through updateCloudUI. No changes to auth/session, saves, or database. Revert HTML commit `5be09ab9e31f1aa0e04d330b8a7cb504031e6d5e` for rollback. Source verification completed; browser/device testing pending.
+
 ### 2026-10-21 — Suggestions submission and owner inbox
 - Halloween HTML adds native Suggestions details below Update Log, text form, 30-second client-side submit cooldown, and owner-only inbox in signed-in Cloud Save panel with Refresh and Mark Reviewed. Submissions stored in new `public.game_suggestions` (3–1000 chars; new/reviewed status), with anonymous/authenticated insert-only, authenticated owner-email-gated select/update RLS. UI escapes submissions with textContent. No save format changes. HTML commit `9adeb8dd96abc38053b41f7d3349957514b50b7e`; reverse HTML commit for UI rollback; database table can remain unused or be separately reviewed for removal, preserving submitted ideas. Browser end-to-end testing pending. Client cooldown is not server-side anti-spam.
 
