@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### 2026-10-21 — Align right sidebar with login card
+- Adjusted the desktop layout wrapper so the Update Log and Suggestions sidebar begins level with the top of the login/menu card, restoring the original side-by-side placement rather than sitting too high. The two panels remain in normal flow and do not overlap when Update Log expands; narrow screens still stack them below. Log Out remains beneath Resume Game. Halloween only; no auth/save/database changes. Browser testing pending.
+
 ### 2026-10-21 — Restore right-side Update Log and Suggestions
 - Moved Update Log and Suggestions into a dedicated sidebar to the right of the login/menu card on desktop, preserving their vertical flow so opening Update Log pushes Suggestions down rather than overlapping it. On narrow screens the sidebar stacks below the card. Kept the Log Out button beneath Resume Game. Halloween only; no authentication, save, or database changes. HTML commit pending. Browser testing pending.
 
