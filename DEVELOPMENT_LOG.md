@@ -1,3 +1,12 @@
+### 2026-10-21 — Add always-visible login announcements
+- **Request:** Add announcements to the left side of the login menu and keep the panel open/visible by default so players notice it.
+- **Change made:** Added a permanently visible orange/black Announcements panel to the left of the centered login card on desktop. It displays the current global announcement or a friendly empty-state message. On screens at or below 1000px wide, it stacks below the login card to avoid squeezing the center card. The existing in-game global announcement renderer now updates both the gameplay banner and login-menu panel.
+- **Database:** Reused the existing `game_global_announcement` row and owner-only publishing flow. No database/schema/policy changes.
+- **Files:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`, `CHANGELOG.md`, `DEVELOPMENT_LOG.md`.
+- **Verification:** Confirmed the expected HTML/CSS/function anchors before making replacements. No live browser or narrow-screen visual test was performed.
+- **Commit:** HTML `01626c8046efa10f7be2448b14b4aeff3fbdd132`; documentation commits recorded in GitHub after this entry.
+- **Rollback:** Revert HTML commit `01626c8046efa10f7be2448b14b4aeff3fbdd132` on `Halloween`. No changes to `game-development` or `main`.
+
 ### 2026-10-21 — Add Pulls player voting
 - **Request:** Add a Pulls button beneath Suggestions where the owner can release a poll and players can vote for an option.
 - **UI:** Added a collapsible Pulls panel under Suggestions. Owner-only form accepts a 3–240 character question and 2–8 unique options (one per line, up to 120 characters each). Only one poll can be active at once; owner closes voting before releasing another. Players must be signed in, can vote once per poll, and see counts/percentages and closed-poll results. Added manual Refresh Results.
