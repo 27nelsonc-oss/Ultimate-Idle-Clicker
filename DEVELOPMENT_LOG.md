@@ -1,3 +1,7 @@
+### 2026-10-20 — Reversible login entry screen
+- HTML-only Halloween change: `#game-entry-gate` overlay, scoped styling, `game-entry-locked` body state, move existing `#cloud-logged-out` controls into the entry card on initialization, toggle entry visibility from `updateCloudUI()`. No duplicate login handlers, account/save/schema changes, or layout moves to game panels.
+- Rollback: revert HTML commit `ba05004a4e4e92edb4bffe40f4c86276db78dae9` on Halloween; no database rollback needed. Source re-fetch verification performed; browser login, signup, session restoration and logout still need testing.
+
 ### 2026-10-20 — Insomniac title
 - Added `insomniac` discovery, text gradient, owned/chat badges, owner test and selected-player management, and local-midnight interval detection to Halloween HTML. Midnight crossing must occur while the page remains open and signed in; a delayed timer over two minutes is not counted. Unlimited claims: no global claim row.
 - Added `claim_insomniac_title` RPC, ownership and active-title check-constraint entries, and owner RPC whitelists. Verified committed HTML and database definitions, but not live browser midnight behavior. HTML commit `58164235af414f09e61c7eabbf80cc5feb596c28`. Roll back HTML commit on Halloween and separately reverse the additive database changes if needed. Main and game-development untouched.
