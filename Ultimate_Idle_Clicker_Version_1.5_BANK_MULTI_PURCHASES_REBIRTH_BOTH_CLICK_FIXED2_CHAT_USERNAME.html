@@ -3212,7 +3212,7 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
                 setCompanyStatus('You do not have enough clicks for that investment.', true);
                 return;
             }
-            if (!confirm('Invest ' + companyFormatClicks(amount) + ' clicks? To confirm, you must create or update your named save. Canceling the named-save popup cancels the investment and returns the reserved clicks.')) return;
+            if (!confirm('Invest ' + companyFormatClicks(amount) + ' clicks? To complete the investment, you must create or update your named save. Canceling before confirmation will not reserve any clicks.')) return;
 
             if (typeof stopSilentClicking === 'function') stopSilentClicking();
             setCompanyBusy(true);
@@ -3232,7 +3232,7 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
 
                 const enteredName = prompt(
                     'Confirm your investment of ' + companyFormatClicks(amount) +
-                    ' clicks by naming or updating your named save. Cancel reverses the investment:',
+                    ' clicks by naming or updating your named save. Cancel leaves your clicks untouched:',
                     existing?.named_save_name || ''
                 );
                 if (enteredName === null) {
