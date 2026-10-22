@@ -1,3 +1,11 @@
+### 2026-10-22 — Show personal Global Company investment cost and profit/loss (Halloween branch)
+- Added a personal **Total clicks invested** display alongside **Current investment value** and **Overall profit / loss**.
+- Profit/loss is calculated as current share value + clicks already withdrawn − total clicks invested, so partial withdrawals are included instead of making the comparison misleading.
+- Extended the existing Supabase `company_market_snapshot()` response with the existing investment row's `total_invested` and `total_withdrawn` values plus calculated `net_profit_loss`. No tables, columns, policies, or investment mechanics were changed.
+- HTML commit: `b200a289065d53ad45d980b4e889e266a2db5132`.
+- Verification: re-fetched the live database function definition and confirmed all three response fields and the profit/loss formula are present. HTML update was committed on `Halloween`; standalone browser testing and a real-account investment/withdrawal test remain outstanding.
+- Rollback: revert HTML commit `b200a289065d53ad45d980b4e889e266a2db5132` on `Halloween`. To revert the database response extension, restore the prior `company_market_snapshot()` definition; do not change `main` or `game-development`.
+
 ### 2026-10-22 — Reduce failed Global Company investments (Halloween branch)
 - **Cause found in Supabase logs:** some commits failed with “Your cloud save changed while confirming” because the player was asked to name/replace a named save after clicks had already been reserved. A long-open prompt left time for another tab/device to change the cloud save.
 - **Change:** moved the named-save name and replacement prompts before the server reserves clicks; re-syncs and rechecks the named save after the prompts; then reserves and commits immediately. If the cloud save changed during the prompts, the flow now stops before reserving any clicks.
