@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### 2026-10-21 — Game sound hookup preparation (Halloween branch)
+- Replaced unreliable embedded audio data with relative paths for the separate sound assets: `sounds/Click 1.mp3` and `sounds/Purchase 2.mp3`.
+- Main-click sound is called from the shared click routine; upgrade sound is called when an upgrade purchase succeeds.
+- **Pending:** the two MP3 assets must be added to the Halloween branch at those paths before sounds can be verified in-game.
+- **HTML commit:** `d69369d45e05e37a51915629df96d47292aac03b`.
+
 ### 2026-10-21 — Upgrade announcements into a long-term notice board
 - Increased announcement text size and redesigned the panel with warm, pinned-notice styling to distinguish persistent notices from temporary gameplay messages.
 - Replaced the single-message editor with a multi-announcement list. Each notice remains until the owner clicks it and confirms deletion; additions and removals sync to other players through Supabase Realtime.
