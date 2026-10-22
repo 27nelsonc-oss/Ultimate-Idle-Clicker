@@ -1,3 +1,10 @@
+### 2026-10-21 — Halloween game sound hookup preparation
+- **Request:** Play `Click 1.mp3` on each main-button click path and `Purchase 2.mp3` when an upgrade purchase succeeds.
+- **Change made:** Kept the shared click and purchase sound calls, but changed audio sources to relative paths instead of embedding large, unreliable base64 strings in the HTML.
+- **Asset paths:** `sounds/Click 1.mp3` and `sounds/Purchase 2.mp3` on the Halloween branch.
+- **Status:** Hookup is not complete until the MP3 assets are added to those paths and the sound playback is tested. No changes were made to `main`.
+- **HTML commit:** `d69369d45e05e37a51915629df96d47292aac03b`.
+
 ### 2026-10-21 — Long-term multi-announcement board
 - **Request:** Make announcement text larger, support multiple persistent notices, allow deleting a notice by clicking it and confirming, and give the panel a more permanent look.
 - **Change made:** Styled the panel as a long-term notice board with larger text and pinned announcement cards. Added an owner-only “Add a Long-Term Announcement” editor. Each announcement stays published until individually deleted through a confirmation prompt. New notices and deletions reload the list and broadcast updates through Supabase Realtime.
