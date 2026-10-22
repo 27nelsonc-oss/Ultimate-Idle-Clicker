@@ -1,3 +1,12 @@
+### 2026-10-21 — Add optional fixed Mobile button (Halloween branch)
+- Added a **Mobile button** On/Off option to Settings, styled like the existing Goofy Audio option. When enabled, a separate **CLICK!** button appears fixed near the lower-right corner of the screen, so it remains in place while the page scrolls.
+- The floating button calls the existing main-click routine, preserving normal click rewards, multipliers, admin click buffs, UI updates, and the existing click sound setting. The preference is saved in this browser using localStorage and defaults to Off; if storage is unavailable, it remains off by default.
+- **HTML commit:** 4f87af8e4efd1dab33c7d4bc45564c62b13c6683.
+- **Verification:** Re-fetched the committed HTML and checked the settings row/toggle, fixed-position CSS, local preference persistence, and connection to the shared main-click routine. Actual mobile-browser interaction and scrolling still need user testing.
+- **Rollback:** Revert HTML commit `4f87af8e4efd1dab33c7d4bc45564c62b13c6683` on `Halloween` only. Do not change `main` or `game-development`.
+
+- **Implementation detail:** Added `#game-settings-mobile-row`, `#game-settings-mobile-toggle`, and `#mobile-click-button`; the floating control uses `position: fixed` and is hidden until enabled. Toggle state uses `ultimateIdleClickerMobileButtonEnabled`; the floating button invokes `performMainClick()` rather than duplicating game mechanics.
+- **Scope/regression notes:** No save format, Supabase, progression, or existing main-button handler changes. Browser-level mobile/touch testing was not available. If a regression appears, revert the HTML commit above and then revert the corresponding documentation entries.
 ### 2026-10-21 — Default Goofy Audio to Off
 - Changed Goofy Audio to start Off unless the player has explicitly saved an On preference in this browser. The Settings toggle also initially displays Off, and browser-storage failure safely leaves audio disabled.
 - **HTML commit:** fec24a0d4d13c89d0fcc2ac07a9b2d36907f3a6f.
