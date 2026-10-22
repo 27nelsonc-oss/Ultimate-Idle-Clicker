@@ -2,9 +2,9 @@
 - **Cause found in Supabase logs:** some commits failed with “Your cloud save changed while confirming” because the player was asked to name/replace a named save after clicks had already been reserved. A long-open prompt left time for another tab/device to change the cloud save.
 - **Change:** moved the named-save name and replacement prompts before the server reserves clicks; re-syncs and rechecks the named save after the prompts; then reserves and commits immediately. If the cloud save changed during the prompts, the flow now stops before reserving any clicks.
 - **Preserved:** existing investment RPCs and database schema, named-save confirmation requirement, server-side click reservation/refund protections, market mechanics, and all other game systems.
-- **HTML commit:** `2624510ddc8d5d9cb81de8f949ac7b2ef8ce76ea`.
+- **HTML commits:** `2624510ddc8d5d9cb81de8f949ac7b2ef8ce76ea` (flow change) and `84a2e206ca19a07131cc2a1b631a6d9f3c0e540a` (clarify pre-reservation prompt wording).
 - **Verification:** re-fetched the committed HTML and confirmed prompt ordering, second cloud sync before reservation, the in-game Update Log entry, and Global Company remains above Bank. No live browser or real-account investment test performed.
-- **Rollback:** revert `2624510ddc8d5d9cb81de8f949ac7b2ef8ce76ea` on `Halloween` only. Do not change `main` or `game-development`.
+- **Rollback:** revert `84a2e206ca19a07131cc2a1b631a6d9f3c0e540a` first, then `2624510ddc8d5d9cb81de8f949ac7b2ef8ce76ea` on `Halloween` only. Do not change `main` or `game-development`.
 
 ### 2026-10-22 — Force company collapse controls to show symbols (Halloween branch)
 - Added CSS-generated plus/minus symbols driven by each button's `aria-expanded` state and visually suppressed any text-node label, so the controls display `−` when expanded and `+` when collapsed even if old button text is present.
