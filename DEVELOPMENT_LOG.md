@@ -1,3 +1,10 @@
+### 2026-10-22 — Force company collapse controls to show symbols (Halloween branch)
+- **User report:** company buttons still visibly said “Minimize” rather than showing plus/minus symbols.
+- **Change:** added scoped CSS for `.company-market-panel .company-collapse-btn` that sets text-node font size to zero and renders a CSS `::before` symbol based on `aria-expanded`: minus when expanded, plus when collapsed. This makes the visible label independent of stale/overridden button text while preserving the existing click handlers and accessible title/aria-label.
+- **HTML commit:** `776d4ed244b94c37b116449b2730bf21b6994cf6`.
+- **Verification:** commit succeeded. Re-fetch and source-level checks still required; no real browser visual test performed.
+- **Rollback:** revert `776d4ed244b94c37b116449b2730bf21b6994cf6` on `Halloween` only; do not change `main` or `game-development`.
+
 ### 2026-10-22 — Match company collapse buttons to Titles panel (Halloween branch)
 - **Request:** make the Global Company and Market activity minimize buttons look like the existing My Titles minimize button.
 - **Changes:** changed the company button CSS to the same compact fixed 28×28 square treatment used by `.titles-panel-heading .titles-minimize-btn` (inline-flex, fixed dimensions, padding 0, #65452f border, #35251c background, 6px radius, inherited text color, bold 1rem glyph). Both controls now display `−` while expanded and `+` while collapsed. Updated aria-label and title attributes with the current action.
