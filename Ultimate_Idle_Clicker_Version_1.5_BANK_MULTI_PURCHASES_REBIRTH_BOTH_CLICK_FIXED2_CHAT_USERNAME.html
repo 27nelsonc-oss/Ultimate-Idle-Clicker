@@ -3429,14 +3429,14 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
             purchase: 'Purchase%202.mp3'
         };
         const GAME_SOUND_PLAYERS = {};
-        let GAME_SOUND_AUDIO_CONTEXT = null;
 
         function playGameSound(soundName) {
             const source = GAME_SOUND_DATA[soundName];
             if (!source) return;
 
-            // Keep one player per sound: a repeated press restarts it instead of layering
-            // extra players, which avoids the lag and duplicate-audio problem.
+            // Use one player per sound to avoid stacked audio and excess player creation.
+            // Repeated presses restart the sound; silence skipping is disabled here until
+            // reliable gap positions can be established without risking silent output.
             let audio = GAME_SOUND_PLAYERS[soundName];
             if (!audio) {
                 audio = new Audio(source);
@@ -3446,77 +3446,13 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
                 audio.load();
             }
 
-            // Best-effort silence skipping: monitor the playing sound and jump ahead
-            // in short steps only after sustained near-silence is detected.
             try {
-                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                if (AudioContextClass) {
-                    if (!GAME_SOUND_AUDIO_CONTEXT) {
-                        GAME_SOUND_AUDIO_CONTEXT = new AudioContextClass();
-                    }
-                    if (!audio._gameSoundAnalyser) {
-                        const analyser = GAME_SOUND_AUDIO_CONTEXT.createAnalyser();
-                        analyser.fftSize = 256;
-                        const sourceNode = GAME_SOUND_AUDIO_CONTEXT.createMediaElementSource(audio);
-                        sourceNode.connect(analyser);
-                        analyser.connect(GAME_SOUND_AUDIO_CONTEXT.destination);
-                        audio._gameSoundAnalyser = analyser;
-                        audio._gameSoundSourceNode = sourceNode;
-                        audio._gameSoundSamples = new Uint8Array(analyser.fftSize);
-                    }
-                    GAME_SOUND_AUDIO_CONTEXT.resume().catch(() => {});
-                }
-            } catch (error) {
-                // If Web Audio analysis is unavailable, play the original sound normally.
-            }
-
-            try {
+                audio.pause();
                 audio.currentTime = 0;
             } catch (error) {
-                // The player may not be seekable until the file is ready.
+                // Playback can still proceed if seeking is not available yet.
             }
-
-            audio.play().then(() => {
-                if (audio._gameSoundMonitorRunning || !audio._gameSoundAnalyser) return;
-                audio._gameSoundMonitorRunning = true;
-                audio._gameSoundQuietSince = 0;
-
-                const monitorSilence = () => {
-                    if (audio.paused || audio.ended) {
-                        audio._gameSoundMonitorRunning = false;
-                        audio._gameSoundQuietSince = 0;
-                        return;
-                    }
-
-                    const analyser = audio._gameSoundAnalyser;
-                    const samples = audio._gameSoundSamples;
-                    if (analyser && samples) {
-                        analyser.getByteTimeDomainData(samples);
-                        let sumSquares = 0;
-                        for (let i = 0; i < samples.length; i++) {
-                            const sample = (samples[i] - 128) / 128;
-                            sumSquares += sample * sample;
-                        }
-                        const rms = Math.sqrt(sumSquares / samples.length);
-                        const now = performance.now();
-
-                        if (rms < 0.012) {
-                            if (!audio._gameSoundQuietSince) audio._gameSoundQuietSince = now;
-                            // Skip sustained silence in small increments; reset on audible sound.
-                            if (now - audio._gameSoundQuietSince >= 100) {
-                                try {
-                                    audio.currentTime = Math.min(audio.duration || audio.currentTime + 0.18, audio.currentTime + 0.18);
-                                } catch (error) {}
-                                audio._gameSoundQuietSince = now;
-                            }
-                        } else {
-                            audio._gameSoundQuietSince = 0;
-                        }
-                    }
-                    requestAnimationFrame(monitorSilence);
-                };
-                requestAnimationFrame(monitorSilence);
-            }).catch(() => {});
+            audio.play().catch(() => {});
         }
 
         function buyClickUpgrades(quantity) {
