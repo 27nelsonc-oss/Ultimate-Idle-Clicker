@@ -1,3 +1,11 @@
+### 2026-10-22 — Prevent Company Market refresh timeouts
+- **Request/problem:** The player reported the Company Market panel stopped loading with `Market could not refresh: canceling statement due to statement timeout`.
+- **Root cause:** Supabase PostgreSQL logs showed repeated timeouts while snapshot calls waited on the single `game_company_market_state` row lock held by `company_advance_market()`. The logs also showed timeouts in snapshot subqueries while these requests were stalled.
+- **Change made:** Added `pg_try_advisory_xact_lock(hashtext('company_market_advance'))` at the start of `company_advance_market()`. Concurrent calls now return immediately instead of queuing for the same market update; the active call continues and later refreshes can advance the market normally.
+- **Preserved:** Market rules, investment/withdrawal balances, click balances, transaction history, and all HTML/UI are unchanged by this fix. Only the live Supabase function was updated; no game branch was changed.
+- **Verification:** Live function definition re-read and confirmed the concurrency guard. A `company_market_snapshot()` smoke test returned successfully under an 8-second statement timeout. This test ran without a signed-in player identity, so an authenticated browser refresh still needs confirmation.
+- **Rollback:** Restore the prior `public.company_advance_market()` function definition from Supabase history/logs. Do not change `main` or `game-development`.
+
 ### 2026-10-22 — Company Market profit/loss shows current position only
 - **Branch:** `Halloween` only.
 - **Request:** Do not include gains/losses from previously withdrawn clicks in the current profit/loss display.
