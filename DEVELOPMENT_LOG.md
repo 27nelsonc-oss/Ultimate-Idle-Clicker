@@ -1,3 +1,9 @@
+### 2026-10-21 — Prevent sound effects from restarting before they finish
+- Changed click and purchase sound playback so a sound already playing ignores additional requests until it finishes. Each sound still uses one reusable audio player; no overlap, restart, silence detection, or player pool.
+- **HTML commit:** 066d61f714558941f078354d18c2969cbb3b2ec2.
+- **Verification:** Confirmed the prior sound helper matched before editing and the update committed on `Halloween`. Source-level behavior checked; actual browser playback still needs user confirmation.
+- **Rollback:** Revert HTML commit `066d61f714558941f078354d18c2969cbb3b2ec2` on `Halloween` only. Do not change `main` or `game-development`.
+
 ### 2026-10-21 — Restore sound after silence-detection regression
 - **Report:** User said all game sounds became silent after the experimental silence detector was added.
 - **Fix:** Removed Web Audio analyser routing and the silence-skipping monitor. Restored one reusable audio player per sound, with each request pausing, rewinding, and replaying it. This prioritizes restoring audible sound and avoids overlapping player pools; automatic silence skipping is temporarily disabled.
