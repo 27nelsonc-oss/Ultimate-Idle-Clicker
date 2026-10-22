@@ -559,6 +559,7 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
 <li>Added the Global Company Market above the Bank in the Halloween version. The company starts with player investments only and has no artificial starting capital.</li>
 <li>Added compact square minus/plus minimize buttons to Global Company and Market activity, matching the My Titles panel controls.</li>
 <li>Added a shared high-risk market with unpredictable booms, downturns, severe crashes, continuously changing investment values, inflation, an index history chart, recent market events, and anonymized public transaction summaries.</li>
+<li>Investments now finish the named-save prompts before reserving clicks, reducing failed confirmations when a cloud save changes while a prompt is open.</li>
 <li>Investments reserve clicks securely and require creating or updating the player's named save to confirm. Canceling the named-save flow cancels the pending investment and returns the reserved clicks.</li>
 <li>Added partial and full withdrawals at current market value, plus owner-only emergency controls to reset market conditions while preserving nominal investment values, add inflation, trigger a drop of up to 90%, and pause or resume market movement.</li>
 <li>Added click and purchase sound effects.</li>
@@ -3211,22 +3212,16 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
                 setCompanyStatus('You do not have enough clicks for that investment.', true);
                 return;
             }
-            if (!confirm('Invest ' + companyFormatClicks(amount) + ' clicks? To confirm, you must create or update your named save. Canceling the named-save popup will cancel the investment and return the reserved clicks.')) return;
+            if (!confirm('Invest ' + companyFormatClicks(amount) + ' clicks? To confirm, you must create or update your named save. Canceling the named-save popup cancels the investment and returns the reserved clicks.')) return;
 
             if (typeof stopSilentClicking === 'function') stopSilentClicking();
             setCompanyBusy(true);
             let transactionId = null;
             let reservedAmount = amount;
             try {
+                // Sync before showing blocking prompts, but do not reserve clicks until all prompts are finished.
                 const synced = await cloudSaveGame(false, true);
                 if (!synced) throw new Error('Your latest progress could not be safely synced. Load the latest cloud save if a conflict was reported, then try again.');
-                const { data: reserve, error: reserveError } = await supabaseClient.rpc('company_begin_investment', { p_amount: amount });
-                if (reserveError) throw reserveError;
-                transactionId = reserve.transaction_id;
-                reservedAmount = Number(reserve.amount);
-                lastCloudSyncAt = reserve.updated_at || lastCloudSyncAt;
-                game.clicks = Math.max(0, Number((Number(game.clicks || 0) - reservedAmount).toFixed(8)));
-                game.lastActiveAt = Date.now();
 
                 const { data: existing, error: readError } = await supabaseClient
                     .from('game_saves')
@@ -3236,28 +3231,54 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
                 if (readError) throw new Error('Could not check your existing named save: ' + readError.message);
 
                 const enteredName = prompt(
-                    'Confirm your investment of ' + companyFormatClicks(reservedAmount) +
+                    'Confirm your investment of ' + companyFormatClicks(amount) +
                     ' clicks by naming or updating your named save. Cancel reverses the investment:',
                     existing?.named_save_name || ''
                 );
                 if (enteredName === null) {
-                    await cancelCompanyInvestment(transactionId);
+                    setCompanyStatus('Investment canceled. No clicks were reserved.');
                     return;
                 }
                 const saveName = enteredName.trim();
                 if (!saveName || saveName.length > 40) {
-                    alert('Please enter a save name between 1 and 40 characters. The investment will be canceled.');
-                    await cancelCompanyInvestment(transactionId);
+                    alert('Please enter a save name between 1 and 40 characters. No clicks were reserved.');
+                    setCompanyStatus('Investment canceled. Enter a valid save name to try again.', true);
                     return;
                 }
                 if (existing?.named_save_data && !confirm(
                     'Replace your existing named save "' + (existing.named_save_name || 'Unnamed save') +
-                    '" with the updated save that confirms this investment? Canceling reverses the investment.'
+                    '" with the updated save that confirms this investment? Canceling leaves your investment untouched.'
                 )) {
-                    await cancelCompanyInvestment(transactionId);
+                    setCompanyStatus('Investment canceled. No clicks were reserved.');
                     return;
                 }
+
+                // Re-check cloud freshness after the prompts. If another tab/device changed the save,
+                // abort before reserving anything rather than overwriting newer progress.
+                const resynced = await cloudSaveGame(false, true);
+                if (!resynced) throw new Error('Your cloud save changed while you were choosing a save name. Load the latest cloud save, then try investing again.');
+
+                const { data: latestNamedSave, error: latestReadError } = await supabaseClient
+                    .from('game_saves')
+                    .select('named_save_name, named_save_data')
+                    .eq('user_id', cloudUser.id)
+                    .maybeSingle();
+                if (latestReadError) throw new Error('Could not recheck your named save: ' + latestReadError.message);
+                if (
+                    (latestNamedSave?.named_save_name ?? null) !== (existing?.named_save_name ?? null) ||
+                    JSON.stringify(latestNamedSave?.named_save_data ?? null) !== JSON.stringify(existing?.named_save_data ?? null)
+                ) {
+                    throw new Error('Your named save changed in another session. Nothing was invested; reload the latest cloud save and try again.');
+                }
+
                 if (cloudUser?.id == null) throw new Error('Your account signed out before the investment could be confirmed.');
+                const { data: reserve, error: reserveError } = await supabaseClient.rpc('company_begin_investment', { p_amount: amount });
+                if (reserveError) throw reserveError;
+                transactionId = reserve.transaction_id;
+                reservedAmount = Number(reserve.amount);
+                lastCloudSyncAt = reserve.updated_at || lastCloudSyncAt;
+                game.clicks = Math.max(0, Number((Number(game.clicks || 0) - reservedAmount).toFixed(8)));
+                game.lastActiveAt = Date.now();
 
                 const snapshot = JSON.parse(JSON.stringify({ ...game, lastActiveAt: Date.now() }));
                 const { data: committed, error: commitError } = await supabaseClient.rpc('company_commit_investment', {
@@ -3265,14 +3286,16 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
                     p_save_name: saveName,
                     p_snapshot: snapshot,
                     p_expected_updated_at: reserve.updated_at,
-                    p_expected_named_save_name: existing?.named_save_name ?? null,
-                    p_expected_named_save_data: existing?.named_save_data ?? null
+                    p_expected_named_save_name: latestNamedSave?.named_save_name ?? null,
+                    p_expected_named_save_data: latestNamedSave?.named_save_data ?? null
                 });
                 if (commitError) {
                     await cancelCompanyInvestment(transactionId);
+                    transactionId = null;
                     setCompanyStatus('Investment was not confirmed: ' + commitError.message, true);
                     return;
                 }
+                transactionId = null;
                 lastCloudSyncAt = committed.updated_at || lastCloudSyncAt;
                 cloudConflictDetected = false;
                 game.lastActiveAt = Date.now();
