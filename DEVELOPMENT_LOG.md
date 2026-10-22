@@ -1,3 +1,11 @@
+### 2026-10-21 — Skip silent gaps in sound effects
+- **Request:** Skip silent parts during playback without editing/trimming the MP3 files, while avoiding the lag and doubled audio caused by overlapping player pools.
+- **Implementation:** In `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`, restored one reusable audio player per sound. A new request restarts the matching player from the beginning. Added a Web Audio analyser to detect sustained near-silence (RMS below 0.012 for at least 100 ms); during such gaps it seeks forward in 0.18-second increments. The analyser is set up lazily, and playback falls back to normal if Web Audio analysis is unavailable.
+- **Assets and gameplay:** No MP3 files, click/purchase sound call sites, game mechanics, or save data were changed.
+- **Verification:** Confirmed the original helper boundaries were found before replacing the sound function and the HTML update committed successfully. This is source-level verification only; actual playback quality, browser support, and whether the threshold skips the intended gaps must be tested in the browser.
+- **HTML commit:** `383cc4ff334474ef01a6305eab99aaac21103dca`.
+- **Rollback:** Revert that HTML commit on the `Halloween` branch only. Do not change `main` or `game-development`.
+
 ### 2026-10-21 — Allow overlapping sound effects
 - **Request:** The user wanted a fresh sound to begin on each press even when the previous instance had not finished, rather than restarting the same sound and cutting off its quiet gaps.
 - **Fix:** Use a reusable pool of up to 8 audio players per sound. Each request uses an idle/finished player or creates one until the pool is full, allowing sound instances to overlap. Once all players are busy, recycle the oldest player instead of growing the pool without limit.
