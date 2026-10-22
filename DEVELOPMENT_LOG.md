@@ -1,3 +1,11 @@
+### 2026-10-21 — Restart sounds on every press
+- **Issue:** The prior lag-reduction behavior skipped click sounds whenever the player was already playing, so repeated presses did not each trigger a sound.
+- **Fix:** Keep one reusable preloaded audio player per sound, set its playback position to the beginning for each request, and call play again. This avoids allocating additional audio objects while allowing a new press to restart the current sound. A seek attempt is guarded for cases where the file is not yet seekable.
+- **File:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`.
+- **Verification:** Source-level check confirms the active-playback skip was removed and sound players are still reused. No live browser/device playback or performance test was available.
+- **HTML commit:** `18644bc4f8bee6f6f7dd7398ca8a5a785aa9d358`.
+- **Rollback:** Revert that HTML commit on `Halloween` only. Leave `main` and `game-development` untouched.
+
 ### 2026-10-21 — Reduce lag from rapid sound playback
 - **Issue:** After the duplicate-sound fix, the user reported severe game lag.
 - **Cause addressed:** The helper paused, rewound, and restarted the same audio element on every accepted click. Doing those operations repeatedly during rapid clicking can cause expensive audio work.
