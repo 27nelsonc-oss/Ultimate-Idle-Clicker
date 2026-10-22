@@ -4,10 +4,10 @@
 - **HTML change:** moved the name/replace prompts before reservation. After the prompts, the game attempts a second guarded cloud sync and rechecks the named-save fields. If the cloud save or named save changed, the attempt aborts before any clicks are reserved. If unchanged, the reservation and commit happen consecutively, reducing the window for conflicts.
 - **In-game Update Log:** added a brief entry about the safer investment confirmation order.
 - **Supabase/database:** no database functions, tables, policies, or schema were changed.
-- **HTML commit:** `2624510ddc8d5d9cb81de8f949ac7b2ef8ce76ea`.
-- **Docs commit:** `966ba5c41c6d98e054ca804e7f5d148ae4a28503` (changelog).
+- **HTML commits:** `2624510ddc8d5d9cb81de8f949ac7b2ef8ce76ea` (flow change), then `84a2e206ca19a07131cc2a1b631a6d9f3c0e540a` (clarify that clicks are not reserved until prompts are finished).
+- **Docs commits:** `966ba5c41c6d98e054ca804e7f5d148ae4a28503` (changelog), `8a6d4741648ef605f8b2269af9648d0cd37896f0` (development log), and `55ba529a1c070c843b9ceb5765c0a5109f1277cb` (changelog rollback/update details).
 - **Verification:** fetched the committed HTML again; checked the name and replacement prompts precede `company_begin_investment`, the second cloud sync is before reservation, the existing commit/cancel flow remains present, the in-game log entry exists, and Global Company remains above Bank. No browser/standalone test or live investment test was performed.
-- **Rollback:** revert the HTML commit `2624510ddc8d5d9cb81de8f949ac7b2ef8ce76ea` and changelog commit `966ba5c41c6d98e054ca804e7f5d148ae4a28503` on `Halloween` only; then revert the development-log commit created after this entry. Do not change `main` or `game-development`.
+- **Rollback:** revert HTML commit `84a2e206ca19a07131cc2a1b631a6d9f3c0e540a`, then `2624510ddc8d5d9cb81de8f949ac7b2ef8ce76ea`, followed by the docs commits `55ba529a1c070c843b9ceb5765c0a5109f1277cb`, `8a6d4741648ef605f8b2269af9648d0cd37896f0`, and `966ba5c41c6d98e054ca804e7f5d148ae4a28503`, on `Halloween` only. Do not change `main` or `game-development`.
 
 ### 2026-10-22 — Force company collapse controls to show symbols (Halloween branch)
 - **User report:** company buttons still visibly said “Minimize” rather than showing plus/minus symbols.
