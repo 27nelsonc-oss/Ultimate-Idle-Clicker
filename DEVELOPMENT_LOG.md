@@ -1,3 +1,14 @@
+### 2026-10-22 — Reduce failed Global Company investments (Halloween branch)
+- **User report:** other players are struggling to invest.
+- **Investigation:** Supabase logs showed repeated `company_commit_investment` errors: “Your cloud save changed while confirming.” The flow reserved clicks before opening the blocking prompt to name/replace a named save. A long prompt could leave the reservation pending while another tab/device changed the cloud save, causing the database's concurrency guard to reject the commit.
+- **HTML change:** moved the name/replace prompts before reservation. After the prompts, the game attempts a second guarded cloud sync and rechecks the named-save fields. If the cloud save or named save changed, the attempt aborts before any clicks are reserved. If unchanged, the reservation and commit happen consecutively, reducing the window for conflicts.
+- **In-game Update Log:** added a brief entry about the safer investment confirmation order.
+- **Supabase/database:** no database functions, tables, policies, or schema were changed.
+- **HTML commit:** `2624510ddc8d5d9cb81de8f949ac7b2ef8ce76ea`.
+- **Docs commit:** `966ba5c41c6d98e054ca804e7f5d148ae4a28503` (changelog).
+- **Verification:** fetched the committed HTML again; checked the name and replacement prompts precede `company_begin_investment`, the second cloud sync is before reservation, the existing commit/cancel flow remains present, the in-game log entry exists, and Global Company remains above Bank. No browser/standalone test or live investment test was performed.
+- **Rollback:** revert the HTML commit `2624510ddc8d5d9cb81de8f949ac7b2ef8ce76ea` and changelog commit `966ba5c41c6d98e054ca804e7f5d148ae4a28503` on `Halloween` only; then revert the development-log commit created after this entry. Do not change `main` or `game-development`.
+
 ### 2026-10-22 — Force company collapse controls to show symbols (Halloween branch)
 - **User report:** company buttons still visibly said “Minimize” rather than showing plus/minus symbols.
 - **Change:** added scoped CSS for `.company-market-panel .company-collapse-btn` that sets text-node font size to zero and renders a CSS `::before` symbol based on `aria-expanded`: minus when expanded, plus when collapsed. This makes the visible label independent of stale/overridden button text while preserving the existing click handlers and accessible title/aria-label.
