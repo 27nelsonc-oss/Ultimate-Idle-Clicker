@@ -1,7 +1,7 @@
 ### 2026-10-21 — Halloween game sound hookup preparation
 - **Request:** Play `Click 1.mp3` on each main-button click path and `Purchase 2.mp3` when an upgrade purchase succeeds.
 - **Change made:** Kept the shared click and purchase sound calls, but changed audio sources to relative paths instead of embedding large, unreliable base64 strings in the HTML.
-- **Asset paths:** `sounds/Click 1.mp3` and `sounds/Purchase 2.mp3` on the Halloween branch.
+- **Asset paths:** `Click 1.mp3` and `Purchase 2.mp3` on the Halloween branch.
 - **Status:** Hookup is not complete until the MP3 assets are added to those paths and the sound playback is tested. No changes were made to `main`.
 - **HTML commit:** `d69369d45e05e37a51915629df96d47292aac03b`.
 
