@@ -561,6 +561,7 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
 <li>Added compact square minus/plus minimize buttons to Global Company and Market activity, matching the My Titles panel controls.</li>
 <li>Added a shared high-risk market with unpredictable booms, downturns, severe crashes, continuously changing investment values, inflation, an index history chart, recent market events, and anonymized public transaction summaries.</li>
 <li>Investments now finish the named-save prompts before reserving clicks, reducing failed confirmations when a cloud save changes while a prompt is open.</li>
+            <li>Company investments now wait and retry when a cloud save/load is already running; genuine cloud conflicts get a clearer message before any clicks are reserved.</li>
 <li>Investments reserve clicks securely and require creating or updating the player's named save to confirm. Canceling the named-save flow cancels the pending investment and returns the reserved clicks.</li>
 <li>Added partial and full withdrawals at current market value, plus owner-only emergency controls to reset market conditions while preserving nominal investment values, add inflation, trigger a drop of up to 90%, and pause or resume market movement.</li>
 <li>Added click and purchase sound effects.</li>
