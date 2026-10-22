@@ -521,6 +521,11 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
 .company-market-panel .company-panel-heading .section-title { margin:0; min-width:0; }
 .company-market-panel .company-collapse-btn { display:inline-flex; flex:0 0 28px; width:28px!important; height:28px; max-width:28px; min-width:28px; box-sizing:border-box; align-items:center; justify-content:center; padding:0; margin:0; border:1px solid #65452f; border-radius:6px; background:#35251c; color:inherit; font-size:1rem; font-weight:bold; line-height:1; cursor:pointer; }
 .company-market-panel .company-collapse-btn:hover { background:#493326; }
+/* Force the compact symbol visually even if older button text remains in the HTML/JS. */
+.company-market-panel .company-collapse-btn { font-size:0 !important; }
+.company-market-panel .company-collapse-btn::before { font-size:1rem; line-height:1; }
+.company-market-panel .company-collapse-btn[aria-expanded="true"]::before { content:"−"; }
+.company-market-panel .company-collapse-btn[aria-expanded="false"]::before { content:"+"; }
 .company-market-panel .company-market-activity-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; }
 .company-market-panel #company-market-activity-content { display:block; }
 .company-market-panel #company-market-activity-content[hidden] { display:none !important; }
