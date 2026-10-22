@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### 2026-10-21 — Skip silent gaps in sound effects
+- Replaced the pool of up to 8 overlapping audio players with one reusable player per sound. Repeated presses restart that sound, avoiding stacked audio and the extra-player lag.
+- Added best-effort silence detection through the Web Audio analyser. When sustained near-silence is detected during playback, the player seeks forward in small 0.18-second steps; audible portions continue normally. If Web Audio analysis is unavailable, the sound still plays normally without silence skipping.
+- **HTML commit:** `383cc4ff334474ef01a6305eab99aaac21103dca`.
+- **Verification:** The updated HTML was committed to `Halloween`; the exact sound-helper replacement boundaries were checked before writing. Real browser/device playback, silence-threshold tuning, and lag/duplicate-audio behavior still need user testing.
+- **Rollback:** Revert HTML commit `383cc4ff334474ef01a6305eab99aaac21103dca` on `Halloween` only. Do not change `main` or `game-development`.
+
 ### 2026-10-21 — Allow overlapping sound effects
 - Changed sound playback to use a small reusable pool of up to 8 players per sound. A new press starts another instance over sounds already playing; completed players are reused. If all 8 are active, the oldest player is reused so rapid input cannot create an unlimited number of audio players.
 - **HTML commit:** `12c3fa783ae2547c0de531eef8cc7f3b0c0e1036`.
