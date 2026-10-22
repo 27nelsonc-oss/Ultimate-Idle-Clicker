@@ -507,7 +507,10 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
 #game-settings-panel.open{display:block}
 #game-settings-panel h3{margin:0 0 10px;color:#ffb347;font-size:1rem}
 #game-settings-audio-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
-#game-settings-audio-toggle{min-width:62px;margin:0;padding:6px 10px;background:#24150e;color:#fff;border:1px solid #ff7518;border-radius:7px;cursor:pointer}
+#game-settings-audio-toggle,#game-settings-mobile-toggle{min-width:62px;margin:0;padding:6px 10px;background:#24150e;color:#fff;border:1px solid #ff7518;border-radius:7px;cursor:pointer}
+#game-settings-mobile-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px}
+#mobile-click-button{display:none;position:fixed;right:16px;bottom:16px;z-index:8999;width:auto;min-width:112px;margin:0;padding:14px 18px;box-shadow:0 3px 14px #000b;touch-action:none}
+#mobile-click-button.enabled{display:block}
 @media(max-width:850px){#game-menu-button,#game-settings-button{font-size:.9rem;padding:8px 10px}}
 </style>
 </head>
@@ -553,7 +556,12 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
         <span>Goofy Audio</span>
         <button type="button" id="game-settings-audio-toggle" aria-pressed="false">Off</button>
     </div>
+    <div id="game-settings-mobile-row">
+        <span>Mobile button</span>
+        <button type="button" id="game-settings-mobile-toggle" aria-pressed="false">Off</button>
+    </div>
 </div>
+<button type="button" id="mobile-click-button" class="btn-main" aria-label="Mobile click button">CLICK!</button>
 
     <!-- Main Game Panel -->
     <div class="panel main-panel">
@@ -3481,6 +3489,38 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
             updateGameSoundSettingUI();
         });
         updateGameSoundSettingUI();
+
+        const MOBILE_BUTTON_SETTING_KEY = 'ultimateIdleClickerMobileButtonEnabled';
+        let MOBILE_BUTTON_ENABLED = false;
+        try {
+            MOBILE_BUTTON_ENABLED = localStorage.getItem(MOBILE_BUTTON_SETTING_KEY) === 'true';
+        } catch (error) {
+            // Keep the mobile button disabled by default if browser storage is unavailable.
+        }
+
+        function updateMobileButtonSettingUI() {
+            const toggle = document.getElementById('game-settings-mobile-toggle');
+            const button = document.getElementById('mobile-click-button');
+            if (toggle) {
+                toggle.textContent = MOBILE_BUTTON_ENABLED ? 'On' : 'Off';
+                toggle.setAttribute('aria-pressed', String(MOBILE_BUTTON_ENABLED));
+            }
+            if (button) button.classList.toggle('enabled', MOBILE_BUTTON_ENABLED);
+        }
+
+        document.getElementById('game-settings-mobile-toggle').addEventListener('click', () => {
+            MOBILE_BUTTON_ENABLED = !MOBILE_BUTTON_ENABLED;
+            try {
+                localStorage.setItem(MOBILE_BUTTON_SETTING_KEY, String(MOBILE_BUTTON_ENABLED));
+            } catch (error) {
+                // The setting still works for this page session if storage is unavailable.
+            }
+            updateMobileButtonSettingUI();
+        });
+        document.getElementById('mobile-click-button').addEventListener('click', () => {
+            performMainClick();
+        });
+        updateMobileButtonSettingUI();
 
         function playGameSound(soundName) {
             if (!GAME_SOUND_ENABLED) return;
