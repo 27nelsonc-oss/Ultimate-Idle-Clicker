@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### 2026-10-21 — Fix duplicate main-button clicks on mobile
+- Fixed the mobile touch fallback so the synthetic click after touch release is stopped for the main click button. This prevents one tap from triggering the main click handler and click sound twice, reducing unnecessary audio playback and duplicate click processing.
+- **HTML commit:** `153569a0d12bc6b003296fa7923371e886b6c89c`.
+- **Verification:** Source review confirmed the touchend fallback handles the main button directly and the subsequent synthetic click is now stopped during capture. Live mobile browser testing was not available.
+- **Rollback:** Revert the HTML commit on the `Halloween` branch only; no changes to `main` or `game-development`.
+
+
 ### 2026-10-21 — Add click and purchase sounds (Halloween branch)
 - Connected the Halloween game to the separate `Click 1.mp3` and `Purchase 2.mp3` files stored beside the HTML file. The click sound uses the shared main-click routine (including normal clicks, Space-key clicks, and Silent Clicking); the purchase sound plays only after a successful upgrade purchase.
 - Confirmed both MP3 files are present on the `Halloween` branch and that the HTML references their exact filenames. Audio volume is set to 45%.
