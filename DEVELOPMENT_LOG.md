@@ -1,3 +1,12 @@
+### 2026-10-21 — Prevent duplicate and stacked sound playback
+- **Issue:** The user reported that one main-button press still played the click sound twice and that rapid clicking caused performance problems after the previous mobile touch fix.
+- **Cause addressed:** The sound helper constructed a brand-new `Audio` object on every invocation and allowed very closely spaced duplicate requests to play. This could create overlapping audio players and extra playback work. The earlier touch fix only addressed one suspected mobile event path and did not address audio-player accumulation.
+- **Fix:** Reuse one audio player per sound; pause and rewind it before replaying so fast clicks do not stack multiple players. Ignore repeat calls for the same sound within 40 ms to suppress duplicate sound triggers from one interaction. This guard affects sound only, not click earnings or click-event handling.
+- **File:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`.
+- **Verification:** Re-fetched the current Halloween HTML and both MP3 assets; checked the updated helper in source. No live browser/device test was available, so the user's playback report is still needed to confirm the result.
+- **HTML commit:** `e9f410f393e008a785caca2da5eddd3e5a70a7a9`.
+- **Rollback:** Revert that HTML commit on `Halloween` only. Leave `main` and `game-development` untouched.
+
 ### 2026-10-21 — Fix duplicate mobile main-button click
 - **Issue:** On mobile, one tap could run the direct `touchend` main-button handler and then also let the browser's synthetic `click` reach the main-button listener. That caused duplicate click processing and could play the click audio twice.
 - **Fix:** In the document-level capture handler, stop propagation of the synthetic click only when the already-handled mobile target is `click-btn`. Other buttons retain the existing fallback behavior.
