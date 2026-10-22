@@ -3433,9 +3433,8 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
             const source = GAME_SOUND_DATA[soundName];
             if (!source) return;
 
-            // Reuse one preloaded player per sound. If it is already playing,
-            // skip this request instead of repeatedly seeking/restarting it.
-            // Game clicks still register normally; only overlapping audio is skipped.
+            // Reuse one preloaded player per sound. Seeking the existing player
+            // to the start restarts it on every request without creating extra players.
             let audio = GAME_SOUND_PLAYERS[soundName];
             if (!audio) {
                 audio = new Audio(source);
@@ -3444,8 +3443,11 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
                 GAME_SOUND_PLAYERS[soundName] = audio;
                 audio.load();
             }
-            if (!audio.paused && !audio.ended) return;
-            if (audio.ended) audio.currentTime = 0;
+            try {
+                audio.currentTime = 0;
+            } catch (error) {
+                // The player may not be seekable until the file is ready.
+            }
             audio.play().catch(() => {});
         }
 
