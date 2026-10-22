@@ -3110,9 +3110,14 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
         async function refreshCompanyMarket() {
             if (!supabaseClient || companyMarketRefreshInProgress || companyInvestmentInProgress) return;
             companyMarketRefreshInProgress = true;
+            const requestUserId = cloudUser?.id || null;
             try {
                 const { data, error } = await supabaseClient.rpc('company_market_snapshot');
                 if (error) throw error;
+                if ((cloudUser?.id || null) !== requestUserId) {
+                    setTimeout(() => refreshCompanyMarket(), 0);
+                    return;
+                }
                 renderCompanyMarket(data);
                 if (cloudUser && Number(data?.expired_refund_clicks || 0) > 0) {
                     setCompanyStatus('A timed-out investment was canceled. Reloading the refunded cloud progress.');
@@ -3507,6 +3512,8 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
             stopPlayerPresence();
             stopPlayerOnlineHeartbeat();
             cloudUser = null;
+            document.getElementById('company-market-my-value').textContent = '0 clicks';
+            document.getElementById('company-market-real-value').textContent = '0 clicks';
             currentUsername = '';
             dmUnreadCount = 0;
             playerListProfiles = [];
