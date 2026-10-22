@@ -1,3 +1,12 @@
+### 2026-10-22 — Company Market profit/loss shows current position only
+- **Branch:** `Halloween` only.
+- **Request:** Do not include gains/losses from previously withdrawn clicks in the current profit/loss display.
+- **Database change:** Replaced `public.company_market_snapshot()`. It walks the signed-in user's Company Market transaction history in timestamp/ID order, adds investment amounts to cost basis, and proportionally removes weighted-average cost basis on withdrawals. `net_profit_loss` is now current share value minus remaining cost basis; `total_invested` is returned as the remaining cost basis for the UI. No stored investment rows or transactions were changed.
+- **HTML change:** Renamed “Total clicks invested” to “Current investment cost” and updated the explanatory text to state that historical withdrawn gains/losses are excluded.
+- **Compatibility:** Kept existing RPC name and response keys; no schema migration was added. This relies on the transaction ledger having the user's investment and withdrawal history.
+- **Verification:** Supabase accepted the function replacement. Source patch is narrow and does not change game mechanics or saved player progress. Real signed-in browser test has not yet been performed.
+- **Rollback:** Restore the previous `company_market_snapshot()` definition from the preceding changelog entry, and revert the HTML/documentation commits for this change. Halloween branch only; do not touch `main` or `game-development`.
+
 ### 2026-10-22 — Keep Company Market profit/loss display in sync (Halloween branch)
 - **User request:** Fix the Overall profit/loss section because its displayed information appeared incorrect.
 - **Investigation:** The live `public.company_market_snapshot()` function returns `my_value`, `total_invested`, `total_withdrawn`, and `net_profit_loss = current share value + total_withdrawn - total_invested`. The withdrawal RPC increments `total_withdrawn` in the same transaction that adds the withdrawn clicks to the cloud save; the investment commit increments `total_invested`. This formula is consistent with nominal profit/loss including withdrawals.
