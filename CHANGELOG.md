@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### 2026-10-21 — Restore sound after silence-detection regression
+- Removed the experimental Web Audio silence detector after the user reported that sounds became completely silent. Restored straightforward playback using one reusable player per sound; repeat presses pause, rewind, and play that player.
+- **HTML commit:** `66376fc4e6974ffe8dee0f003253f39ae370b9e0`.
+- **Verification:** Re-fetched the updated HTML and checked that the silence detector and audio-player pool are absent, and that playback calls `audio.play().catch(() => {})`. Actual browser playback still needs user confirmation.
+- **Rollback:** Revert HTML commit `66376fc4e6974ffe8dee0f003253f39ae370b9e0` on `Halloween` only; do not change `main` or `game-development`.
+
 ### 2026-10-21 — Skip silent gaps in sound effects
 - Replaced the pool of up to 8 overlapping audio players with one reusable player per sound. Repeated presses restart that sound, avoiding stacked audio and the extra-player lag.
 - Added best-effort silence detection through the Web Audio analyser. When sustained near-silence is detected during playback, the player seeks forward in small 0.18-second steps; audible portions continue normally. If Web Audio analysis is unavailable, the sound still plays normally without silence skipping.
