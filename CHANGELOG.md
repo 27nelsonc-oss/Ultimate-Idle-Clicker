@@ -1,3 +1,11 @@
+### 2026-10-22 — Show current-position-only Company Market profit/loss
+- **Request/problem:** The user wants Company Market profit/loss to reflect only the currently held investment, not previously withdrawn gains or losses.
+- **Root cause:** The snapshot used cumulative total withdrawals minus cumulative investments, which reports lifetime realized plus unrealized profit/loss.
+- **Change:** Updated `company_market_snapshot()` to calculate the current position's cost basis from the player's investment/withdrawal transaction history. Each investment adds its cost; each withdrawal removes the same proportion of the position's weighted-average cost basis as the shares withdrawn. Profit/loss is now current share value minus remaining cost basis. The existing response field `total_invested` now represents current remaining cost basis for display. Renamed the UI metric to **Current investment cost** and clarified the note.
+- **Scope:** Supabase snapshot RPC and Halloween HTML only; no investment rows, clicks, share balances, or transaction history were modified.
+- **Verification:** Supabase accepted the function replacement. HTML source text was updated on Halloween; browser/account testing remains required to verify the display and transaction-history basis calculations.
+- **Rollback:** Restore the previous `company_market_snapshot()` definition from the 2026-10-22 changelog entry and revert the HTML commit listed in the follow-up verification. Do not change `main` or `game-development`.
+
 ### 2026-10-22 — Keep Company Market profit/loss display in sync
 - **Problem/request:** The personal Company Market investment values, including overall profit/loss, could remain stale after an investment or withdrawal when a refresh was already in progress.
 - **Cause:** `refreshCompanyMarket()` silently discarded refresh requests while another snapshot or investment was active. A refresh requested after a transaction could therefore be dropped if an older snapshot had not finished.
