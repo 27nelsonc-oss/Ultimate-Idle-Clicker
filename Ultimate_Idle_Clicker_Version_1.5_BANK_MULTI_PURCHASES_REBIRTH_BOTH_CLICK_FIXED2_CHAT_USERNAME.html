@@ -551,7 +551,7 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
     <h3>Settings</h3>
     <div id="game-settings-audio-row">
         <span>Goofy Audio</span>
-        <button type="button" id="game-settings-audio-toggle" aria-pressed="true">On</button>
+        <button type="button" id="game-settings-audio-toggle" aria-pressed="false">Off</button>
     </div>
 </div>
 
@@ -3445,11 +3445,11 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
         };
         const GAME_SOUND_PLAYERS = {};
         const GAME_SOUND_SETTING_KEY = 'ultimateIdleClickerGoofyAudioEnabled';
-        let GAME_SOUND_ENABLED = true;
+        let GAME_SOUND_ENABLED = false;
         try {
-            GAME_SOUND_ENABLED = localStorage.getItem(GAME_SOUND_SETTING_KEY) !== 'false';
+            GAME_SOUND_ENABLED = localStorage.getItem(GAME_SOUND_SETTING_KEY) === 'true';
         } catch (error) {
-            // Keep sounds enabled if browser storage is unavailable.
+            // Keep sounds disabled by default if browser storage is unavailable.
         }
 
         function updateGameSoundSettingUI() {
