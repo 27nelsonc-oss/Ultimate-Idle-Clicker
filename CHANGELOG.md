@@ -1,3 +1,11 @@
+### 2026-10-22 — Retry transient cloud-sync contention before company investments (Halloween branch)
+- Fixed the investment flow's handling of a cloud save/load already in progress: it now waits for the active operation and retries the guarded sync instead of immediately failing on a transient busy response.
+- If a genuine newer-cloud-save conflict is detected, the investment stops before reserving clicks and gives a specific instruction to load the latest cloud save. If cloud sync remains busy after retries, it gives a retry-later message. No unsafe overwrite or automatic discard of local progress was added.
+- Preserved investment reservation/commit protections and the existing market rules.
+- HTML commits: `c83bc4e195f8c6c38b96c9fb8ddd71eeea0e1901` (sync retry) and `ed92c7998e5ac60d35c4af6fd7dd604882fa00b4` (in-game Update Log).
+- Verification: source re-fetched; checked the guarded sync retries, conflict-specific messages, no-clicks-reserved wording, and in-game Update Log. Real browser investment test remains outstanding.
+- Rollback: revert `ed92c7998e5ac60d35c4af6fd7dd604882fa00b4`, then `c83bc4e195f8c6c38b96c9fb8ddd71eeea0e1901` on `Halloween` only. Do not change `main` or `game-development`.
+
 ### 2026-10-22 — Show personal Global Company investment cost and profit/loss (Halloween branch)
 - Added a personal **Total clicks invested** display alongside **Current investment value** and **Overall profit / loss**.
 - Profit/loss is calculated as current share value + clicks already withdrawn − total clicks invested, so partial withdrawals are included instead of making the comparison misleading.
