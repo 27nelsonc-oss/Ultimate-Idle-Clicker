@@ -1,3 +1,12 @@
+### 2026-10-22 — Show personal Global Company investment cost and profit/loss (Halloween branch)
+- **User request:** show what a player originally invested and the current value, so they can tell whether they are ahead or behind.
+- **HTML:** added rows for total clicks invested, current investment value, and overall profit/loss; positive results display green and negative results red. Updated the explanatory note. Logout clears the added personal values.
+- **Calculation:** `net_profit_loss = current share value + total_withdrawn - total_invested`. This correctly includes value already returned by partial/full withdrawals. The database already tracks cumulative `total_invested` and `total_withdrawn` per player.
+- **Supabase:** extended only the JSON response from `public.company_market_snapshot()` to return `total_invested`, `total_withdrawn`, and `net_profit_loss`. No tables/columns, policies, investment rules, or market calculations changed. Re-fetched the function definition and verified the fields/formula are present.
+- **HTML commit:** `b200a289065d53ad45d980b4e889e266a2db5132`.
+- **Testing:** source edits and backend function definition verified. No standalone-browser visual test or real-account invest/withdrawal test performed.
+- **Rollback:** revert HTML commit `b200a289065d53ad45d980b4e889e266a2db5132` on `Halloween`; separately restore the previous `company_market_snapshot()` function definition if the backend change must be undone. Do not change `main` or `game-development`.
+
 ### 2026-10-22 — Reduce failed Global Company investments (Halloween branch)
 - **User report:** other players are struggling to invest.
 - **Investigation:** Supabase logs showed repeated `company_commit_investment` errors: “Your cloud save changed while confirming.” The flow reserved clicks before opening the blocking prompt to name/replace a named save. A long prompt could leave the reservation pending while another tab/device changed the cloud save, causing the database's concurrency guard to reject the commit.
