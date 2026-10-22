@@ -1,3 +1,11 @@
+### 2026-10-22 — Prevent Company Market refresh timeouts
+- **Problem:** Company Market snapshots were failing with `canceling statement due to statement timeout`, leaving the market panel empty.
+- **Root cause confirmed in Supabase logs:** Concurrent snapshot requests queued on the single market-state row lock inside `company_advance_market()`; multiple requests timed out while waiting. The snapshot also includes a small transaction-history cost-basis calculation, but the logged stalls specifically included lock contention and other snapshot statements.
+- **Change:** Added a transaction-scoped PostgreSQL advisory try-lock at the start of `company_advance_market()`. If another request is already advancing the market, a competing request now skips that optional advance rather than waiting in line; it can still read the current snapshot state. This prevents refresh bursts from piling up behind the market-state row lock.
+- **Data safety:** No player investment rows, share balances, clicks, transaction history, or market history were deleted or rewritten.
+- **Verification:** Confirmed the advisory-lock guard is present in the live function. Called `company_market_snapshot()` with an 8-second statement timeout and it returned successfully. This smoke test had no authenticated player identity, so authenticated personal cost-basis display still needs in-game verification.
+- **Rollback:** Restore the previous `public.company_advance_market()` definition from the Supabase function history/logs if needed. Halloween branch only; do not change `main` or `game-development`.
+
 ### 2026-10-22 — Show current-position-only Company Market profit/loss
 - **Request/problem:** The user wants Company Market profit/loss to reflect only the currently held investment, not previously withdrawn gains or losses.
 - **Root cause:** The snapshot used cumulative total withdrawals minus cumulative investments, which reports lifetime realized plus unrealized profit/loss.
