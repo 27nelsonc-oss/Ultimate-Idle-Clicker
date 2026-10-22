@@ -1,3 +1,11 @@
+### 2026-10-21 — Allow overlapping sound effects
+- **Request:** The user wanted a fresh sound to begin on each press even when the previous instance had not finished, rather than restarting the same sound and cutting off its quiet gaps.
+- **Fix:** Use a reusable pool of up to 8 audio players per sound. Each request uses an idle/finished player or creates one until the pool is full, allowing sound instances to overlap. Once all players are busy, recycle the oldest player instead of growing the pool without limit.
+- **File:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`.
+- **Verification:** Source-level check confirms the overlap pool and cap are present. Actual browser/device audio and performance testing is still required.
+- **HTML commit:** `12c3fa783ae2547c0de531eef8cc7f3b0c0e1036`.
+- **Rollback:** Revert that HTML commit on `Halloween` only. Leave `main` and `game-development` untouched.
+
 ### 2026-10-21 — Restart sounds on every press
 - **Issue:** The prior lag-reduction behavior skipped click sounds whenever the player was already playing, so repeated presses did not each trigger a sound.
 - **Fix:** Keep one reusable preloaded audio player per sound, set its playback position to the beginning for each request, and call play again. This avoids allocating additional audio objects while allowing a new press to restart the current sound. A seek attempt is guarded for cases where the file is not yet seekable.
