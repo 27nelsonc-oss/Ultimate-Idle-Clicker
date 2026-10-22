@@ -499,9 +499,16 @@ body {
 body.game-entry-locked> :not(#game-entry-gate):not(script){visibility:hidden}body:not(.game-entry-locked):not(.game-menu-open) #game-entry-gate{display:none}
 body.game-menu-open #game-entry-gate{display:flex}body.game-menu-open #game-entry-auth,body.game-menu-open #game-entry-loading{display:none!important}
 #game-menu-resume{display:none}body.game-menu-open #game-menu-resume{display:block}
-#game-menu-button{display:none;position:fixed;top:8px;right:8px;z-index:9000;width:auto;min-width:76px;margin:0;padding:9px 12px;background:#24150e;color:#fff;border:1px solid #ff7518;border-radius:8px;box-shadow:0 2px 10px #0009}
-body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:block}
-@media(max-width:850px){#game-menu-button{font-size:.9rem;padding:8px 10px}}
+#game-menu-button,#game-settings-button{display:none;position:fixed;right:8px;z-index:9000;width:auto;min-width:76px;margin:0;padding:9px 12px;background:#24150e;color:#fff;border:1px solid #ff7518;border-radius:8px;box-shadow:0 2px 10px #0009}
+#game-menu-button{top:8px}
+#game-settings-button{top:52px}
+body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.game-entry-locked):not(.game-menu-open) #game-settings-button{display:block}
+#game-settings-panel{display:none;position:fixed;top:96px;right:8px;z-index:9001;width:min(270px,calc(100vw - 24px));box-sizing:border-box;padding:12px;background:#1b1714;color:#fff;border:1px solid #ff7518;border-radius:9px;box-shadow:0 3px 14px #000b}
+#game-settings-panel.open{display:block}
+#game-settings-panel h3{margin:0 0 10px;color:#ffb347;font-size:1rem}
+#game-settings-audio-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+#game-settings-audio-toggle{min-width:62px;margin:0;padding:6px 10px;background:#24150e;color:#fff;border:1px solid #ff7518;border-radius:7px;cursor:pointer}
+@media(max-width:850px){#game-menu-button,#game-settings-button{font-size:.9rem;padding:8px 10px}}
 </style>
 </head>
 <body class="game-entry-locked">
@@ -539,6 +546,14 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
 </div></details>
 </div></div></div>
 <button type="button" id="game-menu-button" aria-label="Open game menu">☰ Menu</button>
+<button type="button" id="game-settings-button" aria-label="Open game settings" aria-expanded="false">⚙ Settings</button>
+<div id="game-settings-panel" aria-label="Game settings">
+    <h3>Settings</h3>
+    <div id="game-settings-audio-row">
+        <span>Goofy Audio</span>
+        <button type="button" id="game-settings-audio-toggle" aria-pressed="true">On</button>
+    </div>
+</div>
 
     <!-- Main Game Panel -->
     <div class="panel main-panel">
@@ -3429,8 +3444,46 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
             purchase: 'Purchase%202.mp3'
         };
         const GAME_SOUND_PLAYERS = {};
+        const GAME_SOUND_SETTING_KEY = 'ultimateIdleClickerGoofyAudioEnabled';
+        let GAME_SOUND_ENABLED = true;
+        try {
+            GAME_SOUND_ENABLED = localStorage.getItem(GAME_SOUND_SETTING_KEY) !== 'false';
+        } catch (error) {
+            // Keep sounds enabled if browser storage is unavailable.
+        }
+
+        function updateGameSoundSettingUI() {
+            const toggle = document.getElementById('game-settings-audio-toggle');
+            if (!toggle) return;
+            toggle.textContent = GAME_SOUND_ENABLED ? 'On' : 'Off';
+            toggle.setAttribute('aria-pressed', String(GAME_SOUND_ENABLED));
+        }
+
+        document.getElementById('game-settings-button').addEventListener('click', () => {
+            const panel = document.getElementById('game-settings-panel');
+            const open = !panel.classList.contains('open');
+            panel.classList.toggle('open', open);
+            document.getElementById('game-settings-button').setAttribute('aria-expanded', String(open));
+        });
+        document.getElementById('game-settings-audio-toggle').addEventListener('click', () => {
+            GAME_SOUND_ENABLED = !GAME_SOUND_ENABLED;
+            try {
+                localStorage.setItem(GAME_SOUND_SETTING_KEY, String(GAME_SOUND_ENABLED));
+            } catch (error) {
+                // The setting still works for this page session if storage is unavailable.
+            }
+            if (!GAME_SOUND_ENABLED) {
+                Object.values(GAME_SOUND_PLAYERS).forEach(audio => {
+                    audio.pause();
+                    try { audio.currentTime = 0; } catch (error) {}
+                });
+            }
+            updateGameSoundSettingUI();
+        });
+        updateGameSoundSettingUI();
 
         function playGameSound(soundName) {
+            if (!GAME_SOUND_ENABLED) return;
             const source = GAME_SOUND_DATA[soundName];
             if (!source) return;
 
