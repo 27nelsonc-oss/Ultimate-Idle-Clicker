@@ -1,3 +1,11 @@
+### 2026-10-21 — Fix duplicate mobile main-button click
+- **Issue:** On mobile, one tap could run the direct `touchend` main-button handler and then also let the browser's synthetic `click` reach the main-button listener. That caused duplicate click processing and could play the click audio twice.
+- **Fix:** In the document-level capture handler, stop propagation of the synthetic click only when the already-handled mobile target is `click-btn`. Other buttons retain the existing fallback behavior.
+- **File:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`.
+- **Verification:** Checked the exact event flow and confirmed the change is limited to the duplicate main-button synthetic click. Live mobile playback/performance testing was not available.
+- **HTML commit:** `153569a0d12bc6b003296fa7923371e886b6c89c`.
+- **Rollback:** Revert that HTML commit on `Halloween` only. `main` and `game-development` were not changed.
+
 ### 2026-10-21 — Add click and purchase sounds on Halloween
 - **Request:** Play `Click 1.mp3` on each main-button click path and `Purchase 2.mp3` when an upgrade purchase succeeds.
 - **Change made:** The game uses relative asset paths beside the HTML file. The shared `performMainClick()` routine plays the click sound, covering normal button clicks, Space-key clicks, and each Silent Clicking action. Eight upgrade purchase functions play the purchase sound only when at least one upgrade was bought. Audio volume is 45%.
