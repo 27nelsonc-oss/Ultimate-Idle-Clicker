@@ -1,3 +1,11 @@
+### 2026-10-22 — Match company collapse buttons to Titles panel (Halloween branch)
+- Restyled both Global Company minimize controls to match the My Titles panel: compact fixed 28×28 square buttons with the same border, background, radius, and typography.
+- Replaced the word labels with a minus sign when expanded and plus sign when minimized, with matching accessible labels and hover titles.
+- Preserved independent collapse behavior and existing panel/layout placement.
+- **HTML commit:** `4b323ac7ecf919c78c5e79c449a471562ace836d`.
+- **Verification:** Source checks confirmed both button IDs occur once, both handlers toggle minus/plus, accessible labels are present, and the Global Company remains above the Bank. No browser visual test performed.
+- **Rollback:** Revert HTML commit `4b323ac7ecf919c78c5e79c449a471562ace836d` on `Halloween` only. Do not change `main` or `game-development`.
+
 ### 2026-10-22 — Add Global Company Market collapse controls (Halloween branch)
 - Added a compact **Minimize/Expand** control to the Global Company heading. It hides or restores the market status, stats, chart, personal investment values, and investment/withdrawal controls while leaving the panel heading available.
 - Added an independent **Minimize/Expand** control for the Market activity section. It hides or restores Recent market events, public transaction summaries, and owner company controls together.
