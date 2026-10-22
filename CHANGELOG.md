@@ -2,11 +2,13 @@
 
 ## Unreleased
 
-### 2026-10-21 — Game sound hookup preparation (Halloween branch)
-- Replaced unreliable embedded audio data with relative paths for the separate sound assets: `Click 1.mp3` and `Purchase 2.mp3`.
-- Main-click sound is called from the shared click routine; upgrade sound is called when an upgrade purchase succeeds.
-- **Pending:** the two MP3 assets must be added to the Halloween branch at those paths before sounds can be verified in-game.
-- **HTML commit:** `d69369d45e05e37a51915629df96d47292aac03b`.
+### 2026-10-21 — Add click and purchase sounds (Halloween branch)
+- Connected the Halloween game to the separate `Click 1.mp3` and `Purchase 2.mp3` files stored beside the HTML file. The click sound uses the shared main-click routine (including normal clicks, Space-key clicks, and Silent Clicking); the purchase sound plays only after a successful upgrade purchase.
+- Confirmed both MP3 files are present on the `Halloween` branch and that the HTML references their exact filenames. Audio volume is set to 45%.
+- **Verification:** Source-level checks confirmed one shared click-sound call and eight successful-purchase sound call sites. No live browser playback test was available, so actual playback still needs user testing.
+- **HTML commit:** `44a2b9f5619830ef94cd07c845ffe8a41ef531ab`.
+- **Assets:** `Click 1.mp3` (`b97a800fc132a0911cdfa1ec7d27bbd122d0e23e`); `Purchase 2.mp3` (`0ccf5eb7486a00828d845db8cfde66e5e3bd1332`).
+- **Rollback:** Revert the HTML commit on `Halloween`; leave both MP3 assets in place if reverting only the source comment. No changes to `main` or `game-development`.
 
 ### 2026-10-21 — Upgrade announcements into a long-term notice board
 - Increased announcement text size and redesigned the panel with warm, pinned-notice styling to distinguish persistent notices from temporary gameplay messages.
