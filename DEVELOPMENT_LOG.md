@@ -1,3 +1,11 @@
+### 2026-10-22 — Match company collapse buttons to Titles panel (Halloween branch)
+- **Request:** make the Global Company and Market activity minimize buttons look like the existing My Titles minimize button.
+- **Changes:** changed the company button CSS to the same compact fixed 28×28 square treatment used by `.titles-panel-heading .titles-minimize-btn` (inline-flex, fixed dimensions, padding 0, #65452f border, #35251c background, 6px radius, inherited text color, bold 1rem glyph). Both controls now display `−` while expanded and `+` while collapsed. Updated aria-label and title attributes with the current action.
+- **Preserved:** collapse content and handlers, investment/market logic, and panel placement. No database changes.
+- **HTML commit:** `4b323ac7ecf919c78c5e79c449a471562ace836d`.
+- **Verification:** source checks confirmed unique toggle IDs, plus/minus state updates, accessible labels, and Global Company placement above Bank. Real-browser appearance/clicking remains untested.
+- **Rollback:** revert `4b323ac7ecf919c78c5e79c449a471562ace836d` on `Halloween` only; do not change `main` or `game-development`.
+
 ### 2026-10-22 — Add Global Company Market collapse controls (Halloween branch)
 - **Request:** allow players to minimize the entire Global Company panel and independently minimize Recent market events plus the company-related content below it.
 - **HTML changes:** added `#company-market-toggle` outside `#company-market-content` so the heading stays visible when the main contents are collapsed. Added `#company-market-activity-toggle` for the combined `#company-market-activity-content` wrapper, which contains recent events, anonymized transaction summaries, and owner controls. Both controls update `aria-expanded` and their button labels. Both sections default to expanded. Added scoped CSS for compact controls and an explicit `[hidden]` rule so the activity wrapper's display style cannot override the collapsed state.
