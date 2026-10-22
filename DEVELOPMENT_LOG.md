@@ -1,3 +1,12 @@
+### 2026-10-21 — Reduce lag from rapid sound playback
+- **Issue:** After the duplicate-sound fix, the user reported severe game lag.
+- **Cause addressed:** The helper paused, rewound, and restarted the same audio element on every accepted click. Doing those operations repeatedly during rapid clicking can cause expensive audio work.
+- **Fix:** Keep one preloaded audio player per sound. If the player is already playing, skip another playback request rather than seeking/restarting or overlapping it. The click handler and earned clicks are unchanged; only sound requests during an existing playback are skipped.
+- **File:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`.
+- **Verification:** Source review confirmed the repeated pause/rewind/play path is removed and the reusable player is loaded once. Device/browser performance is not directly testable here; user confirmation is still required.
+- **HTML commit:** `e41bd38d9d1702313067922e0919ba7871147a44`.
+- **Rollback:** Revert that HTML commit on `Halloween` only. Leave `main` and `game-development` untouched.
+
 ### 2026-10-21 — Prevent duplicate and stacked sound playback
 - **Issue:** The user reported that one main-button press still played the click sound twice and that rapid clicking caused performance problems after the previous mobile touch fix.
 - **Cause addressed:** The sound helper constructed a brand-new `Audio` object on every invocation and allowed very closely spaced duplicate requests to play. This could create overlapping audio players and extra playback work. The earlier touch fix only addressed one suspected mobile event path and did not address audio-player accumulation.
