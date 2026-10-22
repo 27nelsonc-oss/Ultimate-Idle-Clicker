@@ -1,3 +1,10 @@
+### 2026-10-21 — Restore sound after silence-detection regression
+- **Report:** User said all game sounds became silent after the experimental silence detector was added.
+- **Fix:** Removed Web Audio analyser routing and the silence-skipping monitor. Restored one reusable audio player per sound, with each request pausing, rewinding, and replaying it. This prioritizes restoring audible sound and avoids overlapping player pools; automatic silence skipping is temporarily disabled.
+- **Verification:** HTML commit succeeded on `Halloween`. A source check should confirm the Web Audio analyser code is absent and the normal `audio.play()` path remains. Real browser/device sound playback still needs user confirmation.
+- **HTML commit:** `66376fc4e6974ffe8dee0f003253f39ae370b9e0`.
+- **Rollback:** Revert that HTML commit on the `Halloween` branch only. Do not change `main` or `game-development`.
+
 ### 2026-10-21 — Skip silent gaps in sound effects
 - **Request:** Skip silent parts during playback without editing/trimming the MP3 files, while avoiding the lag and doubled audio caused by overlapping player pools.
 - **Implementation:** In `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`, restored one reusable audio player per sound. A new request restarts the matching player from the beginning. Added a Web Audio analyser to detect sustained near-silence (RMS below 0.012 for at least 100 ms); during such gaps it seeks forward in 0.18-second increments. The analyser is set up lazily, and playback falls back to normal if Web Audio analysis is unavailable.
