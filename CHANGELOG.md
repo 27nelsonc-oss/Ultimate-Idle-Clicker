@@ -1,3 +1,9 @@
+### 2026-10-21 — Prevent sound effects from restarting before they finish
+- Changed click and purchase sound playback so a sound already playing ignores additional requests until it finishes. Each sound still uses one reusable audio player; no overlap, restart, silence detection, or player pool.
+- **HTML commit:** 066d61f714558941f078354d18c2969cbb3b2ec2.
+- **Verification:** Confirmed the prior sound helper matched before editing and the update committed on `Halloween`. Source-level behavior checked; actual browser playback still needs user confirmation.
+- **Rollback:** Revert HTML commit `066d61f714558941f078354d18c2969cbb3b2ec2` on `Halloween` only. Do not change `main` or `game-development`.
+
 # Ultimate Idle Clicker — Changelog
 
 ## Unreleased
