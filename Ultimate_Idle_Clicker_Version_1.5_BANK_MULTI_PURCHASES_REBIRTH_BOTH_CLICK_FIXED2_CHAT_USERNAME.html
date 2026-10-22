@@ -517,6 +517,12 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
 <style>
 /* Global Company Market — Halloween branch */
 .company-market-panel { width:min(92%,320px); max-width:320px; box-sizing:border-box; margin:0 auto; border:1px solid #8f4a1b; }
+.company-market-panel .company-panel-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.company-market-panel .company-panel-heading .section-title { margin:0; min-width:0; }
+.company-market-panel .company-collapse-btn { flex:0 0 auto; padding:5px 8px; margin:0; border:1px solid #8f4a1b; border-radius:6px; background:#24170f; color:#ffbd75; font-size:.72rem; cursor:pointer; }
+.company-market-panel .company-collapse-btn:hover { background:#3a2113; }
+.company-market-panel .company-market-activity-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.company-market-panel #company-market-activity-content { display:block; }
 .company-market-panel .company-stat-row { display:flex; justify-content:space-between; gap:8px; margin:5px 0; align-items:baseline; }
 .company-market-panel .company-stat-value { text-align:right; font-weight:700; color:#ffbd75; overflow-wrap:anywhere; }
 .company-market-panel .company-market-chart { width:100%; height:78px; display:block; margin:8px 0; border:1px solid #4a2a1b; border-radius:6px; background:#100d0b; }
@@ -545,6 +551,7 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
 <strong>Latest update — October 22, 2026</strong>
 <ul>
 <li>Added the Global Company Market above the Bank in the Halloween version. The company starts with player investments only and has no artificial starting capital.</li>
+<li>Added separate minimize/expand controls for the entire Global Company panel and for Recent market events, transaction summaries, and owner controls beneath it.</li>
 <li>Added a shared high-risk market with unpredictable booms, downturns, severe crashes, continuously changing investment values, inflation, an index history chart, recent market events, and anonymized public transaction summaries.</li>
 <li>Investments reserve clicks securely and require creating or updating the player's named save to confirm. Canceling the named-save flow cancels the pending investment and returns the reserved clicks.</li>
 <li>Added partial and full withdrawals at current market value, plus owner-only emergency controls to reset market conditions while preserving nominal investment values, add inflation, trigger a drop of up to 90%, and pause or resume market movement.</li>
@@ -766,7 +773,11 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
     <div class="left-sidebar">
 
     <div class="panel company-market-panel" id="company-market-panel">
-        <h2 class="section-title">📈 Global Company</h2>
+        <div class="company-panel-heading">
+            <h2 class="section-title">📈 Global Company</h2>
+            <button type="button" class="company-collapse-btn" id="company-market-toggle" aria-expanded="true" aria-controls="company-market-content">Minimize</button>
+        </div>
+        <div id="company-market-content">
         <div class="sub-stat" id="company-market-status" aria-live="polite">Connecting to the global market...</div>
         <div class="sub-stat" style="font-size:.76rem;">Player-funded only · no artificial starting capital</div>
         <div class="company-stat-row"><span>Market index</span><span class="company-stat-value" id="company-market-index">100.00</span></div>
@@ -786,6 +797,11 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
             <button type="button" class="btn-upgrade" id="company-market-withdraw-btn">Withdraw amount</button>
             <button type="button" class="btn-upgrade company-withdraw-all" id="company-market-withdraw-all-btn">Withdraw all</button>
         </div>
+        <div class="company-market-subsection company-market-activity-heading">
+            <strong style="color:#ffbd75;font-size:.88rem;">Market activity</strong>
+            <button type="button" class="company-collapse-btn" id="company-market-activity-toggle" aria-expanded="true" aria-controls="company-market-activity-content">Minimize</button>
+        </div>
+        <div id="company-market-activity-content">
         <div class="company-market-subsection">
             <strong style="color:#ffbd75;font-size:.88rem;">Recent market events</strong>
             <div id="company-market-events" class="company-market-list">No major events yet.</div>
@@ -807,6 +823,8 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
             </div>
             <div class="sub-stat" id="company-admin-status" style="margin-top:6px;"></div>
         </details>
+        </div>
+        </div>
     </div>
 
     <!-- Bank Panel -->
@@ -5169,6 +5187,25 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
         updateUI();
         initializeCloudSave();
         initializeCompanyMarket();
+
+        // Keep the whole company panel and its lower activity sections independently collapsible.
+        const companyPanelToggle = document.getElementById('company-market-toggle');
+        const companyPanelContent = document.getElementById('company-market-content');
+        companyPanelToggle?.addEventListener('click', () => {
+            const isExpanded = companyPanelToggle.getAttribute('aria-expanded') === 'true';
+            companyPanelToggle.setAttribute('aria-expanded', String(!isExpanded));
+            companyPanelToggle.textContent = isExpanded ? 'Expand' : 'Minimize';
+            if (companyPanelContent) companyPanelContent.hidden = isExpanded;
+        });
+        const companyActivityToggle = document.getElementById('company-market-activity-toggle');
+        const companyActivityContent = document.getElementById('company-market-activity-content');
+        companyActivityToggle?.addEventListener('click', () => {
+            const isExpanded = companyActivityToggle.getAttribute('aria-expanded') === 'true';
+            companyActivityToggle.setAttribute('aria-expanded', String(!isExpanded));
+            companyActivityToggle.textContent = isExpanded ? 'Expand' : 'Minimize';
+            if (companyActivityContent) companyActivityContent.hidden = isExpanded;
+        });
+
         loadAdminAbuseSettings();
         setInterval(loadAdminAbuseSettings, 5000);
 
