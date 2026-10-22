@@ -1,3 +1,9 @@
+### 2026-10-21 — Default Goofy Audio to Off
+- Changed Goofy Audio to start Off unless the player has explicitly saved an On preference in this browser. The Settings toggle also initially displays Off, and browser-storage failure safely leaves audio disabled.
+- **HTML commit:** fec24a0d4d13c89d0fcc2ac07a9b2d36907f3a6f.
+- **Verification:** Confirmed the expected default-setting code and initial toggle markup before editing; follow-up fetch checks pending. Browser testing still needs user confirmation.
+- **Rollback:** Revert HTML commit `fec24a0d4d13c89d0fcc2ac07a9b2d36907f3a6f` on `Halloween` only. Do not change `main` or `game-development`.
+
 ### 2026-10-21 — Add Goofy Audio setting
 - Added a fixed Settings button directly beneath the Menu button so both stay anchored to the screen. Settings opens a compact panel with a Goofy Audio On/Off toggle.
 - Turning Goofy Audio off prevents new click/purchase sounds and stops any sound currently playing. The preference is saved in this browser using localStorage and defaults to On.
