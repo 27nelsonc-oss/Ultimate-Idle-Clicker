@@ -1,3 +1,12 @@
+### 2026-10-22 — Keep Company Market profit/loss display in sync
+- **Problem/request:** The personal Company Market investment values, including overall profit/loss, could remain stale after an investment or withdrawal when a refresh was already in progress.
+- **Cause:** `refreshCompanyMarket()` silently discarded refresh requests while another snapshot or investment was active. A refresh requested after a transaction could therefore be dropped if an older snapshot had not finished.
+- **Change:** Added a small queued-refresh flag. Requests made during a transaction or another refresh now trigger a follow-up snapshot as soon as safe, so the displayed invested amount, current value, and overall profit/loss are refreshed together. The existing profit/loss formula remains `current share value + cumulative withdrawals - cumulative investments`.
+- **Files:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`
+- **Verification:** GitHub source updated and re-fetched; source checks confirmed a single refresh function, queued requests during contention, and a follow-up refresh after the active request finishes. No live browser or authenticated investment/withdrawal test was performed.
+- **HTML commit:** `5321933a2558ab309343b91647d0baf7bd5d1df6`.
+- **Rollback:** Revert `5321933a2558ab309343b91647d0baf7bd5d1df6` on `Halloween` only. Do not change `main` or `game-development`.
+
 ### 2026-10-22 — Retry transient cloud-sync contention before company investments (Halloween branch)
 - Fixed the investment flow's handling of a cloud save/load already in progress: it now waits for the active operation and retries the guarded sync instead of immediately failing on a transient busy response.
 - If a genuine newer-cloud-save conflict is detected, the investment stops before reserving clicks and gives a specific instruction to load the latest cloud save. If cloud sync remains busy after retries, it gives a retry-later message. No unsafe overwrite or automatic discard of local progress was added.
