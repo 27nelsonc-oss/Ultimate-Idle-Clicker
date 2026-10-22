@@ -3,7 +3,7 @@
 ## Unreleased
 
 ### 2026-10-21 — Game sound hookup preparation (Halloween branch)
-- Replaced unreliable embedded audio data with relative paths for the separate sound assets: `sounds/Click 1.mp3` and `sounds/Purchase 2.mp3`.
+- Replaced unreliable embedded audio data with relative paths for the separate sound assets: `Click 1.mp3` and `Purchase 2.mp3`.
 - Main-click sound is called from the shared click routine; upgrade sound is called when an upgrade purchase succeeds.
 - **Pending:** the two MP3 assets must be added to the Halloween branch at those paths before sounds can be verified in-game.
 - **HTML commit:** `d69369d45e05e37a51915629df96d47292aac03b`.
