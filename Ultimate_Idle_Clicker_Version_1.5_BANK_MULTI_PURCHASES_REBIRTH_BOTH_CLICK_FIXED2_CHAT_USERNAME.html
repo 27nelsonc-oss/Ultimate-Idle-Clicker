@@ -3423,6 +3423,19 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
             return Number.isFinite(value) && value > 0 ? Math.min(value, 100000) : 1;
         }
 
+        // Short embedded sounds keep the downloaded game as a single self-contained HTML file.
+        const GAME_SOUND_DATA = {
+            click: 'data:audio/mpeg;base64,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',
+            purchase: 'data:audio/mpeg;base64,SUQzBAAAAAACDFRYWFgAAAASAAADbWFqb3JfYnJhbmQATTRBIABUWFhYAAAAEQAAA21pbm9yX3ZlcnNpb24AMABUWFhYAAAAIAAAA2NvbXBhdGlibGVfYnJhbmRzAE00QSBpc29tbXA0MgBUWFhYAAAAfwAAA2lUdW5TTVBCACAwMDAwMDAwMCAwMDAwMDg0MCAwMDAwMDNDMCAwMDAwMDAwMDAwMDA4MDAwIDAwMDAwMDAwIDAwMDAwMDAwIDAwMDAwMDAwIDAwMDAwMDAwIDAwMDAwMDAwIDAwMDAwMDAwAFRTU0UAAAAOAAADTGF2ZjYxLjcuMTAzAAAAAAAAAAAAAAD/83DAAAAAAAAAAAAASW5mbwAAAA8AAAAdAAAJlwAbGxsjIyMrKysrMzMzOzs7O0NDQ0xMTExUVFRcXFxcZGRkbGxsdXV1dX19fYWFhYWNjY2VlZWVnZ2dpqampq6urra2tr6+vr7GxsbOzs7O19fX39/f3+fn5+/v7+/39/f///8AAAAATGF2YzYxLjE5AAAAAAAAAAAAAAAAJAQzAAAAAAAACZdgui3KAAAAAAAAAAAAAAAAAP/zMMQADOiODABKUkwdDe6QMaIBwwF1hQ4jJ0bYjDagfFwQB8TCwGCN6+4kwD5ATh9QEAY6CYg4R5So4GP///9CV50Awx5nOzKVBJSC2P/zMsQNDsjCPAFPSACcisdICcQyHIbhiYIPOXxfG6EB44VNM0QMN3JBDUmlGBOfLpaMDC5M0p8OOEn0VVSqrvl+oWFFVSDDkRN32uaJv6H/8zDEExKaTqQBh2gBTZBzIef03TTn6zv+mcJQFfC9lNZWYrHKUxkE7/p6DboGhueTWbmaRz///ZN+XE1l8vmJamORQYqSRJyJsFxwAdD/8zLECRERrvpfzBACMJyeT0hYKgH4zhZTKd1/7dyZzqf9TnO5IRkT/////bYIUJI9dUojlKGDhFEwCJUGVlqiRVNZwGUFT2Xq/l/aHZfZ//MwxAYOsM8qeFvMEi7gXFBKSh3hcGkhxMCZqAVxjiJxrJ5tBL1XvLuXqmPKKLJFO78s8wXBMm1KAGat+/9MYIJyAPSgEBUAD5MNAQSR//MwxAwRgMbJt08YAB9ryWflQKU+NJ3CznNfmutfRBhyh/xqCAmAni9EjRp0rEqzwNKfWZvEpU6JeVcsSrOiz/GiDU4E0AMgsYmT5r77//MyxAcPAlagAY8oADilbZ9dY0wkrOaY/I+7bJ02Dlf8UZvQis/7kqJu5/qn7/OOcUBxAUJ009O//s45yK7CgmcUd/HsHn80wtBu4CiMnv/zMMQNEcpW1MmDGACnsf///9fpB/iP+7ctA7Ml39OrDY8jX/8SZJ3qRHGdxyI+ggC2J4unnTfmCV/BBkt+mLjFIqCnf1/11VNDOImnOP/zMMQGD6DC4xvGGABSMG5Mog5NiFEFH7CA2MySEPBeJC933uFLzowMSwbNpUuNSaDw460Enul2WTNkTTz0bMqtwi51GVWWxGygQj91yf/zMsQIDpjSzlDKxHAywBIl/S8p2hvq+wBGBZi0gsICoE2g4sprbpx2dHr0wxAYABsQ4Q4oat9oP2Pb/9IEXUrv1uIDfvU2SBr6iZgFIdr/8zDEDw3BnuWwwkRubiKoWRjYc/AU3XIfVNkUNZerfpwv/3qZtMrVKbPqM9C3NzZW0HKSk0AKVbAC3rOlS11kOObq4H9Z6Twlv0uEvRT/8zLEGQ2JDsZQekSkBqtKlxTYvR9HwbGl/VNTVcTUeJPGyWp3epgJgI1VgQkCssYkMQK+u5hDFvJZI0hLaZnyru+qEnSGtzVmxXCaKofZ//MwxCQN0Qqo8MpKpO5pQZdNOVrmeUAWWd1St/ytkNJVIBhaske1xeQKo1N0Eb1VMD0t2UUbfypHfudjMfED41VhHhqAgCiC7W/E8Q9e//MwxC0NiUK6WHlEyIexax33fWwqhKpEGKv25L7MIKM8bdA7zsjwZOBOG+3KWW0rqhkmF9VZAg6w7wVz3av86UZENzvup3FiIgk/WgyF//MyxDcOSULKOHsKaorMVUAa25bndvpvAeTz1gWr7bS2K1sGyEoYVLTm0zLV6m/h0wR2eXWwxnwQ+Xu+mjZOSlV3X5v+RXoNnFOqrSl6jP/zMMQ/Domutlh6xJRthJaQRMBgxW/oSxTVipKfVi7w9xmWlIVVKTo9QxlXiKZtn/EQkuRQjil/9QcGgu+Ju6y3W3b5bBdlj0Fi1psLmv/zMMRFDQDykADLymyvBnhNKt0iXdJg3ypEHPlPKM0DmYcLOrctuSIEpF4XtpT6yoTB8ikAggbsuh0yXR9F+npAFLf3ZeOJUsPPClxrMf/zMsRSDgC+4lh40MYY9WIBZrDLn2xPqXYLuKw/tqmEA+IUMQTWG7P8bBgAqgAMpdrdmOpWVZw7qsmRC91WFjohCAK/tCaPajKlaJoEbAn/8zDEXA5w6o1oykSottWnBk/duyzNvobjtQx7tmCTxV5OaTrbltkt3RnDFNfWVFTv0kFggESuHNn6+/aZy72AdDb+Zdy0L6srVfLqXuX/8zDEYw2xPqo4wwRoerfQKfAv9rgKJCyaAL/5h9LgUsRnnAPZc0FNODyYsGSZM2KJSamzOX1n1L1vfyq0jKazqkf5arVXCjYK/UVFgZL/8zLEbQ3hOtZYeYR6Is/VCEAuN2UACBgCwCEWK+omGMwwMY0AJGSJjIPSiClPMGtVzRYRpHVmyLMWoLkjhN77yaUtabSgs6O224qwuHAB//MwxHcN+T6QUMGGNF+hHFApyS2gDxeTR/BCgVbEGPpD2CqeUfeH4jbldCKg/F5JdM0a6xj01Bofe0XPvacDK0oJiBPbW6YJvYmIj54X//MyxIAQMPaNnmPGADLBbfFUPGNNKgTtPgFwFQAQUSOp2JaJAIkpKscgIVQwEK9v41X/WMfVKf1UAjIyzyPBUNArWGvwqd4VyoiLcs+dR//zMMSBEcj2jZ55hjzqUF46BnCCBUbSJsT5oJKrgsjsKA6NGtFVkeKXSJA8u+zflL3fYmNrbPQS8IyDQ4fGjXAH/uplZlgtGIKliFW3FP/zMMR6DoD2dNQphgzgjZaANydBuKwVJQJrPIC1vIEVEFYkqRc6D5gsaGtQmmFBzSVuN0l/LFyiKqM1eEv6zQCoOeD/49uQih1GUznTkv/zMsSBDSDGGABj2ERzkjNxcDKu4XuMUZK2CETkfonDCPQFAMcouy4sxD3arSVAViz96VRouJSJtDqrJEfQ5kknxhHA25lKgZFUrJUJOkX/8zDEjg4Y5gwAek0B6AFIJAVB4LQsHskE8XCKOQ8icQx4HMkAA7e5IQqFhCDwHg4IxQJxMKREVOFyi6pMQU1FMy4xMDCqqqqqqqqqqqr/8zDElhLA5dwAxlJZqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr/8zLEjA4I1LjoYJLgqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq'
+        };
+        function playGameSound(soundName) {
+            const source = GAME_SOUND_DATA[soundName];
+            if (!source) return;
+            const audio = new Audio(source);
+            audio.volume = 0.45;
+            audio.play().catch(() => {});
+        }
+
         function buyClickUpgrades(quantity) {
             let bought = 0;
             for (let i = 0; i < quantity; i++) {
@@ -3433,6 +3446,7 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
                 game.totalUpgradesBought += 1;
                 bought++;
             }
+            if (bought > 0) playGameSound('purchase');
             return bought;
         }
 
@@ -3445,6 +3459,7 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
                 game.autoClickers += 1;
                 bought++;
             }
+            if (bought > 0) playGameSound('purchase');
             return bought;
         }
 
@@ -3455,6 +3470,7 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
                 if (game.clicks < cost) break;
                 game.clicks -= cost; game.overclockLevel += 1; bought++;
             }
+            if (bought > 0) playGameSound('purchase');
             return bought;
         }
 
@@ -3465,6 +3481,7 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
                 if (game.clicks < cost) break;
                 game.clicks -= cost; game.autoAcceleratorLevel += 1; bought++;
             }
+            if (bought > 0) playGameSound('purchase');
             return bought;
         }
 
@@ -3475,6 +3492,7 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
                 if (game.clicks < cost) break;
                 game.clicks -= cost; game.clickOverdriveLevel += 1; bought++;
             }
+            if (bought > 0) playGameSound('purchase');
             return bought;
         }
 
@@ -3485,6 +3503,7 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
                 if (game.gems < cost) break;
                 game.gems -= cost; game.clickerStationLevel += 1; bought++;
             }
+            if (bought > 0) playGameSound('purchase');
             return bought;
         }
 
@@ -3495,6 +3514,7 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
                 if (game.gems < cost) break;
                 game.gems -= cost; game.upgradeDiscountLevel += 1; bought++;
             }
+            if (bought > 0) playGameSound('purchase');
             return bought;
         }
 
@@ -3506,6 +3526,7 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
                 if (game.gems < gemCost || game.clicks < clickCost) break;
                 game.gems -= gemCost; game.clicks -= clickCost; game.rebirthGemUpgradeLevel += 1; bought++;
             }
+            if (bought > 0) playGameSound('purchase');
             return bought;
         }
 
@@ -4180,6 +4201,7 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
 
         // --- INTERACTION LOGIC ---
         function performMainClick() {
+            playGameSound('click');
             // Manual clicks stay reliable even if an older save is missing a newer field.
             const clicksPerClick = Number(game.clicksPerClick);
             const multiplier = Number(game.multiplier);
