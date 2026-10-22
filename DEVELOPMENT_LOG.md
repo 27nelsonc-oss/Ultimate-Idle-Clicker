@@ -1,9 +1,12 @@
-### 2026-10-21 — Halloween game sound hookup preparation
+### 2026-10-21 — Add click and purchase sounds on Halloween
 - **Request:** Play `Click 1.mp3` on each main-button click path and `Purchase 2.mp3` when an upgrade purchase succeeds.
-- **Change made:** Kept the shared click and purchase sound calls, but changed audio sources to relative paths instead of embedding large, unreliable base64 strings in the HTML.
-- **Asset paths:** `Click 1.mp3` and `Purchase 2.mp3` on the Halloween branch.
-- **Status:** Hookup is not complete until the MP3 assets are added to those paths and the sound playback is tested. No changes were made to `main`.
-- **HTML commit:** `d69369d45e05e37a51915629df96d47292aac03b`.
+- **Change made:** The game uses relative asset paths beside the HTML file. The shared `performMainClick()` routine plays the click sound, covering normal button clicks, Space-key clicks, and each Silent Clicking action. Eight upgrade purchase functions play the purchase sound only when at least one upgrade was bought. Audio volume is 45%.
+- **Files:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`, `Click 1.mp3`, and `Purchase 2.mp3`; this entry also updates project documentation.
+- **Verification:** Fetched the HTML and both MP3 assets from the `Halloween` branch; confirmed exact filenames and current blob SHAs. Static source review found one shared click-sound call and eight successful-purchase sound call sites. No browser/audio playback test was performed.
+- **Not tested / user testing needed:** Open the Halloween game with both MP3 files in the same folder (or use the Halloween hosted page), then test a click, Space, Silent Clicking, and a successful upgrade purchase. Browser audio restrictions or file placement may still prevent playback.
+- **HTML commit SHA:** `44a2b9f5619830ef94cd07c845ffe8a41ef531ab`.
+- **Asset SHAs:** `Click 1.mp3` — `b97a800fc132a0911cdfa1ec7d27bbd122d0e23e`; `Purchase 2.mp3` — `0ccf5eb7486a00828d845db8cfde66e5e3bd1332`.
+- **Rollback instructions:** Revert the HTML commit on the `Halloween` branch. Do not revert/delete the assets unless intentionally removing sound support. `main` and `game-development` were not changed.
 
 ### 2026-10-21 — Long-term multi-announcement board
 - **Request:** Make announcement text larger, support multiple persistent notices, allow deleting a notice by clicking it and confirming, and give the panel a more permanent look.
