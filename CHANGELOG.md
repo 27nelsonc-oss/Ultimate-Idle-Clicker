@@ -1,3 +1,11 @@
+### 2026-10-22 — Add Global Company Market collapse controls (Halloween branch)
+- Added a compact **Minimize/Expand** control to the Global Company heading. It hides or restores the market status, stats, chart, personal investment values, and investment/withdrawal controls while leaving the panel heading available.
+- Added an independent **Minimize/Expand** control for the Market activity section. It hides or restores Recent market events, public transaction summaries, and owner company controls together.
+- Both sections start expanded; all existing market element IDs, market logic, Bank placement, and the rest of the layout remain unchanged.
+- **HTML commits:** `c6b5b71ecf415921d91ce8ac70596dfa791decbe` and `ab5589b9c80a579e198d8b904d02b197c9d3274a`.
+- **Verification:** Re-fetched the current Halloween HTML and checked unique toggle/content IDs, the market panel's position before the Bank, and the continued presence of the events, transactions, owner controls, and in-game Update Log entry. Corrected the activity wrapper's hidden-state CSS so collapsing actually hides it. No browser interaction or standalone HTML test was performed.
+- **Rollback:** Revert HTML commits `ab5589b9c80a579e198d8b904d02b197c9d3274a` and `c6b5b71ecf415921d91ce8ac70596dfa791decbe` in reverse order on `Halloween` only. Do not change `main` or `game-development`.
+
 ### 2026-10-22 — Add Global Company Market (Halloween branch)
 - Added the **Global Company Market** panel directly above the Bank, pushing the Bank down without moving the main clicker. It shows the shared market index and trend, total company value, inflation, the player's nominal and inflation-adjusted investment value, a historical index chart, recent market events, and anonymized public transaction summaries.
 - Added player-funded share investments with no artificial starting capital and no minimum positive amount. Investment clicks are reserved server-side, and the player must create or update their single named save to confirm. Canceling the named-save flow cancels the pending investment; expired reservations are returned safely unless a hard reset changed the save reset version.
