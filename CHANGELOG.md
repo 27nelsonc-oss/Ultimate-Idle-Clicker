@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### 2026-10-21 — Allow overlapping sound effects
+- Changed sound playback to use a small reusable pool of up to 8 players per sound. A new press starts another instance over sounds already playing; completed players are reused. If all 8 are active, the oldest player is reused so rapid input cannot create an unlimited number of audio players.
+- **HTML commit:** `12c3fa783ae2547c0de531eef8cc7f3b0c0e1036`.
+- **Verification:** Source-level checks confirm concurrent playback is supported with a capped pool. Actual browser/device sound quality and performance still need user testing.
+- **Rollback:** Revert HTML commit `12c3fa783ae2547c0de531eef8cc7f3b0c0e1036` on `Halloween` only; do not change `main` or `game-development`.
+
 ### 2026-10-21 — Restart sounds on every press
 - Updated the reusable sound player so each sound request seeks the existing player to the beginning and plays it again, including when the sound is already playing. This restores immediate sound feedback on repeated clicks without allocating a new audio player each time.
 - **HTML commit:** `18644bc4f8bee6f6f7dd7398ca8a5a785aa9d358`.
