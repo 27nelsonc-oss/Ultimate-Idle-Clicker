@@ -1,3 +1,13 @@
+### 2026-10-22 — Retry transient cloud-sync contention before company investments (Halloween branch)
+- **User report:** every investment attempt failed with “Your latest progress could not be safely synced. Load the latest cloud save if a conflict was reported, then try again.”
+- **Root cause scope:** the message was thrown whenever the pre-investment `cloudSaveGame(false, true)` returned false. That function can return false not only for a real stale-cloud conflict, but also when another cloud load/save is already in progress. The investment path previously treated both cases as an immediate failure. A real cloud conflict remains intentionally guarded to prevent overwriting newer progress.
+- **Change made:** the investment path now waits for an active load/save to finish and retries the guarded sync up to four attempts. A detected cloud conflict produces a specific message instructing the player to use “Load from Cloud”; persistent busy state produces a retry-later message. Both stop before click reservation.
+- **Files/functions touched:** Halloween HTML, `beginCompanyInvestment()`, plus the in-game Update Log.
+- **Preserved:** cloud compare-and-swap conflict protection, named-save confirmation, investment reservation/refund safeguards, market formulas, and save schema. No database changes.
+- **Verification:** re-fetched HTML and checked the new retry loop, conflict checks, no-clicks-reserved messages, and Update Log entry. No standalone-browser test or authenticated investment test was performed; the original user-reported issue is not confirmed fixed until a real investment is tested.
+- **HTML commits:** `c83bc4e195f8c6c38b96c9fb8ddd71eeea0e1901` and `ed92c7998e5ac60d35c4af6fd7dd604882fa00b4`.
+- **Rollback:** revert `ed92c7998e5ac60d35c4af6fd7dd604882fa00b4`, then `c83bc4e195f8c6c38b96c9fb8ddd71eeea0e1901` on `Halloween` only. Do not change `main` or `game-development`.
+
 ### 2026-10-22 — Show personal Global Company investment cost and profit/loss (Halloween branch)
 - **User request:** show what a player originally invested and the current value, so they can tell whether they are ahead or behind.
 - **HTML:** added rows for total clicks invested, current investment value, and overall profit/loss; positive results display green and negative results red. Updated the explanatory note. Logout clears the added personal values.
