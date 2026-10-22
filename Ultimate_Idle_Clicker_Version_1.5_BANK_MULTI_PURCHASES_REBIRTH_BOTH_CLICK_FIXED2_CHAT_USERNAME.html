@@ -764,6 +764,7 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
     <div class="panel company-market-panel" id="company-market-panel">
         <h2 class="section-title">📈 Global Company</h2>
         <div class="sub-stat" id="company-market-status" aria-live="polite">Connecting to the global market...</div>
+        <div class="sub-stat" style="font-size:.76rem;">Player-funded only · no artificial starting capital</div>
         <div class="company-stat-row"><span>Market index</span><span class="company-stat-value" id="company-market-index">100.00</span></div>
         <div class="company-stat-row"><span>Trend</span><span class="company-stat-value" id="company-market-trend">Stable</span></div>
         <div class="company-stat-row"><span>Total company value</span><span class="company-stat-value" id="company-market-total">0 clicks</span></div>
@@ -3254,7 +3255,7 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
             } finally {
                 setCompanyBusy(false);
                 updateUI();
-                if (companyMarketSnapshot) renderCompanyMarket(companyMarketSnapshot);
+                refreshCompanyMarket();
             }
         }
 
@@ -3288,7 +3289,7 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
             } finally {
                 setCompanyBusy(false);
                 updateUI();
-                if (companyMarketSnapshot) renderCompanyMarket(companyMarketSnapshot);
+                refreshCompanyMarket();
             }
         }
 
