@@ -1,3 +1,10 @@
+### 2026-10-21 — Add Goofy Audio setting
+- Added a fixed Settings button directly beneath the Menu button so both stay anchored to the screen. Settings opens a compact panel with a Goofy Audio On/Off toggle.
+- Turning Goofy Audio off prevents new click/purchase sounds and stops any sound currently playing. The preference is saved in this browser using localStorage and defaults to On.
+- **HTML commit:** 42fe7c8248042c631ed0c0963afe00be188a8eaf.
+- **Verification:** Source anchors were checked before editing and the updated HTML was committed to `Halloween`; follow-up fetch and source checks pending. Browser interaction/audio testing still needs user confirmation.
+- **Rollback:** Revert HTML commit `42fe7c8248042c631ed0c0963afe00be188a8eaf` on `Halloween` only. Do not change `main` or `game-development`.
+
 ### 2026-10-21 — Prevent sound effects from restarting before they finish
 - Changed click and purchase sound playback so a sound already playing ignores additional requests until it finishes. Each sound still uses one reusable audio player; no overlap, restart, silence detection, or player pool.
 - **HTML commit:** 066d61f714558941f078354d18c2969cbb3b2ec2.
