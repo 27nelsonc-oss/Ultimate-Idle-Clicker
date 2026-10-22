@@ -3434,9 +3434,8 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
             const source = GAME_SOUND_DATA[soundName];
             if (!source) return;
 
-            // Use one player per sound to avoid stacked audio and excess player creation.
-            // Repeated presses restart the sound; silence skipping is disabled here until
-            // reliable gap positions can be established without risking silent output.
+            // Use one player per sound. Ignore repeat requests until that sound finishes,
+            // preventing overlapping/restarting audio and avoiding extra-player lag.
             let audio = GAME_SOUND_PLAYERS[soundName];
             if (!audio) {
                 audio = new Audio(source);
@@ -3446,8 +3445,8 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
                 audio.load();
             }
 
+            if (!audio.paused && !audio.ended) return;
             try {
-                audio.pause();
                 audio.currentTime = 0;
             } catch (error) {
                 // Playback can still proceed if seeking is not available yet.
