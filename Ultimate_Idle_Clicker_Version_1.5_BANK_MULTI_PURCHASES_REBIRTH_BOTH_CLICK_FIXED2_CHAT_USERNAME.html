@@ -3429,20 +3429,34 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
             purchase: 'Purchase%202.mp3'
         };
         const GAME_SOUND_PLAYERS = {};
+        const GAME_SOUND_POOL_LIMIT = 8;
         function playGameSound(soundName) {
             const source = GAME_SOUND_DATA[soundName];
             if (!source) return;
 
-            // Reuse one preloaded player per sound. Seeking the existing player
-            // to the start restarts it on every request without creating extra players.
-            let audio = GAME_SOUND_PLAYERS[soundName];
-            if (!audio) {
+            // Let a new sound play over any sound already in progress.
+            // Reuse finished players and cap simultaneous voices to avoid unbounded audio-player growth.
+            let players = GAME_SOUND_PLAYERS[soundName];
+            if (!players) {
+                players = [];
+                GAME_SOUND_PLAYERS[soundName] = players;
+            }
+
+            let audio = players.find(player => player.paused || player.ended);
+            if (!audio && players.length < GAME_SOUND_POOL_LIMIT) {
                 audio = new Audio(source);
                 audio.preload = 'auto';
                 audio.volume = 0.45;
-                GAME_SOUND_PLAYERS[soundName] = audio;
+                players.push(audio);
                 audio.load();
             }
+
+            // If all voices are busy, recycle the oldest one rather than creating unlimited players.
+            if (!audio) {
+                audio = players.shift();
+                players.push(audio);
+            }
+
             try {
                 audio.currentTime = 0;
             } catch (error) {
