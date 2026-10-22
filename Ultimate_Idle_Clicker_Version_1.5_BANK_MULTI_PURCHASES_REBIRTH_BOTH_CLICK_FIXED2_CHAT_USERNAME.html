@@ -557,6 +557,7 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
 <strong>Latest update — October 22, 2026</strong>
 <ul>
 <li>Added the Global Company Market above the Bank in the Halloween version. The company starts with player investments only and has no artificial starting capital.</li>
+            <li>Added personal investment tracking: total clicks invested, current investment value, and overall profit/loss including earlier withdrawals.</li>
 <li>Added compact square minus/plus minimize buttons to Global Company and Market activity, matching the My Titles panel controls.</li>
 <li>Added a shared high-risk market with unpredictable booms, downturns, severe crashes, continuously changing investment values, inflation, an index history chart, recent market events, and anonymized public transaction summaries.</li>
 <li>Investments now finish the named-save prompts before reserving clicks, reducing failed confirmations when a cloud save changes while a prompt is open.</li>
@@ -794,9 +795,11 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
         <svg id="company-market-chart" class="company-market-chart" viewBox="0 0 280 78" role="img" aria-label="Global company historical market index chart"></svg>
         <div class="sub-stat" style="font-size:.76rem;">Historical market index · newest values at right</div>
         <div class="company-market-subsection">
-            <div class="company-stat-row"><span>Your investment</span><span class="company-stat-value" id="company-market-my-value">0 clicks</span></div>
+            <div class="company-stat-row"><span>Total clicks invested</span><span class="company-stat-value" id="company-market-total-invested">0 clicks</span></div>
+            <div class="company-stat-row"><span>Current investment value</span><span class="company-stat-value" id="company-market-my-value">0 clicks</span></div>
+            <div class="company-stat-row"><span>Overall profit / loss</span><span class="company-stat-value" id="company-market-profit-loss">0 clicks</span></div>
             <div class="company-stat-row"><span>Inflation-adjusted value</span><span class="company-stat-value" id="company-market-real-value">0 clicks</span></div>
-            <div class="sub-stat" style="font-size:.76rem;">Market losses can reduce your investment. Inflation-adjusted value estimates purchasing power.</div>
+            <div class="sub-stat" style="font-size:.76rem;">Profit/loss includes clicks already withdrawn, so partial withdrawals still count toward your overall result. Market losses can reduce your investment.</div>
         </div>
         <div class="company-market-actions">
             <input type="number" id="company-market-amount" min="0.00000001" step="any" value="1" aria-label="Investment or withdrawal amount in clicks">
@@ -3109,7 +3112,12 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
             setText('company-market-trend', data.paused ? 'Paused' : (String(data.trend || 'stable').replace(/^./, c => c.toUpperCase())));
             setText('company-market-total', companyFormatClicks(data.total_pool_balance) + ' clicks');
             setText('company-market-inflation', Math.max(0, (Number(data.inflation_index || 1) - 1) * 100).toFixed(2) + '%');
+            setText('company-market-total-invested', companyFormatClicks(data.total_invested) + ' clicks');
             setText('company-market-my-value', companyFormatClicks(data.my_value) + ' clicks');
+            const profitLoss = Number(data.net_profit_loss || 0);
+            setText('company-market-profit-loss', (profitLoss > 0 ? '+' : '') + companyFormatClicks(profitLoss) + ' clicks');
+            const profitLossEl = document.getElementById('company-market-profit-loss');
+            if (profitLossEl) profitLossEl.style.color = profitLoss > 0 ? '#7ee6a4' : (profitLoss < 0 ? '#ff7777' : '');
             setText('company-market-real-value', companyFormatClicks(data.my_real_value) + ' clicks');
             renderCompanyChart(data.history);
             renderCompanyList('company-market-events', data.events, 'events');
@@ -3559,7 +3567,10 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
             stopPlayerPresence();
             stopPlayerOnlineHeartbeat();
             cloudUser = null;
+            document.getElementById('company-market-total-invested').textContent = '0 clicks';
             document.getElementById('company-market-my-value').textContent = '0 clicks';
+            document.getElementById('company-market-profit-loss').textContent = '0 clicks';
+            document.getElementById('company-market-profit-loss').style.color = '';
             document.getElementById('company-market-real-value').textContent = '0 clicks';
             currentUsername = '';
             dmUnreadCount = 0;
