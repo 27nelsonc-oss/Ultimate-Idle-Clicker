@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### 2026-10-21 — Restart sounds on every press
+- Updated the reusable sound player so each sound request seeks the existing player to the beginning and plays it again, including when the sound is already playing. This restores immediate sound feedback on repeated clicks without allocating a new audio player each time.
+- **HTML commit:** `18644bc4f8bee6f6f7dd7398ca8a5a785aa9d358`.
+- **Verification:** Source-level check confirms the active-playback skip was removed and the reusable-player approach remains. Real browser/device playback and performance still need user testing.
+- **Rollback:** Revert HTML commit `18644bc4f8bee6f6f7dd7398ca8a5a785aa9d358` on `Halloween` only; do not change `main` or `game-development`.
+
 ### 2026-10-21 — Reduce lag from rapid sound playback
 - Changed sound playback so each sound uses one preloaded audio player and repeated requests are skipped while that sound is already playing. This avoids repeatedly pausing, seeking, and restarting audio on every rapid click. Clicks and game progress still register normally; only overlapping sound playback is skipped.
 - **HTML commit:** `e41bd38d9d1702313067922e0919ba7871147a44`.
