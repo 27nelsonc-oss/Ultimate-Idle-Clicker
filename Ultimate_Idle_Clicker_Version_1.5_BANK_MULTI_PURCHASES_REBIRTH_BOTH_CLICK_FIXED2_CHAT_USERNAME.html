@@ -3429,28 +3429,23 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
             purchase: 'Purchase%202.mp3'
         };
         const GAME_SOUND_PLAYERS = {};
-        const GAME_SOUND_LAST_STARTED = {};
         function playGameSound(soundName) {
             const source = GAME_SOUND_DATA[soundName];
             if (!source) return;
 
-            const now = performance.now();
-            // Ignore duplicate sound calls from the same physical interaction.
-            if (now - (GAME_SOUND_LAST_STARTED[soundName] ?? -Infinity) < 40) return;
-            GAME_SOUND_LAST_STARTED[soundName] = now;
-
-            // Reuse one audio player per sound instead of allocating a new player
-            // for every click. Rapid clicks restart the same sound rather than
-            // stacking dozens of overlapping audio players.
+            // Reuse one preloaded player per sound. If it is already playing,
+            // skip this request instead of repeatedly seeking/restarting it.
+            // Game clicks still register normally; only overlapping audio is skipped.
             let audio = GAME_SOUND_PLAYERS[soundName];
             if (!audio) {
                 audio = new Audio(source);
                 audio.preload = 'auto';
                 audio.volume = 0.45;
                 GAME_SOUND_PLAYERS[soundName] = audio;
+                audio.load();
             }
-            audio.pause();
-            try { audio.currentTime = 0; } catch (_) {}
+            if (!audio.paused && !audio.ended) return;
+            if (audio.ended) audio.currentTime = 0;
             audio.play().catch(() => {});
         }
 
