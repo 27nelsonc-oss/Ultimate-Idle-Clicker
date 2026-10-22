@@ -4266,6 +4266,9 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
             const button = event.target && event.target.closest ? event.target.closest('button') : null;
             if (button) event.preventDefault();
             mobileTouchHandled = false;
+            // The main click was already handled in touchend; stop its synthetic click
+            // from reaching the main button listener and playing/earning a second time.
+            if (button && button.id === 'click-btn') event.stopImmediatePropagation();
         }, true);
 
         function startSilentClicking() {
