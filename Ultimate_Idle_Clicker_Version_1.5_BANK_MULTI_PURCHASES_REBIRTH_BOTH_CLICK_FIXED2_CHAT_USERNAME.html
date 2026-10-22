@@ -513,6 +513,29 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
 #mobile-click-button.enabled{display:block}
 @media(max-width:850px){#game-menu-button,#game-settings-button{font-size:.9rem;padding:8px 10px}}
 </style>
+
+<style>
+/* Global Company Market — Halloween branch */
+.company-market-panel { width:min(92%,320px); max-width:320px; box-sizing:border-box; margin:0 auto; border:1px solid #8f4a1b; }
+.company-market-panel .company-stat-row { display:flex; justify-content:space-between; gap:8px; margin:5px 0; align-items:baseline; }
+.company-market-panel .company-stat-value { text-align:right; font-weight:700; color:#ffbd75; overflow-wrap:anywhere; }
+.company-market-panel .company-market-chart { width:100%; height:78px; display:block; margin:8px 0; border:1px solid #4a2a1b; border-radius:6px; background:#100d0b; }
+.company-market-panel .company-market-subsection { margin-top:9px; padding-top:8px; border-top:1px solid #4a2a1b; }
+.company-market-panel .company-market-list { max-height:118px; overflow-y:auto; font-size:.78rem; line-height:1.35; color:#d9c6ad; overflow-wrap:anywhere; }
+.company-market-panel .company-market-list div { padding:4px 0; border-bottom:1px solid #2e2119; }
+.company-market-panel .company-market-actions { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:9px; }
+.company-market-panel .company-market-actions input { min-width:0; width:100%; box-sizing:border-box; padding:7px; background:#100d0b; color:#fff; border:1px solid #65452f; border-radius:5px; }
+.company-market-panel .company-market-actions button { min-width:0; margin:0; }
+.company-market-panel .company-market-actions .company-withdraw-all { grid-column:1 / -1; }
+.company-market-panel details.company-admin-details { margin-top:10px; padding-top:8px; border-top:1px solid #6b3518; text-align:left; }
+.company-market-panel details.company-admin-details summary { cursor:pointer; color:#ffbd75; font-weight:700; }
+.company-market-panel .company-admin-actions { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:8px; }
+.company-market-panel .company-admin-actions input { width:100%; min-width:0; box-sizing:border-box; padding:7px; }
+.company-busy-overlay { position:fixed; inset:0; z-index:999999; display:none; align-items:center; justify-content:center; padding:20px; box-sizing:border-box; background:rgba(8,6,5,.76); }
+.company-busy-overlay > div { max-width:360px; padding:18px; border:1px solid #ff7518; border-radius:10px; background:#1b1714; color:#fff; text-align:center; box-shadow:0 8px 24px rgba(0,0,0,.55); }
+@media(max-width:600px) { .company-market-panel { width:100%; max-width:100%; } }
+</style>
+
 </head>
 <body class="game-entry-locked">
 <div id="game-entry-gate"><div id="game-entry-layout"><div id="game-entry-card"><h1>Ultimate Idle Clicker</h1><div id="game-entry-loading" class="sub-stat">Checking login...</div><div id="game-entry-auth"></div><button type="button" id="game-menu-resume" class="btn-upgrade">Resume Game</button><button type="button" id="game-menu-logout" class="btn-upgrade">Log Out</button>
@@ -731,8 +754,56 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
 
     </div>
 
+
+    <div id="company-busy-overlay" class="company-busy-overlay" aria-live="assertive">
+        <div><strong style="color:#ffbd75;">Securing your investment...</strong><p style="margin-bottom:0;">Please wait while the game safely reserves your clicks and confirms your named save.</p></div>
+    </div>
     <!-- Bank + Chat sidebar -->
     <div class="left-sidebar">
+
+    <div class="panel company-market-panel" id="company-market-panel">
+        <h2 class="section-title">📈 Global Company</h2>
+        <div class="sub-stat" id="company-market-status" aria-live="polite">Connecting to the global market...</div>
+        <div class="company-stat-row"><span>Market index</span><span class="company-stat-value" id="company-market-index">100.00</span></div>
+        <div class="company-stat-row"><span>Trend</span><span class="company-stat-value" id="company-market-trend">Stable</span></div>
+        <div class="company-stat-row"><span>Total company value</span><span class="company-stat-value" id="company-market-total">0 clicks</span></div>
+        <div class="company-stat-row"><span>Inflation</span><span class="company-stat-value" id="company-market-inflation">0.00%</span></div>
+        <svg id="company-market-chart" class="company-market-chart" viewBox="0 0 280 78" role="img" aria-label="Global company historical market index chart"></svg>
+        <div class="sub-stat" style="font-size:.76rem;">Historical market index · newest values at right</div>
+        <div class="company-market-subsection">
+            <div class="company-stat-row"><span>Your investment</span><span class="company-stat-value" id="company-market-my-value">0 clicks</span></div>
+            <div class="company-stat-row"><span>Inflation-adjusted value</span><span class="company-stat-value" id="company-market-real-value">0 clicks</span></div>
+            <div class="sub-stat" style="font-size:.76rem;">Market losses can reduce your investment. Inflation-adjusted value estimates purchasing power.</div>
+        </div>
+        <div class="company-market-actions">
+            <input type="number" id="company-market-amount" min="0.00000001" step="any" value="1" aria-label="Investment or withdrawal amount in clicks">
+            <button type="button" class="btn-upgrade" id="company-market-invest-btn">Invest</button>
+            <button type="button" class="btn-upgrade" id="company-market-withdraw-btn">Withdraw amount</button>
+            <button type="button" class="btn-upgrade company-withdraw-all" id="company-market-withdraw-all-btn">Withdraw all</button>
+        </div>
+        <div class="company-market-subsection">
+            <strong style="color:#ffbd75;font-size:.88rem;">Recent market events</strong>
+            <div id="company-market-events" class="company-market-list">No major events yet.</div>
+        </div>
+        <div class="company-market-subsection">
+            <strong style="color:#ffbd75;font-size:.88rem;">Public transaction summary</strong>
+            <div id="company-market-transactions" class="company-market-list">No company transactions yet.</div>
+        </div>
+        <details class="company-admin-details" id="company-admin-controls" style="display:none;">
+            <summary>Owner Company Controls</summary>
+            <div class="sub-stat" style="margin-top:6px;">Emergency controls are shared across the Halloween game's global market.</div>
+            <div class="company-admin-actions">
+                <button type="button" class="btn-upgrade" id="company-admin-reset-btn">Reset market</button>
+                <button type="button" class="btn-upgrade" id="company-admin-pause-btn">Pause market</button>
+                <input type="number" id="company-admin-inflation-input" min="0.1" max="1000" step="0.1" value="5" aria-label="Inflation increase percent">
+                <button type="button" class="btn-upgrade" id="company-admin-inflation-btn">Add inflation %</button>
+                <input type="number" id="company-admin-drop-input" min="1" max="90" step="1" value="25" aria-label="Market drop percent">
+                <button type="button" class="btn-upgrade" id="company-admin-drop-btn">Trigger drop %</button>
+            </div>
+            <div class="sub-stat" id="company-admin-status" style="margin-top:6px;"></div>
+        </details>
+    </div>
+
     <!-- Bank Panel -->
     <div class="panel bank-panel" id="bank-panel">
         <h2 class="section-title">🏦 Bank</h2>
@@ -1058,6 +1129,10 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
             : null;
 
         let cloudUser = null;
+        let companyInvestmentInProgress = false;
+        let companyMarketRefreshInProgress = false;
+        let companyMarketSnapshot = null;
+        let companyMarketTimer = null;
         let chatChannel = null;
         let chatLastSentAt = 0;
         let chatLoading = false;
@@ -2059,7 +2134,8 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
         let lastCloudSyncAt = null;
         let cloudConflictDetected = false;
 
-        async function cloudSaveGame(showStatus = true) {
+        async function cloudSaveGame(showStatus = true, allowCompanyInvestment = false) {
+            if (companyInvestmentInProgress && !allowCompanyInvestment) return false;
             if (!supabaseClient || !cloudUser) return false;
             if (cloudLoadInProgress || cloudSaveInProgress) {
                 cloudSaveQueued = true;
@@ -2919,6 +2995,323 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
         });
 
         // Manual save creates or replaces the account's one named cloud snapshot.
+
+        function companyFormatClicks(value) {
+            const n = Number(value);
+            if (!Number.isFinite(n)) return '0';
+            return n.toLocaleString(undefined, { maximumFractionDigits: 2 });
+        }
+
+        function setCompanyStatus(message, isError = false) {
+            const el = document.getElementById('company-market-status');
+            if (el) {
+                el.textContent = message;
+                el.style.color = isError ? '#ff7777' : '#d9c6ad';
+            }
+        }
+
+        function setCompanyBusy(isBusy) {
+            companyInvestmentInProgress = isBusy;
+            const overlay = document.getElementById('company-busy-overlay');
+            if (overlay) overlay.style.display = isBusy ? 'flex' : 'none';
+            const invest = document.getElementById('company-market-invest-btn');
+            const withdraw = document.getElementById('company-market-withdraw-btn');
+            const withdrawAll = document.getElementById('company-market-withdraw-all-btn');
+            if (invest) invest.disabled = isBusy;
+            if (withdraw) withdraw.disabled = isBusy;
+            if (withdrawAll) withdrawAll.disabled = isBusy;
+        }
+
+        function renderCompanyChart(history) {
+            const svg = document.getElementById('company-market-chart');
+            if (!svg) return;
+            while (svg.firstChild) svg.removeChild(svg.firstChild);
+            const ns = 'http://www.w3.org/2000/svg';
+            const values = Array.isArray(history) ? history.slice(-36).map(item => Number(item.market_index)).filter(Number.isFinite) : [];
+            const fallback = Number(companyMarketSnapshot?.market_index) || 100;
+            if (values.length < 2) values.push(fallback);
+            const minValue = Math.min(...values);
+            const maxValue = Math.max(...values);
+            const span = Math.max(maxValue - minValue, Math.abs(maxValue) * 0.002, 0.01);
+            const points = values.map((value, index) => {
+                const x = 5 + (index / Math.max(1, values.length - 1)) * 270;
+                const y = 69 - ((value - minValue) / span) * 58;
+                return x.toFixed(1) + ',' + y.toFixed(1);
+            }).join(' ');
+            const baseline = document.createElementNS(ns, 'line');
+            baseline.setAttribute('x1', '5'); baseline.setAttribute('x2', '275');
+            baseline.setAttribute('y1', '69'); baseline.setAttribute('y2', '69');
+            baseline.setAttribute('stroke', '#4a2a1b'); baseline.setAttribute('stroke-width', '1');
+            svg.appendChild(baseline);
+            const line = document.createElementNS(ns, 'polyline');
+            line.setAttribute('points', points); line.setAttribute('fill', 'none');
+            line.setAttribute('stroke', '#ff8c32'); line.setAttribute('stroke-width', '2.5');
+            line.setAttribute('stroke-linejoin', 'round'); line.setAttribute('stroke-linecap', 'round');
+            svg.appendChild(line);
+        }
+
+        function renderCompanyList(elementId, items, kind) {
+            const target = document.getElementById(elementId);
+            if (!target) return;
+            target.replaceChildren();
+            if (!Array.isArray(items) || !items.length) {
+                target.textContent = kind === 'events' ? 'No major events yet.' : 'No company transactions yet.';
+                return;
+            }
+            items.slice(0, 8).forEach(item => {
+                const row = document.createElement('div');
+                const date = item.created_at ? new Date(item.created_at).toLocaleString() : '';
+                if (kind === 'events') {
+                    row.textContent = (item.summary || item.event_type || 'Market update') + (date ? ' · ' + date : '');
+                } else {
+                    const type = item.transaction_type === 'invest' ? 'Investment' : 'Withdrawal';
+                    row.textContent = type + ': ' + companyFormatClicks(item.amount) + ' clicks · ' + date;
+                }
+                target.appendChild(row);
+            });
+        }
+
+        function renderCompanyMarket(data) {
+            if (!data || typeof data !== 'object') return;
+            companyMarketSnapshot = data;
+            const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+            setText('company-market-index', Number(data.market_index || 0).toFixed(2));
+            setText('company-market-trend', data.paused ? 'Paused' : (String(data.trend || 'stable').replace(/^./, c => c.toUpperCase())));
+            setText('company-market-total', companyFormatClicks(data.total_pool_balance) + ' clicks');
+            setText('company-market-inflation', Math.max(0, (Number(data.inflation_index || 1) - 1) * 100).toFixed(2) + '%');
+            setText('company-market-my-value', companyFormatClicks(data.my_value) + ' clicks');
+            setText('company-market-real-value', companyFormatClicks(data.my_real_value) + ' clicks');
+            renderCompanyChart(data.history);
+            renderCompanyList('company-market-events', data.events, 'events');
+            renderCompanyList('company-market-transactions', data.transactions, 'transactions');
+            const signedIn = !!cloudUser;
+            const invest = document.getElementById('company-market-invest-btn');
+            const withdraw = document.getElementById('company-market-withdraw-btn');
+            const withdrawAll = document.getElementById('company-market-withdraw-all-btn');
+            if (invest) invest.disabled = !signedIn || !!data.paused || companyInvestmentInProgress;
+            if (withdraw) withdraw.disabled = !signedIn || Number(data.my_value || 0) <= 0 || companyInvestmentInProgress;
+            if (withdrawAll) withdrawAll.disabled = !signedIn || Number(data.my_value || 0) <= 0 || companyInvestmentInProgress;
+            const adminControls = document.getElementById('company-admin-controls');
+            const ownerEmail = typeof CHAT_OWNER_EMAIL === 'string' ? CHAT_OWNER_EMAIL.toLowerCase() : '';
+            const isOwner = !!cloudUser?.email && ownerEmail && cloudUser.email.toLowerCase() === ownerEmail;
+            if (adminControls) adminControls.style.display = isOwner ? '' : 'none';
+            const pauseButton = document.getElementById('company-admin-pause-btn');
+            if (pauseButton) pauseButton.textContent = data.paused ? 'Resume market' : 'Pause market';
+            if (!signedIn) setCompanyStatus('Sign in to invest. The shared market is shown below.');
+            else if (data.paused) setCompanyStatus('Market paused by the owner. Withdrawals remain available.');
+            else setCompanyStatus('Market is live. Major changes are unpredictable.');
+        }
+
+        async function refreshCompanyMarket() {
+            if (!supabaseClient || companyMarketRefreshInProgress || companyInvestmentInProgress) return;
+            companyMarketRefreshInProgress = true;
+            try {
+                const { data, error } = await supabaseClient.rpc('company_market_snapshot');
+                if (error) throw error;
+                renderCompanyMarket(data);
+                if (cloudUser && Number(data?.expired_refund_clicks || 0) > 0) {
+                    setCompanyStatus('A timed-out investment was canceled. Reloading the refunded cloud progress.');
+                    const loaded = await cloudLoadGame(false);
+                    if (loaded) {
+                        updateUI();
+                        localStorage.setItem('ultimateIdleClicker_scaled_clean_save', JSON.stringify(game));
+                    }
+                    renderCompanyMarket(data);
+                }
+            } catch (error) {
+                setCompanyStatus(cloudUser ? 'Market could not refresh: ' + error.message : 'Sign in to view the live market.', true);
+            } finally {
+                companyMarketRefreshInProgress = false;
+            }
+        }
+
+        function initializeCompanyMarket() {
+            if (companyMarketTimer !== null) clearInterval(companyMarketTimer);
+            refreshCompanyMarket();
+            companyMarketTimer = setInterval(refreshCompanyMarket, 10000);
+        }
+
+        async function cancelCompanyInvestment(transactionId) {
+            const { data, error } = await supabaseClient.rpc('company_cancel_investment', { p_transaction_id: transactionId });
+            if (error) {
+                setCompanyStatus('Cancellation could not be confirmed. The server will automatically return reserved clicks if the confirmation expires. Please reload your latest cloud save before investing again.', true);
+                return false;
+            }
+            if (data?.status === 'committed') {
+                await cloudLoadGame(false);
+                updateUI();
+                setCompanyStatus('The investment was already committed. Your latest cloud save has been reloaded.');
+                return false;
+            }
+            if (data?.status === 'missing') {
+                await cloudLoadGame(false);
+                updateUI();
+                setCompanyStatus('The pending investment could not be found. Your latest cloud save has been reloaded.', true);
+                return false;
+            }
+            const loaded = await cloudLoadGame(false);
+            if (loaded) {
+                updateUI();
+                localStorage.setItem('ultimateIdleClicker_scaled_clean_save', JSON.stringify(game));
+            }
+            if (cloudSaveQueued) {
+                cloudSaveQueued = false;
+                await cloudSaveGame(false, true);
+            }
+            setCompanyStatus('Investment canceled. The reserved clicks have been returned.');
+            return true;
+        }
+
+        async function beginCompanyInvestment() {
+            if (!supabaseClient || !cloudUser) {
+                setCompanyStatus('Please sign in before investing.', true);
+                return;
+            }
+            if (companyInvestmentInProgress) return;
+            const amount = Number(document.getElementById('company-market-amount')?.value);
+            if (!Number.isFinite(amount) || amount <= 0) {
+                setCompanyStatus('Enter any positive number of clicks to invest.', true);
+                return;
+            }
+            if (amount > Number(game.clicks || 0)) {
+                setCompanyStatus('You do not have enough clicks for that investment.', true);
+                return;
+            }
+            if (!confirm('Invest ' + companyFormatClicks(amount) + ' clicks? To confirm, you must create or update your named save. Canceling the named-save popup will cancel the investment and return the reserved clicks.')) return;
+
+            if (typeof stopSilentClicking === 'function') stopSilentClicking();
+            setCompanyBusy(true);
+            let transactionId = null;
+            let reservedAmount = amount;
+            try {
+                const synced = await cloudSaveGame(false, true);
+                if (!synced) throw new Error('Your latest progress could not be safely synced. Load the latest cloud save if a conflict was reported, then try again.');
+                const { data: reserve, error: reserveError } = await supabaseClient.rpc('company_begin_investment', { p_amount: amount });
+                if (reserveError) throw reserveError;
+                transactionId = reserve.transaction_id;
+                reservedAmount = Number(reserve.amount);
+                lastCloudSyncAt = reserve.updated_at || lastCloudSyncAt;
+                game.clicks = Math.max(0, Number((Number(game.clicks || 0) - reservedAmount).toFixed(8)));
+                game.lastActiveAt = Date.now();
+
+                const { data: existing, error: readError } = await supabaseClient
+                    .from('game_saves')
+                    .select('named_save_name, named_save_data')
+                    .eq('user_id', cloudUser.id)
+                    .maybeSingle();
+                if (readError) throw new Error('Could not check your existing named save: ' + readError.message);
+
+                const enteredName = prompt(
+                    'Confirm your investment of ' + companyFormatClicks(reservedAmount) +
+                    ' clicks by naming or updating your named save. Cancel reverses the investment:',
+                    existing?.named_save_name || ''
+                );
+                if (enteredName === null) {
+                    await cancelCompanyInvestment(transactionId);
+                    return;
+                }
+                const saveName = enteredName.trim();
+                if (!saveName || saveName.length > 40) {
+                    alert('Please enter a save name between 1 and 40 characters. The investment will be canceled.');
+                    await cancelCompanyInvestment(transactionId);
+                    return;
+                }
+                if (existing?.named_save_data && !confirm(
+                    'Replace your existing named save "' + (existing.named_save_name || 'Unnamed save') +
+                    '" with the updated save that confirms this investment? Canceling reverses the investment.'
+                )) {
+                    await cancelCompanyInvestment(transactionId);
+                    return;
+                }
+                if (cloudUser?.id == null) throw new Error('Your account signed out before the investment could be confirmed.');
+
+                const snapshot = JSON.parse(JSON.stringify({ ...game, lastActiveAt: Date.now() }));
+                const { data: committed, error: commitError } = await supabaseClient.rpc('company_commit_investment', {
+                    p_transaction_id: transactionId,
+                    p_save_name: saveName,
+                    p_snapshot: snapshot,
+                    p_expected_updated_at: reserve.updated_at,
+                    p_expected_named_save_name: existing?.named_save_name ?? null,
+                    p_expected_named_save_data: existing?.named_save_data ?? null
+                });
+                if (commitError) {
+                    await cancelCompanyInvestment(transactionId);
+                    setCompanyStatus('Investment was not confirmed: ' + commitError.message, true);
+                    return;
+                }
+                lastCloudSyncAt = committed.updated_at || lastCloudSyncAt;
+                cloudConflictDetected = false;
+                game.lastActiveAt = Date.now();
+                localStorage.setItem('ultimateIdleClicker_scaled_clean_save', JSON.stringify(game));
+                updateUI();
+                setCompanyStatus('Investment confirmed and saved as "' + saveName + '".');
+                await refreshCompanyMarket();
+            } catch (error) {
+                if (transactionId) {
+                    await cancelCompanyInvestment(transactionId);
+                }
+                setCompanyStatus('Investment could not be completed: ' + (error?.message || String(error)), true);
+            } finally {
+                setCompanyBusy(false);
+                updateUI();
+                if (companyMarketSnapshot) renderCompanyMarket(companyMarketSnapshot);
+            }
+        }
+
+        async function withdrawFromCompany(all = false) {
+            if (!supabaseClient || !cloudUser) {
+                setCompanyStatus('Please sign in before withdrawing.', true);
+                return;
+            }
+            if (companyInvestmentInProgress) return;
+            const amount = Number(document.getElementById('company-market-amount')?.value);
+            if (!all && (!Number.isFinite(amount) || amount <= 0)) {
+                setCompanyStatus('Enter a positive withdrawal amount.', true);
+                return;
+            }
+            if (all && !confirm('Withdraw your entire current company investment at the current market value?')) return;
+            setCompanyBusy(true);
+            try {
+                const synced = await cloudSaveGame(false, true);
+                if (!synced) throw new Error('Your latest progress could not be safely synced. Load the latest cloud save if a conflict was reported, then try again.');
+                const { data, error } = await supabaseClient.rpc('company_withdraw', { p_amount: all ? 0 : amount, p_all: all });
+                if (error) throw error;
+                lastCloudSyncAt = data.updated_at || lastCloudSyncAt;
+                game.clicks = Number(game.clicks || 0) + Number(data.amount || 0);
+                game.lastActiveAt = Date.now();
+                localStorage.setItem('ultimateIdleClicker_scaled_clean_save', JSON.stringify(game));
+                updateUI();
+                setCompanyStatus('Withdrew ' + companyFormatClicks(data.amount) + ' clicks at the current market value.');
+                await refreshCompanyMarket();
+            } catch (error) {
+                setCompanyStatus('Withdrawal failed: ' + (error?.message || String(error)), true);
+            } finally {
+                setCompanyBusy(false);
+                updateUI();
+                if (companyMarketSnapshot) renderCompanyMarket(companyMarketSnapshot);
+            }
+        }
+
+        async function runCompanyAdminAction(action, value = null) {
+            if (!cloudUser || !cloudUser.email || cloudUser.email.toLowerCase() !== String(CHAT_OWNER_EMAIL || '').toLowerCase()) {
+                setCompanyStatus('Owner-only company controls.', true);
+                return;
+            }
+            if (action === 'reset' && !confirm('Reset market conditions to the baseline while preserving every player’s current nominal investment value?')) return;
+            if (action === 'drop' && !confirm('Trigger a ' + value + '% global market drop? Every investor will be affected.')) return;
+            if (action === 'inflation' && !confirm('Add ' + value + '% inflation? This reduces the purchasing power of every investment and affects future market performance.')) return;
+            if ((action === 'pause' || action === 'resume') && !confirm(action === 'pause' ? 'Pause market movement? Withdrawals will remain available at the frozen price.' : 'Resume market movement?')) return;
+            const status = document.getElementById('company-admin-status');
+            if (status) status.textContent = 'Applying owner control...';
+            const { data, error } = await supabaseClient.rpc('company_market_admin_action', { p_action: action, p_value: value });
+            if (error) {
+                if (status) status.textContent = error.message;
+                return;
+            }
+            if (status) status.textContent = data?.summary || 'Owner control applied.';
+            await refreshCompanyMarket();
+        }
+
         async function saveNamedCloudGame() {
             if (!supabaseClient || !cloudUser) {
                 alert('Please log in before creating a named cloud save.');
@@ -3096,6 +3489,13 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
         }
 
         document.getElementById('cloud-save-btn').addEventListener('click', () => saveNamedCloudGame());
+        document.getElementById('company-market-invest-btn')?.addEventListener('click', beginCompanyInvestment);
+        document.getElementById('company-market-withdraw-btn')?.addEventListener('click', () => withdrawFromCompany(false));
+        document.getElementById('company-market-withdraw-all-btn')?.addEventListener('click', () => withdrawFromCompany(true));
+        document.getElementById('company-admin-reset-btn')?.addEventListener('click', () => runCompanyAdminAction('reset'));
+        document.getElementById('company-admin-inflation-btn')?.addEventListener('click', () => runCompanyAdminAction('inflation', Number(document.getElementById('company-admin-inflation-input')?.value)));
+        document.getElementById('company-admin-drop-btn')?.addEventListener('click', () => runCompanyAdminAction('drop', Number(document.getElementById('company-admin-drop-input')?.value)));
+        document.getElementById('company-admin-pause-btn')?.addEventListener('click', () => runCompanyAdminAction(companyMarketSnapshot?.paused ? 'resume' : 'pause'));
         document.getElementById('cloud-load-btn').addEventListener('click', () => chooseCloudSaveToLoad());
         document.getElementById('cloud-logout-btn').addEventListener('click', async () => {
             await supabaseClient.auth.signOut();
@@ -3165,6 +3565,7 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
 
         // --- LOCAL STORAGE (AUTO-SAVE) ---
         async function saveGame() {
+            if (companyInvestmentInProgress) return false;
             game.lastActiveAt = Date.now();
             localStorage.setItem('ultimateIdleClicker_scaled_clean_save', JSON.stringify(game));
             showToast();
@@ -3792,7 +4193,7 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
 
         // --- GAME LOOP ---
         setInterval(() => {
-            if (hardResetInProgress) return;
+            if (hardResetInProgress || companyInvestmentInProgress) return;
             const autoClickers = Math.max(0, Number(game.autoClickers) || 0);
             const multiplier = Math.max(1, Number(game.multiplier) || 1);
             const regularCps = autoClickers * multiplier * getOverclockMultiplier() * getAutoAcceleratorMultiplier() * getAdminAbuseClickMultiplier();
@@ -3812,6 +4213,7 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
         // Keep local progress safe every 20 seconds without starting a second overlapping
         // cloud request; cloud autosave has its own 10-second loop below.
         setInterval(() => {
+            if (companyInvestmentInProgress) return;
             game.lastActiveAt = Date.now();
             localStorage.setItem('ultimateIdleClicker_scaled_clean_save', JSON.stringify(game));
         }, 20000);
@@ -4317,6 +4719,7 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
 
         // --- INTERACTION LOGIC ---
         function performMainClick() {
+            if (companyInvestmentInProgress) return;
             playGameSound('click');
             // Manual clicks stay reliable even if an older save is missing a newer field.
             const clicksPerClick = Number(game.clicksPerClick);
@@ -4753,6 +5156,7 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
         cloudResetVersion = Number(localStorage.getItem('ultimateIdleClicker_cloud_reset_version') || 0);
         updateUI();
         initializeCloudSave();
+        initializeCompanyMarket();
         loadAdminAbuseSettings();
         setInterval(loadAdminAbuseSettings, 5000);
 
