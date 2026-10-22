@@ -3423,7 +3423,7 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button{display:bloc
             return Number.isFinite(value) && value > 0 ? Math.min(value, 100000) : 1;
         }
 
-        // Short embedded sounds keep the downloaded game as a single self-contained HTML file.
+        // Sound files are stored beside this HTML file on the Halloween branch.
         const GAME_SOUND_DATA = {
             click: 'Click%201.mp3',
             purchase: 'Purchase%202.mp3'
