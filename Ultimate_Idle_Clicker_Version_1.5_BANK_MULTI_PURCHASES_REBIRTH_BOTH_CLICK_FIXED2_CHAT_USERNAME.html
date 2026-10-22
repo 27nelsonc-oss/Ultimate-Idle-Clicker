@@ -1165,6 +1165,7 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
         let cloudUser = null;
         let companyInvestmentInProgress = false;
         let companyMarketRefreshInProgress = false;
+        let companyMarketRefreshQueued = false;
         let companyMarketSnapshot = null;
         let companyMarketTimer = null;
         let chatChannel = null;
@@ -3142,14 +3143,19 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
         }
 
         async function refreshCompanyMarket() {
-            if (!supabaseClient || companyMarketRefreshInProgress || companyInvestmentInProgress) return;
+            if (!supabaseClient) return;
+            if (companyInvestmentInProgress || companyMarketRefreshInProgress) {
+                companyMarketRefreshQueued = true;
+                return;
+            }
+            companyMarketRefreshQueued = false;
             companyMarketRefreshInProgress = true;
             const requestUserId = cloudUser?.id || null;
             try {
                 const { data, error } = await supabaseClient.rpc('company_market_snapshot');
                 if (error) throw error;
                 if ((cloudUser?.id || null) !== requestUserId) {
-                    setTimeout(() => refreshCompanyMarket(), 0);
+                    companyMarketRefreshQueued = true;
                     return;
                 }
                 renderCompanyMarket(data);
@@ -3166,6 +3172,10 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
                 setCompanyStatus(cloudUser ? 'Market could not refresh: ' + error.message : 'Sign in to view the live market.', true);
             } finally {
                 companyMarketRefreshInProgress = false;
+                if (companyMarketRefreshQueued && !companyInvestmentInProgress) {
+                    companyMarketRefreshQueued = false;
+                    setTimeout(() => refreshCompanyMarket(), 0);
+                }
             }
         }
 
