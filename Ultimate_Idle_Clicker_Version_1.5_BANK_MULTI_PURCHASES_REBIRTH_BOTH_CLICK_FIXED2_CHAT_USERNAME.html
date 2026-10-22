@@ -3228,8 +3228,26 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
             let reservedAmount = amount;
             try {
                 // Sync before showing blocking prompts, but do not reserve clicks until all prompts are finished.
-                const synced = await cloudSaveGame(false, true);
-                if (!synced) throw new Error('Your latest progress could not be safely synced. Load the latest cloud save if a conflict was reported, then try again.');
+                // A normal autosave/load already in flight can make cloudSaveGame return false;
+                // wait for that operation and retry before treating the investment as blocked.
+                let synced = false;
+                for (let attempt = 0; attempt < 4 && !synced; attempt++) {
+                    if (cloudConflictDetected) {
+                        throw new Error('A newer cloud save exists than this session has loaded. Use “Load from Cloud”, check your latest clicks, then try investing again. No clicks were reserved.');
+                    }
+                    while (cloudLoadInProgress || cloudSaveInProgress) {
+                        await new Promise(resolve => setTimeout(resolve, 50));
+                        if (!supabaseClient || !cloudUser) throw new Error('You signed out before the investment could be synced. No clicks were reserved.');
+                    }
+                    synced = await cloudSaveGame(false, true);
+                    if (!synced && cloudConflictDetected) {
+                        throw new Error('A newer cloud save exists than this session has loaded. Use “Load from Cloud”, check your latest clicks, then try investing again. No clicks were reserved.');
+                    }
+                    if (!synced && attempt < 3) await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                if (!synced) {
+                    throw new Error('Cloud saving is still busy. Wait a moment and try investing again. No clicks were reserved.');
+                }
 
                 const { data: existing, error: readError } = await supabaseClient
                     .from('game_saves')
