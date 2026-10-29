@@ -1,3 +1,12 @@
+### 2026-10-29 — Add a matching minimize button to Static chat (Halloween branch)
+- **Request:** Add a Chat minimize control matching the existing `+` / `−` buttons and avoid the recurring breakage from prior minimize-button edits.
+- **HTML:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`.
+- **Implementation:** Added a single `#chat-minimize-btn` beside the existing `#chat-title`; wrapped all existing chat content (but not the heading) in a unique `#chat-panel-content` wrapper. The click handler uses the same `aria-expanded`, text, accessible label, and title pattern as My Titles. It uses the wrapper's `hidden` property, without changing chat message handlers or save logic.
+- **Mobile interaction:** The fixed Mobile click button's vertical offset is removed while Static chat is minimized. The minimized-state class tracks chat collapse independently from the Static chat preference, so toggling Static chat does not desynchronize the collapse state.
+- **Verification:** Each HTML/CSS/JS insertion anchor was checked for a single expected match before patching; IDs are unique and style/script tag counts are balanced. HTML re-fetched after commits. No browser interaction test, JS parser test, or standalone downloaded-file test was performed.
+- **HTML commits:** `de504e0fd4f50341dd09bbba6b7c930db93e1457`, then `9beb04a06a4cfc67c68d8fada4e537d9bcdd8bf3`.
+- **Rollback:** Revert the second commit first, then the first commit, on `Halloween` only. Keep `main` and `game-development` untouched.
+
 ### 2026-10-29 — Refine Static chat placement and Settings toggle (Halloween branch)
 - **Request:** Make the Static chat toggle in Settings match the other settings buttons and pin active Static chat to the bottom-right.
 - **Change:** Added the Static chat toggle to the existing Audio/Mobile toggle CSS rule. Changed the fixed Chat panel's desktop and narrow-screen anchors from left to right; kept the viewport height/scroll behavior and Mobile button's upward offset when both options are enabled.
