@@ -1,3 +1,11 @@
+### 2026-10-29 — Add a matching minimize button to Static chat (Halloween branch)
+- Added a compact 28×28 Chat header button matching the existing My Titles and Global Company minimize controls. It switches between **−** (expanded) and **+** (minimized).
+- Wrapped the existing chat contents in one uniquely identified container so minimizing hides the message list, input, send button, and status rows while leaving the heading/button visible.
+- Kept chat messaging, login, saved settings, and cloud data unchanged. When Static chat and the Mobile button are both enabled, minimizing chat also removes the Mobile button's reserved vertical offset.
+- HTML commits: `de504e0fd4f50341dd09bbba6b7c930db93e1457` (feature) and `9beb04a06a4cfc67c68d8fada4e537d9bcdd8bf3` (collapse-state/mobile-offset correction).
+- Verification: source-anchor uniqueness, unique IDs, and balanced style/script tags checked; re-fetched the HTML for final verification. No live browser visual/interaction test or standalone HTML run performed.
+- Rollback: revert `9beb04a06a4cfc67c68d8fada4e537d9bcdd8bf3` first, then `de504e0fd4f50341dd09bbba6b7c930db93e1457`, on `Halloween` only. Do not change `main` or `game-development`.
+
 ### 2026-10-29 — Refine Static chat placement and Settings toggle (Halloween branch)
 - Moved Static chat from the bottom-left to the bottom-right when enabled, including narrow-screen positioning.
 - Styled the Static chat On/Off control to match the existing Audio and Mobile button toggles in Settings.
