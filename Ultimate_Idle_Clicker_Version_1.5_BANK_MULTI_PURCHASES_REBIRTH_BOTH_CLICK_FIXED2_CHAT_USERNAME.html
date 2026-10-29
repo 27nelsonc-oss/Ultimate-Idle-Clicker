@@ -513,8 +513,8 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
 #mobile-click-button.enabled{display:block}
 body.static-chat-enabled #chat-panel{position:fixed!important;left:auto!important;right:12px!important;bottom:12px!important;z-index:8998;width:min(320px,calc(100vw - 24px))!important;max-width:320px!important;max-height:calc(100vh - 24px);overflow-y:auto;margin:0!important;box-sizing:border-box!important;box-shadow:0 3px 18px #000c}
 body.static-chat-enabled #mobile-click-button.enabled{bottom:calc(16px + min(440px,70vh));right:16px}
-body.static-chat-enabled.static-chat-minimized #mobile-click-button.enabled{bottom:16px}
-@media(max-width:420px){body.static-chat-enabled #chat-panel{left:auto!important;right:8px!important;bottom:8px!important;width:calc(100vw - 16px)!important;max-width:calc(100vw - 16px)!important}body.static-chat-enabled #mobile-click-button.enabled{bottom:calc(16px + min(440px,70vh));right:8px}body.static-chat-enabled.static-chat-minimized #mobile-click-button.enabled{bottom:8px}}
+body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{bottom:16px}
+@media(max-width:420px){body.static-chat-enabled #chat-panel{left:auto!important;right:8px!important;bottom:8px!important;width:calc(100vw - 16px)!important;max-width:calc(100vw - 16px)!important}body.static-chat-enabled #mobile-click-button.enabled{bottom:calc(16px + min(440px,70vh));right:8px}body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{bottom:8px}}
 @media(max-width:850px){#game-menu-button,#game-settings-button{font-size:.9rem;padding:8px 10px}}
 </style>
 
@@ -4048,7 +4048,7 @@ body.static-chat-enabled.static-chat-minimized #mobile-click-button.enabled{bott
                 chatMinimizeButton.textContent = isExpanded ? '+' : '−';
                 chatMinimizeButton.setAttribute('aria-label', isExpanded ? 'Expand chat panel' : 'Minimize chat panel');
                 chatMinimizeButton.setAttribute('title', isExpanded ? 'Expand chat panel' : 'Minimize chat panel');
-                document.body.classList.toggle('static-chat-minimized', isExpanded && STATIC_CHAT_ENABLED);
+                document.body.classList.toggle('chat-panel-minimized', isExpanded);
             });
         }
 
