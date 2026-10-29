@@ -1,3 +1,11 @@
+### 2026-10-29 — Refine Static chat placement and Settings toggle (Halloween branch)
+- Moved Static chat from the bottom-left to the bottom-right when enabled, including narrow-screen positioning.
+- Styled the Static chat On/Off control to match the existing Audio and Mobile button toggles in Settings.
+- Preserved the existing saved preference, chat behavior, viewport height limit, and Mobile button overlap avoidance.
+- HTML commit: 1e62a9384e744b7ad637018d4354c2a1cc68c9ed
+- Verification: checked the three targeted CSS replacements occurred exactly once, confirmed balanced style/script tags, and re-fetched the committed HTML to verify the new selectors and positioning. No browser visual/interaction test performed.
+- Rollback: revert 1e62a9384e744b7ad637018d4354c2a1cc68c9ed on `Halloween` only. Do not change `main` or `game-development`.
+
 ### 2026-10-29 — Add optional Static chat setting (Halloween branch)
 - Added a Settings toggle called **Static chat**, Off by default and saved in browser localStorage.
 - When enabled, the existing Chat panel is fixed to the bottom-left so it stays in place while the page scrolls. The panel has a viewport-limited height and can scroll internally on shorter screens.
