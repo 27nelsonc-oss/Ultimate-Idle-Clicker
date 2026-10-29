@@ -1,3 +1,11 @@
+### 2026-10-29 — Add Chat minimize to the in-game Update Log (Halloween branch)
+- **Request:** Add the latest Static Chat minimize update to the in-game Update Log.
+- **Change:** Updated the player-facing latest-update date to October 29, 2026; added a concise bullet explaining the matching +/− Chat minimize control; corrected the earlier Static Chat description to say bottom-right, matching the current implementation.
+- **Scope:** Only the existing editable Update Log text in the Halloween HTML was changed. No game behavior, chat logic, or saved data changed.
+- **Verification:** Re-checked the targeted text anchors before writing, confirmed the updated date and both Static Chat log items, and checked balanced style/script tags. No browser UI test performed.
+- **HTML commit:** `f1b56bea87c9eb363a2b8d0d35df885809f2c97b`.
+- **Rollback:** Revert the HTML commit above on `Halloween` only; leave `main` and `game-development` untouched.
+
 ### 2026-10-29 — Add a matching minimize button to Static chat (Halloween branch)
 - **Request:** Add a Chat minimize control matching the existing `+` / `−` buttons and avoid the recurring breakage from prior minimize-button edits.
 - **HTML:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`.
