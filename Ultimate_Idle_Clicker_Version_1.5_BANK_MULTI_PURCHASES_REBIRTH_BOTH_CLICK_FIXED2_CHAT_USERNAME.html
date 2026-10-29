@@ -513,12 +513,14 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
 #mobile-click-button.enabled{display:block}
 body.static-chat-enabled #chat-panel{position:fixed!important;left:auto!important;right:12px!important;bottom:12px!important;z-index:8998;width:min(320px,calc(100vw - 24px))!important;max-width:320px!important;max-height:calc(100vh - 24px);overflow-y:auto;margin:0!important;box-sizing:border-box!important;box-shadow:0 3px 18px #000c}
 body.static-chat-enabled #mobile-click-button.enabled{bottom:calc(16px + min(440px,70vh));right:16px}
-@media(max-width:420px){body.static-chat-enabled #chat-panel{left:auto!important;right:8px!important;bottom:8px!important;width:calc(100vw - 16px)!important;max-width:calc(100vw - 16px)!important}body.static-chat-enabled #mobile-click-button.enabled{bottom:calc(16px + min(440px,70vh));right:8px}}
+body.static-chat-enabled.static-chat-minimized #mobile-click-button.enabled{bottom:16px}
+@media(max-width:420px){body.static-chat-enabled #chat-panel{left:auto!important;right:8px!important;bottom:8px!important;width:calc(100vw - 16px)!important;max-width:calc(100vw - 16px)!important}body.static-chat-enabled #mobile-click-button.enabled{bottom:calc(16px + min(440px,70vh));right:8px}body.static-chat-enabled.static-chat-minimized #mobile-click-button.enabled{bottom:8px}}
 @media(max-width:850px){#game-menu-button,#game-settings-button{font-size:.9rem;padding:8px 10px}}
 </style>
 
 <style>
 /* Global Company Market — Halloween branch */
+.chat-panel .chat-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:8px}.chat-panel-heading .section-title{margin:0;min-width:0}.chat-panel-heading .chat-minimize-btn{display:inline-flex;flex:0 0 28px;width:28px!important;height:28px;max-width:28px;min-width:28px;box-sizing:border-box;align-items:center;justify-content:center;padding:0;margin:0;border:1px solid #65452f;border-radius:6px;background:#35251c;color:inherit;font-size:1rem;font-weight:bold;line-height:1;cursor:pointer}.chat-panel #chat-panel-content[hidden]{display:none!important}
 .company-market-panel { width:min(92%,320px); max-width:320px; box-sizing:border-box; margin:0 auto; border:1px solid #8f4a1b; }
 .company-market-panel .company-panel-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; }
 .company-market-panel .company-panel-heading .section-title { margin:0; min-width:0; }
@@ -868,7 +870,11 @@ body.static-chat-enabled #mobile-click-button.enabled{bottom:calc(16px + min(440
 
     <!-- Public Chat Panel -->
     <div class="panel chat-panel" id="chat-panel">
-        <h2 class="section-title" id="chat-title"><span id="chat-title-text">💬 Chat</span><span id="dm-unread-badge" class="dm-unread-badge"></span></h2>
+        <div class="chat-panel-heading">
+            <h2 class="section-title" id="chat-title"><span id="chat-title-text">💬 Chat</span><span id="dm-unread-badge" class="dm-unread-badge"></span></h2>
+            <button type="button" class="chat-minimize-btn" id="chat-minimize-btn" aria-label="Minimize chat panel" title="Minimize chat panel" aria-expanded="true" aria-controls="chat-panel-content">−</button>
+        </div>
+        <div id="chat-panel-content">
         <div id="dm-unread-list" style="display:none; margin-bottom:8px;"></div>
         <button type="button" id="chat-back-global-btn" class="btn-upgrade" style="display:none; margin-bottom:8px;">← Back to Global Chat</button>
         <div class="sub-stat" id="chat-login-status" style="margin-bottom:8px;">Sign in to chat with other players.</div>
@@ -880,6 +886,7 @@ body.static-chat-enabled #mobile-click-button.enabled{bottom:calc(16px + min(440
         <div style="display:flex; justify-content:space-between; gap:8px; margin-top:5px;">
             <div class="sub-stat" id="chat-status"></div>
             <div class="sub-stat"><span id="chat-char-count">0</span>/300</div>
+        </div>
         </div>
     </div>
 
@@ -4030,6 +4037,20 @@ body.static-chat-enabled #mobile-click-button.enabled{bottom:calc(16px + min(440
             updateStaticChatSettingUI();
         });
         updateStaticChatSettingUI();
+
+        const chatMinimizeButton = document.getElementById('chat-minimize-btn');
+        const chatPanelContent = document.getElementById('chat-panel-content');
+        if (chatMinimizeButton && chatPanelContent) {
+            chatMinimizeButton.addEventListener('click', () => {
+                const isExpanded = chatMinimizeButton.getAttribute('aria-expanded') === 'true';
+                chatPanelContent.hidden = isExpanded;
+                chatMinimizeButton.setAttribute('aria-expanded', String(!isExpanded));
+                chatMinimizeButton.textContent = isExpanded ? '+' : '−';
+                chatMinimizeButton.setAttribute('aria-label', isExpanded ? 'Expand chat panel' : 'Minimize chat panel');
+                chatMinimizeButton.setAttribute('title', isExpanded ? 'Expand chat panel' : 'Minimize chat panel');
+                document.body.classList.toggle('static-chat-minimized', isExpanded && STATIC_CHAT_ENABLED);
+            });
+        }
 
         const MOBILE_BUTTON_SETTING_KEY = 'ultimateIdleClickerMobileButtonEnabled';
         let MOBILE_BUTTON_ENABLED = false;
