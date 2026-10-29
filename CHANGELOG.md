@@ -1,3 +1,12 @@
+### 2026-10-29 — Add optional Static chat setting (Halloween branch)
+- Added a Settings toggle called **Static chat**, Off by default and saved in browser localStorage.
+- When enabled, the existing Chat panel is fixed to the bottom-left so it stays in place while the page scrolls. The panel has a viewport-limited height and can scroll internally on shorter screens.
+- When Static chat and the fixed Mobile button are both enabled, the Mobile button moves upward so it does not sit over the chat. Narrow screens use adjusted left/right margins.
+- No chat messaging logic, account data, cloud save format, or game progression changed.
+- HTML commit: 5b566fe9f76873c7dd00688c7849dc5f2bc3267d
+- Verification before commit: confirmed unique Settings toggle and handler, persistence key, CSS positioning and mobile-button offset, and balanced HTML/style/script tags. No browser visual/interaction test performed.
+- Rollback: revert the Static chat HTML commit on `Halloween` only. Do not change `main` or `game-development`.
+
 ### 2026-10-22 — Prevent Company Market refresh timeouts
 - **Problem:** Company Market snapshots were failing with `canceling statement due to statement timeout`, leaving the market panel empty.
 - **Root cause confirmed in Supabase logs:** Concurrent snapshot requests queued on the single market-state row lock inside `company_advance_market()`; multiple requests timed out while waiting. The snapshot also includes a small transaction-history cost-basis calculation, but the logged stalls specifically included lock contention and other snapshot statements.
