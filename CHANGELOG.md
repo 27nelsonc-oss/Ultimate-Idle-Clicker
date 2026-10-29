@@ -1,3 +1,10 @@
+### 2026-10-29 — Add Chat minimize to the in-game Update Log (Halloween branch)
+- Updated the in-game Update Log heading to October 29, 2026.
+- Added the Static Chat minimize button update to the player-facing list and corrected the older Static Chat placement description from bottom-left to bottom-right.
+- HTML commit: `f1b56bea87c9eb363a2b8d0d35df885809f2c97b`.
+- Verification: confirmed the in-game log contains the updated date, accurate bottom-right Static Chat description, and new +/− minimize entry; style and script tag counts remain balanced.
+- Rollback: revert `f1b56bea87c9eb363a2b8d0d35df885809f2c97b` on `Halloween` only. Do not change `main` or `game-development`.
+
 ### 2026-10-29 — Add a matching minimize button to Static chat (Halloween branch)
 - Added a compact 28×28 Chat header button matching the existing My Titles and Global Company minimize controls. It switches between **−** (expanded) and **+** (minimized).
 - Wrapped the existing chat contents in one uniquely identified container so minimizing hides the message list, input, send button, and status rows while leaving the heading/button visible.
