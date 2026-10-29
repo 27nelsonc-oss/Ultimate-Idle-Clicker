@@ -1,3 +1,12 @@
+### 2026-10-29 — Refine Static chat placement and Settings toggle (Halloween branch)
+- **Request:** Make the Static chat toggle in Settings match the other settings buttons and pin active Static chat to the bottom-right.
+- **Change:** Added the Static chat toggle to the existing Audio/Mobile toggle CSS rule. Changed the fixed Chat panel's desktop and narrow-screen anchors from left to right; kept the viewport height/scroll behavior and Mobile button's upward offset when both options are enabled.
+- **File:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html` (Halloween branch only). No chat messaging logic, local preference key, cloud save, progression, or database behavior changed.
+- **Verification:** Confirmed each intended CSS replacement matched exactly once before writing; verified style/script tag counts are balanced and re-fetched the committed HTML to confirm the right-side anchors and shared Settings toggle style. No live browser visual/interaction test was performed.
+- **HTML commit:** 1e62a9384e744b7ad637018d4354c2a1cc68c9ed
+- **Changelog commit:** 5d722bd4e99fad61b8d296c4e33f6e743fc693bf
+- **Rollback:** Revert the HTML commit above on `Halloween`; the documentation-only commit can also be reverted if needed. Do not change `main` or `game-development`.
+
 ### 2026-10-29 — Add optional Static chat setting (Halloween branch)
 - **Request:** Add an optional Settings toggle to pin Chat at the bottom-left and avoid overlap with the fixed Mobile button.
 - **Change:** Added `ultimateIdleClickerStaticChatEnabled` as a browser-local preference (off by default); `updateStaticChatSettingUI()` updates the toggle and body class. CSS fixes the existing Chat panel to the bottom-left, limits it to the viewport height, and moves the Mobile button upward when both options are on.
