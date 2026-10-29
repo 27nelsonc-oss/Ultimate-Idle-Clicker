@@ -507,13 +507,13 @@ body:not(.game-entry-locked):not(.game-menu-open) #game-menu-button,body:not(.ga
 #game-settings-panel.open{display:block}
 #game-settings-panel h3{margin:0 0 10px;color:#ffb347;font-size:1rem}
 #game-settings-audio-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
-#game-settings-audio-toggle,#game-settings-mobile-toggle{min-width:62px;margin:0;padding:6px 10px;background:#24150e;color:#fff;border:1px solid #ff7518;border-radius:7px;cursor:pointer}
+#game-settings-audio-toggle,#game-settings-mobile-toggle,#game-settings-static-chat-toggle{min-width:62px;margin:0;padding:6px 10px;background:#24150e;color:#fff;border:1px solid #ff7518;border-radius:7px;cursor:pointer}
 #game-settings-mobile-row,#game-settings-static-chat-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px}
 #mobile-click-button{display:none;position:fixed;right:16px;bottom:16px;z-index:8999;width:auto;min-width:112px;margin:0;padding:14px 18px;box-shadow:0 3px 14px #000b;touch-action:none}
 #mobile-click-button.enabled{display:block}
-body.static-chat-enabled #chat-panel{position:fixed!important;left:12px!important;bottom:12px!important;right:auto!important;z-index:8998;width:min(320px,calc(100vw - 24px))!important;max-width:320px!important;max-height:calc(100vh - 24px);overflow-y:auto;margin:0!important;box-sizing:border-box!important;box-shadow:0 3px 18px #000c}
+body.static-chat-enabled #chat-panel{position:fixed!important;left:auto!important;right:12px!important;bottom:12px!important;z-index:8998;width:min(320px,calc(100vw - 24px))!important;max-width:320px!important;max-height:calc(100vh - 24px);overflow-y:auto;margin:0!important;box-sizing:border-box!important;box-shadow:0 3px 18px #000c}
 body.static-chat-enabled #mobile-click-button.enabled{bottom:calc(16px + min(440px,70vh));right:16px}
-@media(max-width:420px){body.static-chat-enabled #chat-panel{left:8px!important;bottom:8px!important;width:calc(100vw - 16px)!important;max-width:calc(100vw - 16px)!important}body.static-chat-enabled #mobile-click-button.enabled{bottom:calc(16px + min(440px,70vh));right:8px}}
+@media(max-width:420px){body.static-chat-enabled #chat-panel{left:auto!important;right:8px!important;bottom:8px!important;width:calc(100vw - 16px)!important;max-width:calc(100vw - 16px)!important}body.static-chat-enabled #mobile-click-button.enabled{bottom:calc(16px + min(440px,70vh));right:8px}}
 @media(max-width:850px){#game-menu-button,#game-settings-button{font-size:.9rem;padding:8px 10px}}
 </style>
 
