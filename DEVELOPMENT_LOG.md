@@ -1,3 +1,11 @@
+### 2026-10-29 — Add optional Static chat setting (Halloween branch)
+- **Request:** Add an optional Settings toggle to pin Chat at the bottom-left and avoid overlap with the fixed Mobile button.
+- **Change:** Added `ultimateIdleClickerStaticChatEnabled` as a browser-local preference (off by default); `updateStaticChatSettingUI()` updates the toggle and body class. CSS fixes the existing Chat panel to the bottom-left, limits it to the viewport height, and moves the Mobile button upward when both options are on.
+- **File:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html` (Halloween branch only). No chat messaging logic, cloud-save format, game progression, or database schema changed.
+- **Verification:** Confirmed the setting toggle/handler and preference key are unique, the CSS rules exist, and HTML/style/script tag counts are balanced. No browser visual or interaction test performed; user should test Static chat alone and with Mobile button also enabled.
+- **HTML commit:** 5b566fe9f76873c7dd00688c7849dc5f2bc3267d
+- **Rollback:** Revert the Static chat HTML commit on `Halloween` only. Do not change `main` or `game-development`.
+
 ### 2026-10-22 — Prevent Company Market refresh timeouts
 - **Request/problem:** The player reported the Company Market panel stopped loading with `Market could not refresh: canceling statement due to statement timeout`.
 - **Root cause:** Supabase PostgreSQL logs showed repeated timeouts while snapshot calls waited on the single `game_company_market_state` row lock held by `company_advance_market()`. The logs also showed timeouts in snapshot subqueries while these requests were stalled.
