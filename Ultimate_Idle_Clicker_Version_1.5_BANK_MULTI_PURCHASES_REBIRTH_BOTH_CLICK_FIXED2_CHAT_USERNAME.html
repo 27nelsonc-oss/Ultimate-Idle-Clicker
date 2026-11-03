@@ -3841,6 +3841,9 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
                     if (!Array.isArray(game.ownedRelics)) game.ownedRelics = [];
                     game.ownedRelics = [...new Set(game.ownedRelics.filter(id => typeof id === 'string' && id.trim()))];
                     if (typeof game.equippedRelic !== 'string' || !game.ownedRelics.includes(game.equippedRelic)) game.equippedRelic = null;
+                    if (!Array.isArray(game.ownedClickerRelics)) game.ownedClickerRelics = [];
+                    game.ownedClickerRelics = [...new Set(game.ownedClickerRelics.filter(id => typeof id === 'string' && id.trim()))];
+                    if (typeof game.equippedClickerRelic !== 'string' || !game.ownedClickerRelics.includes(game.equippedClickerRelic)) game.equippedClickerRelic = null;
                 } catch (e) {
                     console.error("Error loading save file", e);
                 }
@@ -4358,7 +4361,7 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
         // --- UI UPDATE ---
         function updateUI() {
             document.getElementById('click-display').innerText = Math.floor(game.clicks).toLocaleString();
-            document.getElementById('cpc-display').innerText = `Clicks per Click: ${(game.clicksPerClick * game.multiplier * getClickOverdriveMultiplier() * getAdminAbuseClickMultiplier()).toFixed(1)}`;
+            document.getElementById('cpc-display').innerText = `Clicks per Click: ${(game.clicksPerClick * game.multiplier * getClickOverdriveMultiplier() * getAdminAbuseClickMultiplier() * getClickerRelicMultiplier()).toFixed(1)}`;
             
             const autoClickers = Math.max(0, Number(game.autoClickers) || 0);
             const multiplier = Math.max(1, Number(game.multiplier) || 1);
@@ -5374,7 +5377,9 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
                     bankBalance: 0,
                     bankLastInterestAt: Date.now(),
                     ownedRelics: [],
-                    equippedRelic: null
+                    equippedRelic: null,
+                    ownedClickerRelics: [],
+                    equippedClickerRelic: null
                 };
 
                 // Save the reset state locally immediately, then synchronize the cloud copy.
