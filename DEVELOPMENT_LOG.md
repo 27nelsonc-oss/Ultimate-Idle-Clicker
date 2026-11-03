@@ -5,7 +5,7 @@
 - **Changes in this continuation:** Added the Discount Relic entry to the in-game Update Log, clarified the per-family no-offer comment in the shop spawn function, and updated CHANGELOG.md.
 - **Save compatibility:** Uses existing game save JSON fields only; no Supabase schema changes. Discount Relics survive rebirth and are cleared by Hard Reset.
 - **Verification:** Source checks confirmed rarity thresholds, gem prices, discount percentages, independent family roll, shop/cart purchase paths, owned-only equipment, local/cloud save fields, reset behavior, and the two intended upgrade-cost call sites. JavaScript syntax checks are recorded after the final re-fetch. No live browser shop-spawn, checkout, equipment, or price interaction test performed.
-- **Rollback:** Revert the Halloween HTML and documentation commits made for this release. No database rollback is needed. Do not change main or game-development.
+- **Rollback:** Reverting this continuation's HTML commit removes the in-game Update Log entry and comment clarification; reverting its documentation commits removes the release notes. The Discount Relic gameplay code pre-dated this continuation, so removing the mechanic itself requires identifying and reverting its earlier implementation commit. No database rollback is needed. Do not change main or game-development.
 
 ### 2026-11-03 — Add normal Clicker Relics (Halloween)
 - **Request:** Add Clicker Relic rarities with the same rarity chances, gem prices, and percentage bonuses as Auto Clicker Relics, but apply the bonus to normal clicking.
