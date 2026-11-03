@@ -4,8 +4,8 @@
 - **Change made:** Removed the Test Gem item markup, its click handler, cart state/row, checkout quantity, click deduction, and gem reward. Preserved Bob and Auto Clicker Relic purchases. Replaced the extra spawn gate plus rarity roll with one per-visit roll: Common 0–50 (50%), Rare 50–75 (25%), Epic 75–85 (10%), Mythic 85–90 (5%), Legendary 90–90.5 (0.5%), and no relic 90.5–100 (9.5%).
 - **Files/functions touched:** Halloween HTML; in-game Update Log; CHANGELOG.md. No Supabase or save-schema changes.
 - **Preserved behavior / compatibility:** Bob and relic purchase IDs, gem prices, cart validation, ownership by exact rarity, equipment behavior, save persistence, and other shop timers remain unchanged.
-- **Tests run and results:** Pending final source re-fetch, JavaScript syntax validation, and deterministic threshold-count verification. No browser shop-spawn or checkout test performed.
-- **Commit SHA:** HTML 4498aa8e3a7e758ce3900c4eed00704b7c1700e9; in-game Update Log ef639966fd8a860ed3ffc4a0e9e9d67544252beb.
+- **Tests run and results:** Re-fetched the final HTML; both inline JavaScript blocks passed syntax compilation. Confirmed no Test Gem/testGem/add-test-gem/gemQuantity references remain, the first slot is an empty placeholder, the Bob/relic inventory indices remain unchanged, and the rarity thresholds map to the requested intervals. No browser shop-spawn or checkout test performed.
+- **Commit SHA:** HTML commits 4498aa8e3a7e758ce3900c4eed00704b7c1700e9, ef639966fd8a860ed3ffc4a0e9e9d67544252beb, and 51926160c0f0bcf34a5c0bed80e4fad5969f50a2.
 - **Rollback instructions:** Revert those HTML commits on Halloween only. No database rollback is needed. Do not change main or game-development.
 
 ### 2026-11-03 — Fix Auto Clicker Relic ownership by rarity (Halloween)
