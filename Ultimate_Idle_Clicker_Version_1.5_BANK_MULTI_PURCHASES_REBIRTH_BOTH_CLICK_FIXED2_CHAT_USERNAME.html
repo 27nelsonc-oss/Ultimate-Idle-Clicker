@@ -617,8 +617,12 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
 }
 #relics-panel h2 { margin:0; color:#d8b5ff; font-size:1.25rem; }
 #relics-panel .relics-empty { margin-top:14px; padding:14px; border:1px dashed #8963aa; border-radius:8px; color:#d9cce8; line-height:1.45; }
-#relics-panel .relic-owned-card { margin-top:10px; padding:12px; border:1px solid #765394; border-radius:8px; background:#30213d; }
-#relics-panel .relic-owned-card button { width:100%; margin-top:9px; }
+#relics-panel .relic-category { margin-top:12px; }
+#relics-panel .relic-category-toggle { display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; margin:0; padding:12px; border:1px solid #765394; border-radius:8px; background:#30213d; color:#fff; text-align:left; cursor:pointer; }
+#relics-panel .relic-category-toggle .relic-category-arrow { flex:0 0 auto; font-size:1.1rem; }
+#relics-panel .relic-rarity-options { display:grid; gap:7px; margin-top:8px; padding:9px; border:1px solid #59416d; border-radius:8px; background:#261b30; }
+#relics-panel .relic-rarity-option { width:100%; margin:0; padding:9px 11px; border:1px solid currentColor; border-radius:7px; font-weight:bold; cursor:pointer; text-align:left; }
+#relics-panel .relic-rarity-option[aria-pressed="true"] { outline:2px solid #fff; outline-offset:2px; }
 #relics-close { float:right; width:auto; margin:0; padding:3px 9px; border:1px solid #8963aa; border-radius:6px; background:#382849; color:white; cursor:pointer; }
 
 </style>
@@ -5421,6 +5425,14 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
             if (button) button.style.top = randomShopExpiresAt > Date.now() ? '84px' : '14px';
         }
 
+        let autoClickerRelicOptionsExpanded = false;
+        const RELIC_RARITY_STYLES = Object.freeze({
+            Common: { background: '#777777', color: '#ffffff' },
+            Rare: { background: '#238b45', color: '#ffffff' },
+            Epic: { background: '#783dbb', color: '#ffffff' },
+            Mythic: { background: '#b52e35', color: '#ffffff' },
+            Legendary: { background: '#e0b52f', color: '#241900' }
+        });
         function renderOwnedRelics() {
             const list = document.getElementById('relics-owned-list');
             const status = document.getElementById('relics-status');
@@ -5437,28 +5449,60 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
                 status.textContent = 'No relic equipped.';
                 return;
             }
-            game.ownedRelics.forEach(id => {
-                const relic = RELIC_DEFINITIONS[id];
-                const card = document.createElement('div');
-                card.className = 'relic-owned-card';
-                const title = document.createElement('strong');
-                title.textContent = relic.name;
-                const description = document.createElement('div');
-                description.className = 'sub-stat';
-                description.textContent = relic.description;
-                const button = document.createElement('button');
-                button.type = 'button';
-                button.className = 'btn-upgrade';
-                button.textContent = game.equippedRelic === id ? 'Unequip' : 'Equip';
-                button.addEventListener('click', () => {
-                    game.equippedRelic = game.equippedRelic === id ? null : id;
-                    saveGame();
-                    renderOwnedRelics();
-                });
-                card.append(title, description, button);
-                list.appendChild(card);
+
+            const category = document.createElement('div');
+            category.className = 'relic-category';
+            const toggle = document.createElement('button');
+            toggle.type = 'button';
+            toggle.className = 'relic-category-toggle';
+            toggle.setAttribute('aria-expanded', String(autoClickerRelicOptionsExpanded));
+            const label = document.createElement('strong');
+            label.textContent = 'Auto Clicker Relic';
+            const arrow = document.createElement('span');
+            arrow.className = 'relic-category-arrow';
+            arrow.textContent = autoClickerRelicOptionsExpanded ? '⌄' : '^';
+            toggle.append(label, arrow);
+            if (game.equippedRelic) {
+                const equippedStyle = RELIC_RARITY_STYLES[RELIC_DEFINITIONS[game.equippedRelic].rarity];
+                if (equippedStyle) {
+                    toggle.style.background = equippedStyle.background;
+                    toggle.style.borderColor = equippedStyle.background;
+                    toggle.style.color = equippedStyle.color;
+                }
+            }
+            toggle.addEventListener('click', () => {
+                autoClickerRelicOptionsExpanded = !autoClickerRelicOptionsExpanded;
+                renderOwnedRelics();
             });
-            status.textContent = game.equippedRelic ? 'Equipped: ' + RELIC_DEFINITIONS[game.equippedRelic].name : 'No relic equipped.';
+            category.appendChild(toggle);
+
+            if (autoClickerRelicOptionsExpanded) {
+                const options = document.createElement('div');
+                options.className = 'relic-rarity-options';
+                const rarityOrder = ['Common', 'Rare', 'Epic', 'Mythic', 'Legendary'];
+                rarityOrder.forEach(rarity => {
+                    const id = AUTO_CLICKER_RELIC_IDS.find(relicId => RELIC_DEFINITIONS[relicId].rarity === rarity && game.ownedRelics.includes(relicId));
+                    if (!id) return;
+                    const relic = RELIC_DEFINITIONS[id];
+                    const style = RELIC_RARITY_STYLES[rarity];
+                    const option = document.createElement('button');
+                    option.type = 'button';
+                    option.className = 'relic-rarity-option';
+                    option.textContent = rarity + (game.equippedRelic === id ? ' — Equipped' : '');
+                    option.setAttribute('aria-pressed', String(game.equippedRelic === id));
+                    option.style.background = style.background;
+                    option.style.color = style.color;
+                    option.addEventListener('click', () => {
+                        game.equippedRelic = game.equippedRelic === id ? null : id;
+                        saveGame();
+                        renderOwnedRelics();
+                    });
+                    options.appendChild(option);
+                });
+                category.appendChild(options);
+            }
+            list.appendChild(category);
+            status.textContent = game.equippedRelic ? 'Equipped: ' + RELIC_DEFINITIONS[game.equippedRelic].rarity + ' Auto Clicker Relic.' : 'No relic equipped.';
         }
 
         document.getElementById('relics-launcher').addEventListener('click', () => {
