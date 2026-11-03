@@ -2,8 +2,8 @@
 - Removed the temporary Test Gem item, its Add to Cart handler, cart row/state, click deduction, and gem reward. The first shop slot is now an empty placeholder; Bob and Auto Clicker Relic purchases remain unchanged.
 - Corrected the relic spawn calculation so the listed rarity chances are the actual chances per Traveling Shop visit: Common 50%, Rare 25%, Epic 10%, Mythic 5%, Legendary 0.5%, and no relic offer 9.5%. The previous extra 50% spawn gate halved every listed per-visit chance; it did not reverse the Common/Rare ratio.
 - Updated the in-game Update Log and this changelog. No save schema or Supabase changes.
-- HTML commits: 4498aa8e3a7e758ce3900c4eed00704b7c1700e9 (shop logic/UI) and ef639966fd8a860ed3ffc4a0e9e9d67544252beb (in-game Update Log).
-- Verification: pending final re-fetch, syntax validation, and a deterministic count check of the rarity thresholds. No browser shop-spawn or checkout test performed.
+- HTML commits: 4498aa8e3a7e758ce3900c4eed00704b7c1700e9 (shop logic/UI), ef639966fd8a860ed3ffc4a0e9e9d67544252beb (in-game Update Log), and 51926160c0f0bcf34a5c0bed80e4fad5969f50a2 (checkout cleanup).
+- Verification: re-fetched the final HTML; both inline JavaScript blocks passed syntax compilation; confirmed no Test Gem/testGem/cart handler/gemQuantity references remain; confirmed the per-visit rarity thresholds and empty first shop slot. No browser shop-spawn or checkout test performed.
 - Rollback: revert the two HTML commits above on Halloween only; revert this documentation entry separately if needed. Do not change main or game-development.
 
 ### 2026-11-03 — Auto Clicker Relics (Halloween)
