@@ -1,3 +1,11 @@
+### 2026-11-03 — Add temporary Traveling Shop test purchase (Halloween branch)
+- **Request:** Add a test purchase to the Traveling Shop that costs 10 clicks and awards 1 gem; user explicitly expects this offer to be removed later.
+- **File:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`.
+- **Implementation:** Replaced the empty shop placeholder with a clearly labeled temporary Test Gem offer. The button checks that the shop is still active and that the player has at least 10 clicks before deducting 10 and awarding 1 gem. It calls the existing `updateUI()` to refresh displayed values. No new save keys, Supabase calls, or persistent shop state were introduced; the changed game values continue through the existing game-save flow.
+- **Verification:** Checked patch anchors and resulting purchase guard/reward source. No browser UI or live purchase test performed.
+- **HTML commit:** `ac30555285d76d7e06ed87dc845a34127d6c32c3`.
+- **Rollback:** Revert the HTML commit for this entry on `Halloween` only; this restores the empty shop placeholder and leaves `main` and `game-development` untouched.
+
 ### 2026-11-03 — Add the Traveling Shop and admin controls (Halloween branch)
 - **Request:** Add the session-based Traveling Shop and its owner/admin testing controls to the Halloween branch, not `game-development`.
 - **File:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`.
