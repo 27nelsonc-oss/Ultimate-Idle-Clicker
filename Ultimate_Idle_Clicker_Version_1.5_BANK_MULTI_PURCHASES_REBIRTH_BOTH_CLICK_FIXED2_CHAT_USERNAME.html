@@ -560,20 +560,41 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
     cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.45);
 }
 #random-shop-panel {
-    display:none; position:fixed; top:66px; left:14px; z-index:10021;
-    width:min(320px,calc(100vw - 28px)); max-height:min(70vh,520px);
-    overflow-y:auto; box-sizing:border-box; padding:16px; border:1px solid #d6a84f;
-    border-radius:12px; background:#1e1e1e; color:#fff;
-    box-shadow:0 8px 24px rgba(0,0,0,.65); text-align:left;
+    display:none; position:fixed; inset:0; z-index:10021;
+    width:100vw; height:100vh; max-height:100vh; overflow:auto;
+    box-sizing:border-box; padding:clamp(12px,2.5vw,30px);
+    background:radial-gradient(ellipse at top,#392514 0%,#171310 55%,#100e0c 100%);
+    color:#fff; text-align:left;
 }
-#random-shop-panel h2 { margin:0; color:#f2c66d; font-size:1.25rem; }
+#random-shop-panel .random-shop-shell { width:min(1200px,100%); min-height:100%; margin:0 auto; display:flex; flex-direction:column; }
+#random-shop-panel .random-shop-header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding-bottom:16px; border-bottom:1px solid #79552b; }
+#random-shop-panel h2 { margin:0; color:#f2c66d; font-size:clamp(1.5rem,3vw,2.1rem); }
 #random-shop-close {
-    float:right; width:auto; margin:0; padding:3px 9px; border:1px solid #777;
-    border-radius:6px; background:#333; color:white; cursor:pointer;
+    flex:0 0 auto; width:auto; margin:0; padding:6px 13px; border:1px solid #a17b43;
+    border-radius:7px; background:#33271a; color:white; font-size:1.35rem; cursor:pointer;
 }
-#random-shop-panel .random-shop-placeholder {
-    margin-top:12px; padding:12px; border:1px dashed #8b7448;
-    border-radius:8px; color:#d7d0c2; line-height:1.45;
+#random-shop-panel .random-shop-layout { display:grid; grid-template-columns:minmax(0,1.7fr) minmax(260px,1fr); gap:20px; flex:1; padding-top:18px; }
+#random-shop-panel .random-shop-items { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-content:start; gap:12px; }
+#random-shop-panel .random-shop-item { min-height:132px; padding:15px; border:1px solid #78552c; border-radius:10px; background:rgba(40,31,22,.94); box-sizing:border-box; }
+#random-shop-panel .random-shop-item strong { display:block; color:#f2c66d; font-size:1.05rem; margin-bottom:8px; }
+#random-shop-panel .random-shop-item .sub-stat { min-height:22px; }
+#random-shop-panel .random-shop-item button { width:100%; margin-top:10px; }
+#random-shop-panel .random-shop-item button:disabled { opacity:.45; cursor:not-allowed; }
+#random-shop-panel .random-shop-cart { padding:16px; border:1px solid #a17b43; border-radius:11px; background:rgba(25,20,16,.96); display:flex; flex-direction:column; min-width:0; }
+#random-shop-panel .random-shop-cart h3 { margin:0 0 12px; color:#f2c66d; font-size:1.25rem; }
+#random-shop-cart-list { flex:1; min-height:90px; }
+#random-shop-cart-list .random-shop-cart-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:9px 0; border-bottom:1px solid #493827; font-size:.92rem; }
+#random-shop-cart-list .random-shop-cart-row button { width:auto; margin:0; padding:3px 8px; }
+#random-shop-panel .random-shop-cart-total { display:flex; justify-content:space-between; gap:10px; padding:14px 0; margin-top:10px; border-top:1px solid #79552b; font-weight:bold; }
+#random-shop-checkout { width:100%; margin:0; }
+#random-shop-cart-status { min-height:22px; margin-top:9px; }
+@media(max-width:700px) {
+    #random-shop-panel .random-shop-layout { grid-template-columns:1fr; }
+    #random-shop-panel .random-shop-items { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    #random-shop-panel .random-shop-cart { min-height:220px; }
+}
+@media(max-width:420px) {
+    #random-shop-panel .random-shop-items { grid-template-columns:1fr; }
 }
 
 </style>
@@ -652,16 +673,29 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
     🛒 Traveling Shop
     <span id="random-shop-time-left" style="display:block;font-size:.75rem;font-weight:400;margin-top:2px;">10:00 remaining</span>
 </button>
-<section id="random-shop-panel" role="dialog" aria-label="Traveling Shop" aria-modal="false">
-    <button type="button" id="random-shop-close" aria-label="Close shop">×</button>
-    <h2>🛒 Traveling Shop</h2>
-    <div class="sub-stat" style="margin-top:6px;">This visit's stock is fixed until the shop leaves.</div>
-    <div class="random-shop-placeholder" style="margin-bottom:12px;">The shop has arrived! Try this temporary test offer while the shop is being built.</div>
-    <div style="padding:12px;border:1px solid #8b7448;border-radius:8px;background:#292116;">
-        <strong style="color:#f2c66d;">💎 Test Gem</strong>
-        <div class="sub-stat" style="margin:6px 0;">Cost: 10 clicks · Reward: 1 gem</div>
-        <button type="button" id="random-shop-test-purchase" class="btn-upgrade" style="width:100%;">Purchase for 10 Clicks</button>
-        <div id="random-shop-test-status" class="sub-stat" role="status" style="margin-top:7px;"></div>
+<section id="random-shop-panel" role="dialog" aria-label="Traveling Shop" aria-modal="true">
+    <div class="random-shop-shell">
+        <div class="random-shop-header">
+            <div><h2>🛒 Traveling Shop</h2><div class="sub-stat" style="margin-top:5px;">This shop's stock stays available until the visit ends.</div></div>
+            <button type="button" id="random-shop-close" aria-label="Close shop">×</button>
+        </div>
+        <div class="random-shop-layout">
+            <div class="random-shop-items" aria-label="Shop items">
+                <div class="random-shop-item"><strong>💎 Test Gem</strong><div class="sub-stat">10 clicks · Gives 1 gem</div><button type="button" id="random-shop-add-test-gem" class="btn-upgrade">Add to Cart</button></div>
+                <div class="random-shop-item"><strong>Empty</strong><div class="sub-stat">No item available</div><button type="button" class="btn-upgrade" disabled>Empty</button></div>
+                <div class="random-shop-item"><strong>Empty</strong><div class="sub-stat">No item available</div><button type="button" class="btn-upgrade" disabled>Empty</button></div>
+                <div class="random-shop-item"><strong>Empty</strong><div class="sub-stat">No item available</div><button type="button" class="btn-upgrade" disabled>Empty</button></div>
+                <div class="random-shop-item"><strong>Empty</strong><div class="sub-stat">No item available</div><button type="button" class="btn-upgrade" disabled>Empty</button></div>
+                <div class="random-shop-item"><strong>Empty</strong><div class="sub-stat">No item available</div><button type="button" class="btn-upgrade" disabled>Empty</button></div>
+            </div>
+            <aside class="random-shop-cart" aria-label="Shopping cart">
+                <h3>🛒 Your Cart</h3>
+                <div id="random-shop-cart-list"><div class="sub-stat">Your cart is empty.</div></div>
+                <div class="random-shop-cart-total"><span>Total</span><span id="random-shop-cart-total">0 clicks</span></div>
+                <button type="button" id="random-shop-checkout" class="btn-upgrade" disabled>Purchase Cart</button>
+                <div id="random-shop-cart-status" class="sub-stat" role="status" aria-live="polite"></div>
+            </aside>
+        </div>
     </div>
 </section>
 
@@ -5322,6 +5356,7 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
         let randomShopNextCheckAt = randomShopCycleStartedAt + RANDOM_SHOP_CHECK_INTERVAL_MS;
         let randomShopExpiresAt = 0;
         let randomShopInventory = null;
+        let randomShopCart = { testGem: 0 };
         let randomShopAttemptHistory = [];
         let randomShopLastAttempt = null;
 
@@ -5358,7 +5393,9 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
         function spawnRandomShop() {
             if (randomShopExpiresAt > Date.now()) return false;
             // Inventory is rolled once per visit; actual offers will be added when shop contents are designed.
-            randomShopInventory = Object.freeze([]);
+            randomShopInventory = Object.freeze(['testGem', null, null, null, null, null]);
+            randomShopCart = { testGem: 0 };
+            renderRandomShopCart();
             randomShopExpiresAt = Date.now() + RANDOM_SHOP_OPEN_MS;
             const launcher = document.getElementById('random-shop-launcher');
             launcher.style.display = 'block';
@@ -5419,21 +5456,68 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
         });
 
         // Temporary test offer: spends 10 clicks and grants exactly 1 gem.
-        document.getElementById('random-shop-test-purchase').addEventListener('click', () => {
-            const status = document.getElementById('random-shop-test-status');
+        function renderRandomShopCart() {
+            const list = document.getElementById('random-shop-cart-list');
+            const totalLabel = document.getElementById('random-shop-cart-total');
+            const checkout = document.getElementById('random-shop-checkout');
+            const quantity = Math.max(0, Math.floor(Number(randomShopCart.testGem) || 0));
+            const total = quantity * 10;
+            list.textContent = '';
+            if (quantity === 0) {
+                const empty = document.createElement('div');
+                empty.className = 'sub-stat';
+                empty.textContent = 'Your cart is empty.';
+                list.appendChild(empty);
+            } else {
+                const row = document.createElement('div');
+                row.className = 'random-shop-cart-row';
+                const description = document.createElement('span');
+                description.textContent = '💎 Test Gem × ' + quantity + ' — ' + total + ' clicks';
+                const remove = document.createElement('button');
+                remove.type = 'button';
+                remove.className = 'btn-upgrade';
+                remove.textContent = '−';
+                remove.setAttribute('aria-label', 'Remove one Test Gem');
+                remove.addEventListener('click', () => {
+                    randomShopCart.testGem = Math.max(0, quantity - 1);
+                    renderRandomShopCart();
+                });
+                row.append(description, remove);
+                list.appendChild(row);
+            }
+            totalLabel.textContent = total.toLocaleString() + ' clicks';
+            checkout.disabled = quantity === 0;
+        }
+
+        document.getElementById('random-shop-add-test-gem').addEventListener('click', () => {
+            if (randomShopExpiresAt <= Date.now()) return;
+            randomShopCart.testGem = Math.max(0, Math.floor(Number(randomShopCart.testGem) || 0)) + 1;
+            document.getElementById('random-shop-cart-status').textContent = '';
+            renderRandomShopCart();
+        });
+        document.getElementById('random-shop-checkout').addEventListener('click', () => {
+            const status = document.getElementById('random-shop-cart-status');
             if (randomShopExpiresAt <= Date.now()) {
                 status.textContent = 'This shop visit has ended.';
                 return;
             }
+            const quantity = Math.max(0, Math.floor(Number(randomShopCart.testGem) || 0));
+            const total = quantity * 10;
             const availableClicks = Number(game.clicks);
-            if (!Number.isFinite(availableClicks) || availableClicks < 10) {
-                status.textContent = 'You need at least 10 clicks to buy this.';
+            if (quantity < 1 || !Number.isSafeInteger(total)) {
+                status.textContent = 'Your cart is empty or contains an invalid quantity.';
                 return;
             }
-            game.clicks = availableClicks - 10;
-            game.gems = Math.max(0, Number(game.gems) || 0) + 1;
+            if (!Number.isFinite(availableClicks) || availableClicks < total) {
+                status.textContent = 'You need ' + total.toLocaleString() + ' clicks to purchase this cart.';
+                return;
+            }
+            game.clicks = availableClicks - total;
+            game.gems = Math.max(0, Number(game.gems) || 0) + quantity;
+            randomShopCart.testGem = 0;
             updateUI();
-            status.textContent = 'Purchase successful! You received 1 gem.';
+            renderRandomShopCart();
+            status.textContent = 'Purchase successful! You received ' + quantity + ' gem' + (quantity === 1 ? '' : 's') + '.';
         });
         document.getElementById('admin-force-random-shop').addEventListener('click', () => {
             if (!adminUnlocked) return;
