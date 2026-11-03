@@ -1,5 +1,28 @@
 # Ultimate Idle Clicker — Development and Rollback Log
 
+## 2026-11-03 — Local random traveling shop framework
+
+**Request:** Add a rare per-player shop appearance system, with a five-minute chance check, a guaranteed appearance within one hour, a ten-minute active window, and no Supabase timer/shared state.
+
+**Implementation:**
+- HTML file: `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`
+- Added `#random-shop-launcher` as a fixed top-left button and `#random-shop-panel` as a small fixed popup. These are outside the main game panel, so they do not alter the existing grid/layout.
+- Added a session-local timer in the main game script. It checks once per second whether a five-minute check boundary has passed; actual chance rolls occur only at those boundaries.
+- Spawn chance is currently 5% per five-minute check. The twelfth check (60 minutes after the current cycle begins) is forced.
+- A spawned visit lasts ten minutes. When it expires, the button and popup hide and a new one-hour cycle begins.
+- Closing the popup does not dismiss the visit. Reloading/reopening the page resets all timer state and starts with the shop hidden.
+- The visit inventory is represented by a session-only variable initialized once at spawn. It is currently an empty placeholder because the user will define the shop's actual offers later.
+- No Supabase calls, save fields, local-storage entries, or account-wide state were added.
+
+**Verification performed:** Re-fetched the HTML after commit and checked unique UI IDs, 5-minute interval constant, 5% chance constant, one-hour forced-check condition, ten-minute expiry, post-expiry cycle reset, absence of a shop storage key, and balanced script/style tags.
+
+**Not tested:** No standalone Chrome/browser execution or real-time wait-through test. Confirm the shop button appears, popup toggles, page reload resets the timer, and the shop hides after ten minutes. The inventory generator and purchase behavior remain intentionally unimplemented.
+
+**Commit:** `4163ca6a47b2539eb60240162de9f355d7a0eb46`
+
+**Rollback:** Revert that HTML commit on `game-development`. The documentation commit can also be reverted independently if the feature itself is rolled back.
+
+
 This is the durable engineering record for future work across chats. It should contain enough context for another developer or assistant to understand what changed, what was checked, and how to reverse it safely.
 
 Read [DEVELOPMENT_RULES.md](DEVELOPMENT_RULES.md) before making edits. Record user-facing summaries in [CHANGELOG.md](CHANGELOG.md).
