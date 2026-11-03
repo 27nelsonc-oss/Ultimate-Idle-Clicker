@@ -1,9 +1,9 @@
 ### 2026-11-03 — Auto Clicker Relics (Halloween)
 - Added five relic rarities: Common 50% (+10%, 20 gems), Rare 25% (+30%, 100 gems), Epic 10% (+100%, 250 gems), Mythic 5% (+250%, 500 gems), Legendary 0.5% (+500%, 1,000 gems).
-- Each Traveling Shop visit rolls a 50% chance for one relic offer; a separate rarity roll uses the exact odds. The remaining 9.5% yields no relic. Only one relic offer can appear per visit and each player can own only one Auto Clicker Relic.
+- Each Traveling Shop visit rolls a 50% chance for one relic offer; a separate rarity roll uses the exact odds. The remaining 9.5% yields no relic. Only one relic offer can appear per visit, but players may own one of each rarity; only duplicates of the same rarity are blocked.
 - Added a shop slot, gem checkout, and save handling. The equipped relic multiplies Auto Clicker production after existing Auto Clicker buffs in live CPS and offline progress; Gem Station production is unaffected.
 - Uses existing relic save fields; no database migration. Relics survive rebirth and are cleared by the existing Hard Reset behavior.
-- HTML commits: 8d250de, 04f863f, dd9b59e, 2d6aad2, 1d07765, 4b5f5cb, 322ebff. Browser testing remains outstanding.
+- HTML commits: 8d250de, 04f863f, dd9b59e, 2d6aad2, 1d07765, 4b5f5cb, 322ebff, 6b65380. Browser testing remains outstanding.
 
 ### 2026-11-03 — Add Bob as an unlimited Traveling Shop title (Halloween branch)
 - Added **Bob** to My Titles with a black name, white outline, and bright white glow. The exact discovery hint is **“bob REALY likes people”**.
