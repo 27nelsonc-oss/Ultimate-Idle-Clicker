@@ -1,6 +1,14 @@
+### 2026-11-03 — Fix Auto Clicker Relic ownership by rarity (Halloween)
+- Corrected the ownership helper and all Traveling Shop cart/render/checkout checks to compare the exact offered relic ID instead of checking whether the player owns any Auto Clicker Relic.
+- Players can now collect Common, Rare, Epic, Mythic, and Legendary independently, while duplicate copies of an already-owned rarity remain blocked. The existing one-relic-equipped-at-a-time behavior is unchanged.
+- Updated the in-game Update Log and CHANGELOG wording to match the corrected collection rule.
+- HTML commit: 6b653801bc93dbf787386e851ce70e530fb6989e. No save-schema or Supabase changes.
+- Verification: re-fetch and syntax-check the updated HTML; confirm every shop ownership check passes the exact relic ID and the duplicate-rarity guard remains. No live browser purchase test performed.
+- Rollback: revert HTML commit 6b653801bc93dbf787386e851ce70e530fb6989e and this documentation update on Halloween only. Do not alter main or game-development.
+
 ### 2026-11-03 — Auto Clicker Relics implementation (Halloween)
 - Implemented five rarity IDs and their requested bonuses/prices. One 50% relic spawn roll occurs per shop visit, then a second roll selects Common 0–50, Rare 50–75, Epic 75–85, Mythic 85–90, Legendary 90–90.5; 90.5–100 yields no offer.
-- Added the third Traveling Shop slot, cart support for gem-priced relics, balance validation, ownership guard, and save integration. One Auto Clicker Relic variant per player; it appears in the existing Relics menu and must be equipped.
+- Added the third Traveling Shop slot, cart support for gem-priced relics, balance validation, ownership guard, and save integration. Players can own one of each Auto Clicker Relic rarity; duplicate copies of the same rarity are blocked. Owned variants appear in the existing Relics menu and one can be equipped at a time.
 - Applied the equipped relic multiplier after all existing Auto Clicker multipliers in live CPS calculations and offline Auto Clicker progress. Gem Station output is not affected.
 - Reused existing ownedRelics/equippedRelic save properties; no Supabase schema change. Existing rebirth/Hard Reset behavior remains.
 - Source validation: extracted JavaScript parses successfully with new Function; checked all three regularCps expressions and confirmed relic multiplier is present in each, with Admin Abuse applied before it in live calculations. No browser gameplay, shop probability, or checkout test performed.
