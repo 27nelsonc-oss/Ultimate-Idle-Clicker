@@ -634,7 +634,7 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
 <li>Added Bob, an unlimited-claim title that can rarely appear in the Traveling Shop for 2 clicks, with a black name and glowing white outline.</li>
 <li>Added five Auto Clicker Relic rarities to the Traveling Shop. One 50% spawn roll is made per shop visit, followed by the rarity odds; each relic costs gems and boosts Auto Clicker production after the other Auto Clicker buffs. Players can own one of each Auto Clicker Relic rarity; duplicates of the same rarity are blocked.</li>
 <li>Added the purple fixed Relics button and an owned-only equipment menu. Players can equip one owned relic at a time; relic ownership and equipped selection are stored in the save and survive rebirths. The menu currently shows an empty state because no relics are available yet.</li>
-<li>Redesigned the Traveling Shop as a full-screen, six-slot shop with a shopping cart, item quantities, a running total, and one checkout button. Five slots currently show Empty; the temporary Test Gem remains available for 10 clicks each.</li>
+<li>Redesigned the Traveling Shop as a full-screen, six-slot shop with a shopping cart, item quantities, a running total, and one checkout button. The temporary test purchase has been removed; only real shop offers can be purchased.</li>
 <li>Added the session-based Traveling Shop with a five-minute spawn check, a one-hour guarantee, and a ten-minute visit. Added owner/admin force-spawn and local attempt history controls.</li>
 <li>Added the Global Company Market above the Bank in the Halloween version. The company starts with player investments only and has no artificial starting capital.</li>
             <li>Added personal investment tracking: total clicks invested, current investment value, and overall profit/loss including earlier withdrawals.</li>
@@ -709,7 +709,7 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
         </div>
         <div class="random-shop-layout">
             <div class="random-shop-items" aria-label="Shop items">
-                <div class="random-shop-item"><strong>💎 Test Gem</strong><div class="sub-stat">10 clicks · Gives 1 gem</div><button type="button" id="random-shop-add-test-gem" class="btn-upgrade">Add to Cart</button></div>
+                <div class="random-shop-item"><strong>Empty</strong><div class="sub-stat">No item available</div><button type="button" class="btn-upgrade" disabled>Empty</button></div>
                 <div class="random-shop-item" id="random-shop-bob-slot"><strong>Empty</strong><div class="sub-stat">No item available</div><button type="button" class="btn-upgrade" disabled>Empty</button></div>
                 <div class="random-shop-item" id="random-shop-relic-slot"><strong>Empty</strong><div class="sub-stat">No item available</div><button type="button" class="btn-upgrade" disabled>Empty</button></div>
                 <div class="random-shop-item"><strong>Empty</strong><div class="sub-stat">No item available</div><button type="button" class="btn-upgrade" disabled>Empty</button></div>
@@ -5482,7 +5482,7 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
         let randomShopNextCheckAt = randomShopCycleStartedAt + RANDOM_SHOP_CHECK_INTERVAL_MS;
         let randomShopExpiresAt = 0;
         let randomShopInventory = null;
-        let randomShopCart = { testGem: 0, bob: 0, autoClickerRelic: 0 };
+        let randomShopCart = { bob: 0, autoClickerRelic: 0 };
         let randomShopAttemptHistory = [];
         let randomShopLastAttempt = null;
 
@@ -5521,18 +5521,17 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
 
         function spawnRandomShop() {
             if (randomShopExpiresAt > Date.now()) return false;
-            // Roll one Auto Clicker Relic offer per shop visit: 50% spawn chance, then rarity odds.
+            // One rarity roll per shop visit: the listed chances are the actual per-visit odds.
+            // The remaining 9.5% intentionally produces no Auto Clicker Relic offer.
             let autoClickerRelicOffer = null;
-            if (Math.random() < 0.50) {
-                const rarityRoll = Math.random() * 100;
-                if (rarityRoll < 50) autoClickerRelicOffer = 'auto_clicker_common';
-                else if (rarityRoll < 75) autoClickerRelicOffer = 'auto_clicker_rare';
-                else if (rarityRoll < 85) autoClickerRelicOffer = 'auto_clicker_epic';
-                else if (rarityRoll < 90) autoClickerRelicOffer = 'auto_clicker_mythic';
-                else if (rarityRoll < 90.5) autoClickerRelicOffer = 'auto_clicker_legendary';
-            }
-            randomShopInventory = Object.freeze(['testGem', Math.random() < (1 / 7500) ? 'bob' : null, autoClickerRelicOffer, null, null, null]);
-            randomShopCart = { testGem: 0, bob: 0, autoClickerRelic: 0 };
+            const rarityRoll = Math.random() * 100;
+            if (rarityRoll < 50) autoClickerRelicOffer = 'auto_clicker_common';
+            else if (rarityRoll < 75) autoClickerRelicOffer = 'auto_clicker_rare';
+            else if (rarityRoll < 85) autoClickerRelicOffer = 'auto_clicker_epic';
+            else if (rarityRoll < 90) autoClickerRelicOffer = 'auto_clicker_mythic';
+            else if (rarityRoll < 90.5) autoClickerRelicOffer = 'auto_clicker_legendary';
+            randomShopInventory = Object.freeze([null, Math.random() < (1 / 7500) ? 'bob' : null, autoClickerRelicOffer, null, null, null]);
+            randomShopCart = { bob: 0, autoClickerRelic: 0 };
             renderRandomShopBobSlot();
             renderRandomShopAutoClickerRelicSlot();
             renderRandomShopCart();
@@ -5658,16 +5657,15 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
             const list = document.getElementById('random-shop-cart-list');
             const totalLabel = document.getElementById('random-shop-cart-total');
             const checkout = document.getElementById('random-shop-checkout');
-            const gemQuantity = Math.max(0, Math.floor(Number(randomShopCart.testGem) || 0));
             const bobQuantity = bobTitleOwned ? 0 : Math.min(1, Math.max(0, Math.floor(Number(randomShopCart.bob) || 0)));
             const relicId = randomShopInventory?.[2];
             const relicQuantity = hasAutoClickerRelic(relicId) || !relicId || !RELIC_DEFINITIONS[relicId] ? 0 : Math.min(1, Math.max(0, Math.floor(Number(randomShopCart.autoClickerRelic) || 0)));
             randomShopCart.bob = bobQuantity;
             randomShopCart.autoClickerRelic = relicQuantity;
-            const clickTotal = gemQuantity * 10 + bobQuantity * 2;
+            const clickTotal = bobQuantity * 2;
             const gemTotal = relicQuantity ? RELIC_DEFINITIONS[relicId].gemCost : 0;
             list.textContent = '';
-            if (!gemQuantity && !bobQuantity && !relicQuantity) {
+            if (!bobQuantity && !relicQuantity) {
                 const empty = document.createElement('div'); empty.className = 'sub-stat'; empty.textContent = 'Your cart is empty.'; list.appendChild(empty);
             } else {
                 const addCartRow = (label, costText, removeLabel, onRemove) => {
@@ -5676,7 +5674,6 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
                     const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'btn-upgrade'; remove.textContent = '−'; remove.setAttribute('aria-label', removeLabel); remove.addEventListener('click', onRemove);
                     row.append(description, remove); list.appendChild(row);
                 };
-                if (gemQuantity) addCartRow('💎 Test Gem × ' + gemQuantity, (gemQuantity * 10).toLocaleString() + ' clicks', 'Remove one Test Gem', () => { randomShopCart.testGem = Math.max(0, gemQuantity - 1); renderRandomShopCart(); });
                 if (bobQuantity) addCartRow('Bob', '2 clicks', 'Remove Bob', () => { randomShopCart.bob = 0; renderRandomShopBobSlot(); renderRandomShopCart(); });
                 if (relicQuantity) addCartRow(RELIC_DEFINITIONS[relicId].name, gemTotal.toLocaleString() + ' gems', 'Remove Auto Clicker Relic', () => { randomShopCart.autoClickerRelic = 0; renderRandomShopAutoClickerRelicSlot(); renderRandomShopCart(); });
             }
@@ -5684,23 +5681,16 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
             checkout.disabled = !gemQuantity && !bobQuantity && !relicQuantity;
         }
 
-        document.getElementById('random-shop-add-test-gem').addEventListener('click', () => {
-            if (randomShopExpiresAt <= Date.now()) return;
-            randomShopCart.testGem = Math.max(0, Math.floor(Number(randomShopCart.testGem) || 0)) + 1;
-            document.getElementById('random-shop-cart-status').textContent = '';
-            renderRandomShopCart();
-        });
         document.getElementById('random-shop-checkout').addEventListener('click', async () => {
             const status = document.getElementById('random-shop-cart-status');
             if (randomShopExpiresAt <= Date.now()) { status.textContent = 'This shop visit has ended.'; return; }
-            const gemQuantity = Math.max(0, Math.floor(Number(randomShopCart.testGem) || 0));
             let bobQuantity = bobTitleOwned ? 0 : Math.min(1, Math.max(0, Math.floor(Number(randomShopCart.bob) || 0)));
             const relicId = randomShopInventory?.[2];
             const relicQuantity = hasAutoClickerRelic(relicId) || !relicId || !RELIC_DEFINITIONS[relicId] ? 0 : Math.min(1, Math.max(0, Math.floor(Number(randomShopCart.autoClickerRelic) || 0)));
-            const clickTotal = gemQuantity * 10 + bobQuantity * 2;
+            const clickTotal = bobQuantity * 2;
             const gemTotal = relicQuantity ? RELIC_DEFINITIONS[relicId].gemCost : 0;
             const availableClicks = Number(game.clicks), availableGems = Number(game.gems);
-            if ((!gemQuantity && !bobQuantity && !relicQuantity) || !Number.isSafeInteger(clickTotal) || !Number.isSafeInteger(gemTotal)) { status.textContent = 'Your cart is empty or contains an invalid quantity.'; return; }
+            if ((!bobQuantity && !relicQuantity) || !Number.isSafeInteger(clickTotal) || !Number.isSafeInteger(gemTotal)) { status.textContent = 'Your cart is empty or contains an invalid quantity.'; return; }
             if (!Number.isFinite(availableClicks) || availableClicks < clickTotal) { status.textContent = 'You need ' + clickTotal.toLocaleString() + ' clicks to purchase this cart.'; return; }
             if (!Number.isFinite(availableGems) || availableGems < gemTotal) { status.textContent = 'You need ' + gemTotal.toLocaleString() + ' gems to purchase this cart.'; return; }
             let bobPurchased = false;
@@ -5716,13 +5706,12 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
                 randomShopCart.autoClickerRelic = 0; renderRandomShopAutoClickerRelicSlot(); renderRandomShopCart(); return;
             }
             game.clicks = availableClicks - (gemQuantity * 10 + bobQuantity * 2);
-            game.gems = Math.max(0, availableGems - gemTotal) + gemQuantity;
+            game.gems = Math.max(0, availableGems - gemTotal);
             if (relicQuantity > 0) game.ownedRelics = [...new Set([...(Array.isArray(game.ownedRelics) ? game.ownedRelics : []), relicId])];
-            randomShopCart.testGem = 0; randomShopCart.bob = 0; randomShopCart.autoClickerRelic = 0;
+            randomShopCart.bob = 0; randomShopCart.autoClickerRelic = 0;
             updateUI(); renderRandomShopBobSlot(); renderRandomShopAutoClickerRelicSlot(); renderRandomShopCart();
             if (bobPurchased) { await refreshTitlePanel(); await refreshChatTitleBadges(); }
             const purchased = [];
-            if (gemQuantity) purchased.push(gemQuantity + ' gem' + (gemQuantity === 1 ? '' : 's'));
             if (bobPurchased) purchased.push('Bob');
             if (relicQuantity) purchased.push(RELIC_DEFINITIONS[relicId].name);
             status.textContent = purchased.length ? 'Purchase successful! ' + purchased.join(', ') + ' added.' : 'You already owned every item in that cart; no charge was made.';
