@@ -3,7 +3,7 @@
 - Added a right-side arrow that expands/collapses the category. Expanded choices include only owned rarities, ordered Common, Rare, Epic, Mythic, Legendary.
 - Applied rarity colors to the choices and the main category button when equipped: Common grey, Rare green, Epic purple, Mythic red, Legendary yellow. Selecting an equipped rarity again unequips it; selecting another rarity switches the equipped relic.
 - Preserved existing relic IDs, one-equipped-at-a-time behavior, save fields, and bonus calculations. No Supabase/schema changes.
-- HTML commits: 566081825378e77e320ba548bdef73bf0eeff32b (equipment menu) and 566081825378e77e320ba548bdef73bf0eeff32b (in-game Update Log).
+- HTML commits: 84d14367f487415f97c9c43ab227a4021cd8c5b5 (equipment menu) and 566081825378e77e320ba548bdef73bf0eeff32b (in-game Update Log).
 - Verification: both inline JavaScript blocks passed syntax compilation; source checks confirmed the owned-only rarity filter, requested order/colors, and equipped-color styling. No browser visual or click-interaction test performed.
 - Rollback: revert the two HTML commits above on Halloween only. Do not change main or game-development.
 
