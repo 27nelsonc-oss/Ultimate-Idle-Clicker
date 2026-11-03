@@ -5678,7 +5678,7 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
                 if (relicQuantity) addCartRow(RELIC_DEFINITIONS[relicId].name, gemTotal.toLocaleString() + ' gems', 'Remove Auto Clicker Relic', () => { randomShopCart.autoClickerRelic = 0; renderRandomShopAutoClickerRelicSlot(); renderRandomShopCart(); });
             }
             totalLabel.textContent = clickTotal.toLocaleString() + ' clicks' + (gemTotal ? ' + ' + gemTotal.toLocaleString() + ' gems' : '');
-            checkout.disabled = !gemQuantity && !bobQuantity && !relicQuantity;
+            checkout.disabled = !bobQuantity && !relicQuantity;
         }
 
         document.getElementById('random-shop-checkout').addEventListener('click', async () => {
@@ -5705,7 +5705,7 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
                 status.textContent = 'You already own this Auto Clicker Relic rarity.';
                 randomShopCart.autoClickerRelic = 0; renderRandomShopAutoClickerRelicSlot(); renderRandomShopCart(); return;
             }
-            game.clicks = availableClicks - (gemQuantity * 10 + bobQuantity * 2);
+            game.clicks = availableClicks - (bobQuantity * 2);
             game.gems = Math.max(0, availableGems - gemTotal);
             if (relicQuantity > 0) game.ownedRelics = [...new Set([...(Array.isArray(game.ownedRelics) ? game.ownedRelics : []), relicId])];
             randomShopCart.bob = 0; randomShopCart.autoClickerRelic = 0;
