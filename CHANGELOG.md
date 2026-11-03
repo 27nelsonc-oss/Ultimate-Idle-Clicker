@@ -1,3 +1,12 @@
+### 2026-11-03 — Group Auto Clicker Relic equipment by rarity (Halloween)
+- Replaced the separate owned-relic cards with one **Auto Clicker Relic** category button. It appears when at least one Auto Clicker Relic rarity is owned.
+- Added a right-side arrow that expands/collapses the category. Expanded choices include only owned rarities, ordered Common, Rare, Epic, Mythic, Legendary.
+- Applied rarity colors to the choices and the main category button when equipped: Common grey, Rare green, Epic purple, Mythic red, Legendary yellow. Selecting an equipped rarity again unequips it; selecting another rarity switches the equipped relic.
+- Preserved existing relic IDs, one-equipped-at-a-time behavior, save fields, and bonus calculations. No Supabase/schema changes.
+- HTML commits: 566081825378e77e320ba548bdef73bf0eeff32b (equipment menu) and 566081825378e77e320ba548bdef73bf0eeff32b (in-game Update Log).
+- Verification: both inline JavaScript blocks passed syntax compilation; source checks confirmed the owned-only rarity filter, requested order/colors, and equipped-color styling. No browser visual or click-interaction test performed.
+- Rollback: revert the two HTML commits above on Halloween only. Do not change main or game-development.
+
 ### 2026-11-03 — Remove temporary Traveling Shop test purchase and correct relic odds (Halloween)
 - Removed the temporary Test Gem item, its Add to Cart handler, cart row/state, click deduction, and gem reward. The first shop slot is now an empty placeholder; Bob and Auto Clicker Relic purchases remain unchanged.
 - Corrected the relic spawn calculation so the listed rarity chances are the actual chances per Traveling Shop visit: Common 50%, Rare 25%, Epic 10%, Mythic 5%, Legendary 0.5%, and no relic offer 9.5%. The previous extra 50% spawn gate halved every listed per-visit chance; it did not reverse the Common/Rare ratio.
