@@ -5532,7 +5532,7 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
                 });
                 category.appendChild(options);
             }
-            list.appendChild(category);
+            if (game.ownedRelics.length) list.appendChild(category);
             if (game.ownedClickerRelics.length) {
                 const category = document.createElement('div');
                 category.className = 'relic-category';
