@@ -1,3 +1,12 @@
+### 2026-11-03 — Add Discount Relics (Halloween)
+- Added a separate Discount Relic family with Common (5% off, 25 gems), Rare (15% off, 125 gems), Epic (30% off, 313 gems), Mythic (40% off, 625 gems), and Legendary (50% off, 1,250 gems). Each price is 25% above the corresponding standard relic price, rounded up to a whole gem.
+- Each Traveling Shop visit makes an independent Discount Relic rarity roll using the same actual per-visit chances as the other relic families: Common 50%, Rare 25%, Epic 10%, Mythic 5%, Legendary 0.5%, and no offer 9.5%. Discount Relics can appear alongside the other relic families.
+- The equipped Discount Relic reduces only the two click-priced upgrades in the main upgrade list. It does not affect Gem Station, relics, rebirth upgrades, or other gem purchases. Its discount multiplies with existing upgrade-price modifiers.
+- Added independent ownership/equipment fields, an owned-only rarity selector, shop slot/cart/checkout handling, and local/cloud save normalization. Discount Relics persist through rebirth and are cleared by Hard Reset. No Supabase schema changes.
+- The Discount Relic logic was already present in the Halloween HTML when this continuation resumed; this pass verified the definitions, pricing, independent rarity roll, purchase/equipment flow, save fields, and that the discount multiplier is used only by the two main click-priced upgrade cost functions. Updated the in-game Update Log and clarified the shop-roll comment.
+- Verification: source-level checks and JavaScript syntax checks are recorded after the final documentation commit. No live browser shop-spawn, purchase, equip, or upgrade-price interaction test performed.
+- Rollback: revert the HTML and documentation commits for this Discount Relic release on Halloween only. No database rollback is needed.
+
 ### 2026-11-03 — Add normal Clicker Relics (Halloween)
 - Added a separate Clicker Relic family with Common (+10%, 20 gems), Rare (+30%, 100 gems), Epic (+100%, 250 gems), Mythic (+250%, 500 gems), and Legendary (+500%, 1,000 gems).
 - Each rarity has the same per-shop-visit chance as its matching Auto Clicker Relic: 50%, 25%, 10%, 5%, and 0.5%; the remaining 9.5% produces no offer for that family. The two families roll independently and can both appear in one visit.
