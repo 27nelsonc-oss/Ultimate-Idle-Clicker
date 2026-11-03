@@ -1,3 +1,13 @@
+### 2026-11-03 — Make the Traveling Shop full-screen with a cart (Halloween branch)
+- **Request:** Make the shop occupy the full screen, show six item slots, and place a shopping cart on the right with selected items, total cost, and a checkout button. User specified that currently undefined inventory slots should simply say Empty.
+- **File:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`.
+- **Implementation:** Replaced the small popup with a full-screen responsive shop. The left side contains six slots: the existing temporary Test Gem offer (10 clicks for 1 gem) and five disabled Empty slots. The right side contains the cart, quantity, remove-one control, running total, and Purchase Cart button. Checkout validates the active shop visit, quantity, safe total, and available clicks before deducting the full cost and awarding the matching number of gems. Cart state is session-local and reset when a new visit spawns.
+- **Compatibility:** No changes to save shape, localStorage, Supabase, or other game systems. Existing launcher, shop timing, and admin force-spawn remain in place.
+- **Verification:** Re-fetched and inspected the current HTML before editing; source-level structure and guarded checkout implementation were reviewed. No browser visual/interaction test performed.
+- **HTML commits:** `5dacd8e6a646c4ffd00148c8409058ab8cabd3f1` (shop implementation) and `HTML_UPDATE_LOG_COMMIT` (in-game Update Log).
+- **CHANGELOG commit:** `CHANGELOG_COMMIT_SHA`.
+- **Rollback:** Revert the in-game Update Log commit and shop implementation commit on `Halloween` only. Do not change `main` or `game-development`.
+
 ### 2026-11-03 — Add temporary Traveling Shop test purchase (Halloween branch)
 - **Request:** Add a test purchase to the Traveling Shop that costs 10 clicks and awards 1 gem; user explicitly expects this offer to be removed later.
 - **File:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`.
