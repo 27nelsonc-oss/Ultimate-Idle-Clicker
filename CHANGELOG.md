@@ -1,3 +1,11 @@
+### 2026-11-03 — Add temporary Traveling Shop test purchase (Halloween branch)
+- Added a temporary **Test Gem** offer to the Traveling Shop: costs 10 clicks and grants 1 gem.
+- The purchase is available only while the shop visit is active, checks that the player has at least 10 clicks, deducts the cost, awards exactly 1 gem, and refreshes the displayed stats. It introduces no shop save keys or Supabase calls; normal game saving handles the updated game values.
+- This is explicitly temporary and can be removed when real shop inventory is implemented.
+- HTML commit: `ac30555285d76d7e06ed87dc845a34127d6c32c3`.
+- Verification: source-level checks only; no live browser purchase test performed.
+- Rollback: revert the HTML commit for this entry on `Halloween` only. Do not change `main` or `game-development`.
+
 ### 2026-11-03 — Add the Traveling Shop and admin controls (Halloween branch)
 - Added the fixed top-left Traveling Shop launcher and popup. The shop checks every five minutes, has a 5% chance per check, is guaranteed at the one-hour check, and stays available for ten minutes.
 - Added Random Shop Controls inside the existing Admin Panel: force spawn, latest attempt summary, and a newest-first session history of automatic successes/failures and manual spawns.
