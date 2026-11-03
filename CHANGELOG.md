@@ -1,3 +1,11 @@
+### 2026-11-03 — Add the Traveling Shop and admin controls (Halloween branch)
+- Added the fixed top-left Traveling Shop launcher and popup. The shop checks every five minutes, has a 5% chance per check, is guaranteed at the one-hour check, and stays available for ten minutes.
+- Added Random Shop Controls inside the existing Admin Panel: force spawn, latest attempt summary, and a newest-first session history of automatic successes/failures and manual spawns.
+- Timer, inventory placeholder, and attempt history are session-local only; no Supabase calls or save-data changes. Shop inventory remains an empty placeholder until offers are designed.
+- HTML commit: `a1dfa275f1e8dc698d2b66d1eec37cbb32e184e7`.
+- Verification: confirmed all new IDs are unique, timer/admin guard/history-cap/local-only anchors are present, in-game Update Log is updated, and style/script tags are balanced. No browser interaction or standalone HTML test performed.
+- Rollback: revert `a1dfa275f1e8dc698d2b66d1eec37cbb32e184e7` on `Halloween` only. Do not change `main` or `game-development`.
+
 ### 2026-10-29 — Add Chat minimize to the in-game Update Log (Halloween branch)
 - Updated the in-game Update Log heading to October 29, 2026.
 - Added the Static Chat minimize button update to the player-facing list and corrected the older Static Chat placement description from bottom-left to bottom-right.
