@@ -5450,9 +5450,6 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
             document.getElementById('relics-panel').style.display = 'none';
             document.getElementById('relics-launcher').setAttribute('aria-expanded', 'false');
         });
-        updateRelicsButtonPosition();
-        renderOwnedRelics();
-
         // --- LOCAL RANDOM SHOP (Halloween branch) ---
         // Session-local only: timers and attempt history are never saved or sent to Supabase.
         const RANDOM_SHOP_CHECK_INTERVAL_MS = 5 * 60 * 1000;
@@ -5466,6 +5463,9 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
         let randomShopCart = { testGem: 0 };
         let randomShopAttemptHistory = [];
         let randomShopLastAttempt = null;
+
+        updateRelicsButtonPosition();
+        renderOwnedRelics();
 
         function updateRandomShopAdminStatus() {
             const summary = document.getElementById('admin-random-shop-summary');
