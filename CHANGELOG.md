@@ -1,3 +1,11 @@
+### 2026-11-03 — Make the Relics launcher star-only (Halloween branch)
+- Changed the fixed purple Relics launcher to show only the `✦` star glyph, removing the visible “Relics” text as requested.
+- Kept the same top-left fixed positioning, shop-visit vertical offset behavior, and menu action. Added accessible `aria-label` and hover title text (“Relics”).
+- Styled it as a compact 46×46 icon button. No menu, relic ownership, save, or gameplay behavior changed.
+- HTML commit: `75bdd99235d0f98be6da17232f052ca9b42317a7`.
+- Verification: re-fetched the Halloween HTML and confirmed icon-only button markup, accessible label/title, and compact dimensions. No browser visual test performed.
+- Rollback: revert the HTML commit above on `Halloween` only.
+
 ### 2026-11-03 — Add Relics equipment menu (Halloween branch)
 - Added a purple, fixed-position **Relics** launcher at the top-left. When the Traveling Shop is active, the launcher shifts below the shop launcher to avoid overlap.
 - Added an owned-only Relics menu. With no relics currently available, it displays an empty-state message rather than showing unowned/locked relics.
