@@ -713,7 +713,7 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
         </div>
         <div class="random-shop-layout">
             <div class="random-shop-items" aria-label="Shop items">
-                <div class="random-shop-item"><strong>Empty</strong><div class="sub-stat">No item available</div><button type="button" class="btn-upgrade" disabled>Empty</button></div>
+                <div class="random-shop-item" id="random-shop-clicker-relic-slot"><strong>Empty</strong><div class="sub-stat">No item available</div><button type="button" class="btn-upgrade" disabled>Empty</button></div>
                 <div class="random-shop-item" id="random-shop-bob-slot"><strong>Empty</strong><div class="sub-stat">No item available</div><button type="button" class="btn-upgrade" disabled>Empty</button></div>
                 <div class="random-shop-item" id="random-shop-relic-slot"><strong>Empty</strong><div class="sub-stat">No item available</div><button type="button" class="btn-upgrade" disabled>Empty</button></div>
                 <div class="random-shop-item"><strong>Empty</strong><div class="sub-stat">No item available</div><button type="button" class="btn-upgrade" disabled>Empty</button></div>
@@ -2300,7 +2300,9 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
                 bankBalance: 0,
                 bankLastInterestAt: Date.now(),
                 ownedRelics: [],
-                equippedRelic: null
+                equippedRelic: null,
+                ownedClickerRelics: [],
+                equippedClickerRelic: null
             };
             localStorage.setItem('ultimateIdleClicker_cloud_reset_version', String(cloudResetVersion));
             updateUI();
@@ -2471,6 +2473,9 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
                     if (!Array.isArray(game.ownedRelics)) game.ownedRelics = [];
                     game.ownedRelics = [...new Set(game.ownedRelics.filter(id => typeof id === 'string' && id.trim()))];
                     if (typeof game.equippedRelic !== 'string' || !game.ownedRelics.includes(game.equippedRelic)) game.equippedRelic = null;
+                    if (!Array.isArray(game.ownedClickerRelics)) game.ownedClickerRelics = [];
+                    game.ownedClickerRelics = [...new Set(game.ownedClickerRelics.filter(id => typeof id === 'string' && id.trim()))];
+                    if (typeof game.equippedClickerRelic !== 'string' || !game.ownedClickerRelics.includes(game.equippedClickerRelic)) game.equippedClickerRelic = null;
                     if (!Number.isFinite(Number(game.clickOverdriveLevel))) game.clickOverdriveLevel = 0;
                     const offlineSeconds = applyOfflineProgress(game.lastActiveAt);
                     game.lastActiveAt = Date.now();
@@ -3794,7 +3799,9 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
             bankBalance: 0,
             bankLastInterestAt: Date.now(),
             ownedRelics: [],
-            equippedRelic: null
+            equippedRelic: null,
+            ownedClickerRelics: [],
+            equippedClickerRelic: null
         };
 
         // --- CONFIGURATION / BALANCING ---
@@ -5027,7 +5034,7 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
             const safeMultiplier = Number.isFinite(multiplier) && multiplier > 0 ? multiplier : 1;
             const safeOverdriveLevel = Number.isFinite(clickOverdriveLevel) && clickOverdriveLevel >= 0 ? clickOverdriveLevel : 0;
             const safeOverclockLevel = Number.isFinite(overclockLevel) && overclockLevel >= 0 ? overclockLevel : 0;
-            const earned = baseClick * safeMultiplier * (1 + safeOverdriveLevel * 0.25) * (1 + safeOverclockLevel * 0.25) * getAdminAbuseClickMultiplier();
+            const earned = baseClick * safeMultiplier * (1 + safeOverdriveLevel * 0.25) * (1 + safeOverclockLevel * 0.25) * getAdminAbuseClickMultiplier() * getClickerRelicMultiplier();
             addGeneratedClicks(earned);
             updateUI();
         }
@@ -5412,10 +5419,25 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
             auto_clicker_mythic: { name: 'Mythic Auto Clicker Relic', rarity: 'Mythic', description: '+250% Auto Clicker production.', bonus: 2.50, gemCost: 500 },
             auto_clicker_legendary: { name: 'Legendary Auto Clicker Relic', rarity: 'Legendary', description: '+500% Auto Clicker production.', bonus: 5.00, gemCost: 1000 }
         });
+        const CLICKER_RELIC_DEFINITIONS = Object.freeze({
+            clicker_common: { name: 'Common Clicker Relic', rarity: 'Common', description: '+10% normal clicking.', bonus: 0.10, gemCost: 20 },
+            clicker_rare: { name: 'Rare Clicker Relic', rarity: 'Rare', description: '+30% normal clicking.', bonus: 0.30, gemCost: 100 },
+            clicker_epic: { name: 'Epic Clicker Relic', rarity: 'Epic', description: '+100% normal clicking.', bonus: 1.00, gemCost: 250 },
+            clicker_mythic: { name: 'Mythic Clicker Relic', rarity: 'Mythic', description: '+250% normal clicking.', bonus: 2.50, gemCost: 500 },
+            clicker_legendary: { name: 'Legendary Clicker Relic', rarity: 'Legendary', description: '+500% normal clicking.', bonus: 5.00, gemCost: 1000 }
+        });
         const AUTO_CLICKER_RELIC_IDS = Object.freeze(Object.keys(RELIC_DEFINITIONS));
+        const CLICKER_RELIC_IDS = Object.freeze(Object.keys(CLICKER_RELIC_DEFINITIONS));
         function getAutoClickerRelicMultiplier() {
             const relic = RELIC_DEFINITIONS[game.equippedRelic];
             return relic && AUTO_CLICKER_RELIC_IDS.includes(game.equippedRelic) ? 1 + relic.bonus : 1;
+        }
+        function getClickerRelicMultiplier() {
+            const relic = CLICKER_RELIC_DEFINITIONS[game.equippedClickerRelic];
+            return relic && CLICKER_RELIC_IDS.includes(game.equippedClickerRelic) ? 1 + relic.bonus : 1;
+        }
+        function hasClickerRelic(relicId) {
+            return CLICKER_RELIC_IDS.includes(relicId) && Array.isArray(game.ownedClickerRelics) && game.ownedClickerRelics.includes(relicId);
         }
         function hasAutoClickerRelic(relicId) {
             return AUTO_CLICKER_RELIC_IDS.includes(relicId) && Array.isArray(game.ownedRelics) && game.ownedRelics.includes(relicId);
@@ -5426,6 +5448,7 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
         }
 
         let autoClickerRelicOptionsExpanded = false;
+        let clickerRelicOptionsExpanded = false;
         const RELIC_RARITY_STYLES = Object.freeze({
             Common: { background: '#777777', color: '#ffffff' },
             Rare: { background: '#238b45', color: '#ffffff' },
@@ -5438,10 +5461,13 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
             const status = document.getElementById('relics-status');
             if (!list || !status) return;
             if (!Array.isArray(game.ownedRelics)) game.ownedRelics = [];
+            if (!Array.isArray(game.ownedClickerRelics)) game.ownedClickerRelics = [];
             game.ownedRelics = [...new Set(game.ownedRelics.filter(id => typeof id === 'string' && Object.prototype.hasOwnProperty.call(RELIC_DEFINITIONS, id)))];
+            game.ownedClickerRelics = [...new Set(game.ownedClickerRelics.filter(id => typeof id === 'string' && Object.prototype.hasOwnProperty.call(CLICKER_RELIC_DEFINITIONS, id)))];
             if (!game.ownedRelics.includes(game.equippedRelic)) game.equippedRelic = null;
+            if (!game.ownedClickerRelics.includes(game.equippedClickerRelic)) game.equippedClickerRelic = null;
             list.replaceChildren();
-            if (game.ownedRelics.length === 0) {
+            if (game.ownedRelics.length === 0 && game.ownedClickerRelics.length === 0) {
                 const empty = document.createElement('div');
                 empty.className = 'relics-empty';
                 empty.textContent = "You don't own any relics yet. Relics you discover will appear here.";
@@ -5502,7 +5528,42 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
                 category.appendChild(options);
             }
             list.appendChild(category);
-            status.textContent = game.equippedRelic ? 'Equipped: ' + RELIC_DEFINITIONS[game.equippedRelic].rarity + ' Auto Clicker Relic.' : 'No relic equipped.';
+            if (game.ownedClickerRelics.length) {
+                const category = document.createElement('div');
+                category.className = 'relic-category';
+                const toggle = document.createElement('button');
+                toggle.type = 'button'; toggle.className = 'relic-category-toggle';
+                toggle.setAttribute('aria-expanded', String(clickerRelicOptionsExpanded));
+                const label = document.createElement('strong'); label.textContent = 'Clicker Relic';
+                const arrow = document.createElement('span'); arrow.className = 'relic-category-arrow'; arrow.textContent = clickerRelicOptionsExpanded ? '⌄' : '^';
+                toggle.append(label, arrow);
+                if (game.equippedClickerRelic) {
+                    const style = RELIC_RARITY_STYLES[CLICKER_RELIC_DEFINITIONS[game.equippedClickerRelic].rarity];
+                    toggle.style.background = style.background; toggle.style.borderColor = style.background; toggle.style.color = style.color;
+                }
+                toggle.addEventListener('click', () => { clickerRelicOptionsExpanded = !clickerRelicOptionsExpanded; renderOwnedRelics(); });
+                category.appendChild(toggle);
+                if (clickerRelicOptionsExpanded) {
+                    const options = document.createElement('div'); options.className = 'relic-rarity-options';
+                    ['Common', 'Rare', 'Epic', 'Mythic', 'Legendary'].forEach(rarity => {
+                        const id = CLICKER_RELIC_IDS.find(key => CLICKER_RELIC_DEFINITIONS[key].rarity === rarity && game.ownedClickerRelics.includes(key));
+                        if (!id) return;
+                        const style = RELIC_RARITY_STYLES[rarity];
+                        const option = document.createElement('button'); option.type = 'button'; option.className = 'relic-rarity-option';
+                        option.textContent = rarity + (game.equippedClickerRelic === id ? ' — Equipped' : '');
+                        option.setAttribute('aria-pressed', String(game.equippedClickerRelic === id));
+                        option.style.background = style.background; option.style.color = style.color;
+                        option.addEventListener('click', () => { game.equippedClickerRelic = game.equippedClickerRelic === id ? null : id; saveGame(); renderOwnedRelics(); });
+                        options.appendChild(option);
+                    });
+                    category.appendChild(options);
+                }
+                list.appendChild(category);
+            }
+            const equipped = [];
+            if (game.equippedRelic) equipped.push(RELIC_DEFINITIONS[game.equippedRelic].rarity + ' Auto Clicker Relic');
+            if (game.equippedClickerRelic) equipped.push(CLICKER_RELIC_DEFINITIONS[game.equippedClickerRelic].rarity + ' Clicker Relic');
+            status.textContent = equipped.length ? 'Equipped: ' + equipped.join(' and ') + '.' : 'No relic equipped.';
         }
 
         document.getElementById('relics-launcher').addEventListener('click', () => {
