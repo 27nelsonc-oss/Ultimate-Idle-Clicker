@@ -5696,7 +5696,7 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
             const gemQuantity = Math.max(0, Math.floor(Number(randomShopCart.testGem) || 0));
             let bobQuantity = bobTitleOwned ? 0 : Math.min(1, Math.max(0, Math.floor(Number(randomShopCart.bob) || 0)));
             const relicId = randomShopInventory?.[2];
-            const relicQuantity = hasAutoClickerRelic() || !relicId || !RELIC_DEFINITIONS[relicId] ? 0 : Math.min(1, Math.max(0, Math.floor(Number(randomShopCart.autoClickerRelic) || 0)));
+            const relicQuantity = hasAutoClickerRelic(relicId) || !relicId || !RELIC_DEFINITIONS[relicId] ? 0 : Math.min(1, Math.max(0, Math.floor(Number(randomShopCart.autoClickerRelic) || 0)));
             const clickTotal = gemQuantity * 10 + bobQuantity * 2;
             const gemTotal = relicQuantity ? RELIC_DEFINITIONS[relicId].gemCost : 0;
             const availableClicks = Number(game.clicks), availableGems = Number(game.gems);
