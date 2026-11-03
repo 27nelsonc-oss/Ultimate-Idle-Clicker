@@ -1,3 +1,14 @@
+### 2026-11-03 — Add the Traveling Shop and admin controls (Halloween branch)
+- **Request:** Add the session-based Traveling Shop and its owner/admin testing controls to the Halloween branch, not `game-development`.
+- **File:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`.
+- **Implementation:** Added fixed top-left `#random-shop-launcher` and `#random-shop-panel`; shop opens for ten minutes, checks every five minutes at 5% probability, and is guaranteed on the one-hour check. Closing the popup does not dismiss the shop. Reloading starts a fresh local timer. Inventory is frozen once per visit and currently an empty placeholder because the shop's actual offers have not been designed.
+- **Admin controls:** Added `#admin-random-shop-tools` at the top of the existing hidden-until-unlocked `#admin-panel`. The force-spawn handler checks `adminUnlocked`, does not replace an active visit, and records manual spawns. Automatic checks record success/failure, local time, and reason. History is newest-first and capped at 30 entries.
+- **Persistence/scope:** No Supabase calls, localStorage, game save fields, account data, or shared/server timers were changed. Timer, active visit, inventory placeholder, and history exist only in the current page session.
+- **Player-facing log:** Updated the existing in-game Update Log date to November 3, 2026 and added the Traveling Shop/admin controls entry.
+- **Verification:** Re-fetched the committed HTML and confirmed all seven new element IDs appear exactly once, required timer constants and admin guard are present, history cap and local-only marker are present, Update Log entry exists, and style/script tag counts balance. No browser UI, timing, admin-login, or standalone-download test was performed.
+- **HTML commit:** `a1dfa275f1e8dc698d2b66d1eec37cbb32e184e7`.
+- **Rollback:** Revert the HTML commit above on `Halloween` only. Do not touch `main` or `game-development`.
+
 ### 2026-10-29 — Add Chat minimize to the in-game Update Log (Halloween branch)
 - **Request:** Add the latest Static Chat minimize update to the in-game Update Log.
 - **Change:** Updated the player-facing latest-update date to October 29, 2026; added a concise bullet explaining the matching +/− Chat minimize control; corrected the earlier Static Chat description to say bottom-right, matching the current implementation.
