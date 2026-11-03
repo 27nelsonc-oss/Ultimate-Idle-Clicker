@@ -4,7 +4,7 @@
 - Updated the in-game Update Log and this changelog. No save schema or Supabase changes.
 - HTML commits: 4498aa8e3a7e758ce3900c4eed00704b7c1700e9 (shop logic/UI), ef639966fd8a860ed3ffc4a0e9e9d67544252beb (in-game Update Log), and 51926160c0f0bcf34a5c0bed80e4fad5969f50a2 (checkout cleanup).
 - Verification: re-fetched the final HTML; both inline JavaScript blocks passed syntax compilation; confirmed no Test Gem/testGem/cart handler/gemQuantity references remain; confirmed the per-visit rarity thresholds and empty first shop slot. No browser shop-spawn or checkout test performed.
-- Rollback: revert the two HTML commits above on Halloween only; revert this documentation entry separately if needed. Do not change main or game-development.
+- Rollback: revert the three HTML commits above on Halloween only; revert this documentation entry separately if needed. Do not change main or game-development.
 
 ### 2026-11-03 — Auto Clicker Relics (Halloween)
 - Added five relic rarities: Common 50% (+10%, 20 gems), Rare 25% (+30%, 100 gems), Epic 10% (+100%, 250 gems), Mythic 5% (+250%, 500 gems), Legendary 0.5% (+500%, 1,000 gems).
