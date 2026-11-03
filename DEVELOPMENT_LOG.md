@@ -4,8 +4,8 @@
 - **Implementation:** Replaced the small popup with a full-screen responsive shop. The left side contains six slots: the existing temporary Test Gem offer (10 clicks for 1 gem) and five disabled Empty slots. The right side contains the cart, quantity, remove-one control, running total, and Purchase Cart button. Checkout validates the active shop visit, quantity, safe total, and available clicks before deducting the full cost and awarding the matching number of gems. Cart state is session-local and reset when a new visit spawns.
 - **Compatibility:** No changes to save shape, localStorage, Supabase, or other game systems. Existing launcher, shop timing, and admin force-spawn remain in place.
 - **Verification:** Re-fetched and inspected the current HTML before editing; source-level structure and guarded checkout implementation were reviewed. No browser visual/interaction test performed.
-- **HTML commits:** `5dacd8e6a646c4ffd00148c8409058ab8cabd3f1` (shop implementation) and `HTML_UPDATE_LOG_COMMIT` (in-game Update Log).
-- **CHANGELOG commit:** `CHANGELOG_COMMIT_SHA`.
+- **HTML commits:** `5dacd8e6a646c4ffd00148c8409058ab8cabd3f1` (shop implementation) and `1aa40a1706bb33ceef8f201be0b6addd301d4682` (in-game Update Log).
+- **CHANGELOG commit:** `66319dfb3d0ab273fb12edec3ed0d3bc99837d48`.
 - **Rollback:** Revert the in-game Update Log commit and shop implementation commit on `Halloween` only. Do not change `main` or `game-development`.
 
 ### 2026-11-03 — Add temporary Traveling Shop test purchase (Halloween branch)
