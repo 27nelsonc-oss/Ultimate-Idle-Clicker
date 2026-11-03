@@ -1,3 +1,12 @@
+### 2026-11-03 — Make the Relics launcher star-only (Halloween branch)
+- **Request:** Keep the Relics button, but display only the star shape `✦` rather than the word “Relics”.
+- **File:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`.
+- **Implementation:** Changed the button content to the star glyph only and adjusted the purple button to a centered 46×46 icon control. Preserved its fixed top-left placement, shop offset, and click behavior. Kept `aria-label="Relics"` and `title="Relics"` for accessibility/identification.
+- **Verification:** Re-fetched current source; verified icon-only markup, accessible label/title, and dimensions. No live browser visual test performed.
+- **HTML commit:** `75bdd99235d0f98be6da17232f052ca9b42317a7`.
+- **CHANGELOG commit:** `CHANGELOG_COMMIT`.
+- **Rollback:** Revert the HTML and documentation commits on `Halloween` only.
+
 ### 2026-11-03 — Add Relics equipment menu (Halloween branch)
 - **Request:** Add a purple top-left static Relics button that moves below the Traveling Shop launcher while the shop is active. The menu should list only relics the player owns, allow one equipped relic at a time, and preserve relics through rebirths.
 - **File:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`.
