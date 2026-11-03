@@ -1,3 +1,12 @@
+### 2026-11-03 — Group Auto Clicker Relic equipment by rarity (Halloween)
+- **Request:** In the Relics menu, show one Auto Clicker Relic button when the player owns at least one rarity. Its right-side arrow expands to owned rarity choices, ordered from most common to rarest, with rarity colors and an equipped-color indicator on the category button.
+- **Implementation:** Replaced the per-relic card renderer with one category toggle and an expandable owned-only rarity list. Added a stable rarity order (Common, Rare, Epic, Mythic, Legendary) and colors (grey, green, purple, red, yellow). The main category button adopts the currently equipped rarity's background/text color. Clicking an option equips it; clicking the equipped option again unequips it.
+- **Files/functions touched:** Halloween HTML styles and `renderOwnedRelics()`; in-game Update Log; CHANGELOG.md. No Supabase or save-format changes.
+- **Compatibility:** Kept `ownedRelics`, `equippedRelic`, existing relic IDs, and the existing Auto Clicker multiplier calculation unchanged.
+- **Verification:** Re-fetched the edited HTML and compiled both inline JavaScript blocks successfully. Source checks confirmed the category accordion, owned-only filter, Common-to-Legendary order, all five colors, and equipped-color indicator. No browser visual, keyboard, mobile, or live equip/unequip test performed.
+- **Commits:** 566081825378e77e320ba548bdef73bf0eeff32b (menu), 566081825378e77e320ba548bdef73bf0eeff32b (in-game Update Log), 51b42e9edd33476ff5ca8521dfa86d0e7aa1c811 (CHANGELOG.md).
+- **Rollback:** Revert the two HTML commits and the documentation commit on Halloween only. Do not change main or game-development.
+
 ### 2026-11-03 — Remove temporary Traveling Shop test purchase and correct relic odds (Halloween)
 - **Request/problem:** Remove the temporary test purchase and investigate why observed relic rarities seemed inconsistent with the listed odds.
 - **Root cause:** The rarity thresholds themselves were in the correct order, but an additional 50% spawn gate ran before the rarity roll. This halved the advertised per-visit odds for every rarity. It did not make Rare more likely than Common; Common still had twice Rare's conditional probability. The user may also see short-run random variation.
