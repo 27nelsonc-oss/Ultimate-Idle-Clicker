@@ -5,7 +5,7 @@
 - Added independent ownership/equipment fields, an owned-only rarity selector, shop slot/cart/checkout handling, and local/cloud save normalization. Discount Relics persist through rebirth and are cleared by Hard Reset. No Supabase schema changes.
 - The Discount Relic logic was already present in the Halloween HTML when this continuation resumed; this pass verified the definitions, pricing, independent rarity roll, purchase/equipment flow, save fields, and that the discount multiplier is used only by the two main click-priced upgrade cost functions. Updated the in-game Update Log and clarified the shop-roll comment.
 - Verification: source-level checks and JavaScript syntax checks are recorded after the final documentation commit. No live browser shop-spawn, purchase, equip, or upgrade-price interaction test performed.
-- Rollback: revert the HTML and documentation commits for this Discount Relic release on Halloween only. No database rollback is needed.
+- Rollback: reverting this continuation's HTML commit removes the in-game Update Log entry and comment clarification; reverting its documentation commits removes the release notes. The Discount Relic gameplay code was already present before this continuation, so removing the mechanic itself requires identifying and reverting its earlier implementation commit. No database rollback is needed.
 
 ### 2026-11-03 — Add normal Clicker Relics (Halloween)
 - Added a separate Clicker Relic family with Common (+10%, 20 gems), Rare (+30%, 100 gems), Epic (+100%, 250 gems), Mythic (+250%, 500 gems), and Legendary (+500%, 1,000 gems).
