@@ -4,7 +4,7 @@
 - **Implementation:** Changed the button content to the star glyph only and adjusted the purple button to a centered 46×46 icon control. Preserved its fixed top-left placement, shop offset, and click behavior. Kept `aria-label="Relics"` and `title="Relics"` for accessibility/identification.
 - **Verification:** Re-fetched current source; verified icon-only markup, accessible label/title, and dimensions. No live browser visual test performed.
 - **HTML commit:** `75bdd99235d0f98be6da17232f052ca9b42317a7`.
-- **CHANGELOG commit:** `CHANGELOG_COMMIT`.
+- **CHANGELOG commit:** `c2945fe724234d8c53c4105c079a475fea4d9a4e`.
 - **Rollback:** Revert the HTML and documentation commits on `Halloween` only.
 
 ### 2026-11-03 — Add Relics equipment menu (Halloween branch)
