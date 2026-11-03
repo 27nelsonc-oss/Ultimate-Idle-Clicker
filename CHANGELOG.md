@@ -1,3 +1,12 @@
+### 2026-11-03 — Add Bob as an unlimited Traveling Shop title (Halloween branch)
+- Added **Bob** to My Titles with a black name, white outline, and bright white glow. The exact discovery hint is **“bob REALY likes people”**.
+- Bob has no global claim limit: every player can own it. It appears in one shop slot on a 1-in-7,500 chance per Traveling Shop visit and costs 2 clicks.
+- Added Bob to active chat title badges and both owner title-testing / selected-player grant-removal controls.
+- Added the Supabase migration `add_unlimited_bob_shop_title`: expanded the owned-title and active-title constraints, added the authenticated `claim_bob_title()` RPC, and extended the owner title-management RPC allowlists. Bob is intentionally not added to the one-winner `game_title_claims` table.
+- HTML commit: `a0483e49abc4c67a9761b25c06d6fbd1649983fa`.
+- Verification: confirmed the Halloween HTML contains the hint, Bob styling, 1/7,500 spawn roll, 2-click cart total, claim RPC call, title display, chat badge style, and owner selectors; style/script tags are balanced. Confirmed the database constraints include `bob` and the migration is recorded. No browser shop-spawn or checkout test performed.
+- Rollback: revert the HTML commit on `Halloween`; if rolling back the database, use a separate reviewed migration only after confirming no player owns or has equipped Bob. Do not change `main` or `game-development`.
+
 ### 2026-11-03 — Make the Relics launcher star-only (Halloween branch)
 - Changed the fixed purple Relics launcher to show only the `✦` star glyph, removing the visible “Relics” text as requested.
 - Kept the same top-left fixed positioning, shop-visit vertical offset behavior, and menu action. Added accessible `aria-label` and hover title text (“Relics”).
