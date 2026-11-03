@@ -5691,63 +5691,42 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
         });
         document.getElementById('random-shop-checkout').addEventListener('click', async () => {
             const status = document.getElementById('random-shop-cart-status');
-            if (randomShopExpiresAt <= Date.now()) {
-                status.textContent = 'This shop visit has ended.';
-                return;
-            }
+            if (randomShopExpiresAt <= Date.now()) { status.textContent = 'This shop visit has ended.'; return; }
             const gemQuantity = Math.max(0, Math.floor(Number(randomShopCart.testGem) || 0));
             let bobQuantity = bobTitleOwned ? 0 : Math.min(1, Math.max(0, Math.floor(Number(randomShopCart.bob) || 0)));
-            let total = gemQuantity * 10 + bobQuantity * 2;
-            const availableClicks = Number(game.clicks);
-            if ((gemQuantity < 1 && bobQuantity < 1) || !Number.isSafeInteger(total)) {
-                status.textContent = 'Your cart is empty or contains an invalid quantity.';
-                return;
-            }
-            if (!Number.isFinite(availableClicks) || availableClicks < total) {
-                status.textContent = 'You need ' + total.toLocaleString() + ' clicks to purchase this cart.';
-                return;
-            }
+            const relicId = randomShopInventory?.[2];
+            const relicQuantity = hasAutoClickerRelic() || !relicId || !RELIC_DEFINITIONS[relicId] ? 0 : Math.min(1, Math.max(0, Math.floor(Number(randomShopCart.autoClickerRelic) || 0)));
+            const clickTotal = gemQuantity * 10 + bobQuantity * 2;
+            const gemTotal = relicQuantity ? RELIC_DEFINITIONS[relicId].gemCost : 0;
+            const availableClicks = Number(game.clicks), availableGems = Number(game.gems);
+            if ((!gemQuantity && !bobQuantity && !relicQuantity) || !Number.isSafeInteger(clickTotal) || !Number.isSafeInteger(gemTotal)) { status.textContent = 'Your cart is empty or contains an invalid quantity.'; return; }
+            if (!Number.isFinite(availableClicks) || availableClicks < clickTotal) { status.textContent = 'You need ' + clickTotal.toLocaleString() + ' clicks to purchase this cart.'; return; }
+            if (!Number.isFinite(availableGems) || availableGems < gemTotal) { status.textContent = 'You need ' + gemTotal.toLocaleString() + ' gems to purchase this cart.'; return; }
             let bobPurchased = false;
             if (bobQuantity > 0) {
-                if (!supabaseClient || !cloudUser) {
-                    status.textContent = 'Sign in to purchase and save Bob.';
-                    return;
-                }
+                if (!supabaseClient || !cloudUser) { status.textContent = 'Sign in to purchase and save Bob.'; return; }
                 const { data, error } = await supabaseClient.rpc('claim_bob_title');
-                if (error || !data?.success) {
-                    status.textContent = error?.message || data?.reason || 'Bob could not be added to your titles. Please try again.';
-                    return;
-                }
-                if (data.already_owned) {
-                    bobTitleOwned = true;
-                    bobQuantity = 0;
-                    randomShopCart.bob = 0;
-                    status.textContent = 'You already own Bob, so you were not charged for him.';
-                } else {
-                    bobPurchased = true;
-                    bobTitleOwned = true;
-                }
+                if (error || !data?.success) { status.textContent = error?.message || data?.reason || 'Bob could not be added to your titles. Please try again.'; return; }
+                if (data.already_owned) { bobTitleOwned = true; bobQuantity = 0; randomShopCart.bob = 0; status.textContent = 'You already own Bob, so you were not charged for him.'; }
+                else { bobPurchased = true; bobTitleOwned = true; }
             }
-            total = gemQuantity * 10 + bobQuantity * 2;
-            game.clicks = availableClicks - total;
-            game.gems = Math.max(0, Number(game.gems) || 0) + gemQuantity;
-            randomShopCart.testGem = 0;
-            randomShopCart.bob = 0;
-            updateUI();
-            renderRandomShopBobSlot();
-            renderRandomShopCart();
-            if (bobPurchased) {
-                await refreshTitlePanel();
-                await refreshChatTitleBadges();
-                status.textContent = 'Purchase successful! Bob has been added to My Titles.';
-            } else if (gemQuantity > 0 && bobTitleOwned) {
-                status.textContent = 'Purchase successful! You received ' + gemQuantity + ' gem' + (gemQuantity === 1 ? '' : 's') + '. You already own Bob.';
-            } else if (gemQuantity > 0) {
-                status.textContent = 'Purchase successful! You received ' + gemQuantity + ' gem' + (gemQuantity === 1 ? '' : 's') + '.';
-            } else if (!status.textContent) {
-                status.textContent = 'Purchase successful!';
+            if (relicQuantity > 0 && hasAutoClickerRelic()) {
+                status.textContent = 'You already own an Auto Clicker Relic. Only one can be owned at a time.';
+                randomShopCart.autoClickerRelic = 0; renderRandomShopAutoClickerRelicSlot(); renderRandomShopCart(); return;
             }
-            saveGame();
+            game.clicks = availableClicks - (gemQuantity * 10 + bobQuantity * 2);
+            game.gems = Math.max(0, availableGems - gemTotal) + gemQuantity;
+            if (relicQuantity > 0) game.ownedRelics = [...new Set([...(Array.isArray(game.ownedRelics) ? game.ownedRelics : []), relicId])];
+            randomShopCart.testGem = 0; randomShopCart.bob = 0; randomShopCart.autoClickerRelic = 0;
+            updateUI(); renderRandomShopBobSlot(); renderRandomShopAutoClickerRelicSlot(); renderRandomShopCart();
+            if (bobPurchased) { await refreshTitlePanel(); await refreshChatTitleBadges(); }
+            const purchased = [];
+            if (gemQuantity) purchased.push(gemQuantity + ' gem' + (gemQuantity === 1 ? '' : 's'));
+            if (bobPurchased) purchased.push('Bob');
+            if (relicQuantity) purchased.push(RELIC_DEFINITIONS[relicId].name);
+            status.textContent = purchased.length ? 'Purchase successful! ' + purchased.join(', ') + ' added.' : 'You already owned every item in that cart; no charge was made.';
+            await saveGame();
+            if (relicQuantity) renderOwnedRelics();
         });
         document.getElementById('admin-force-random-shop').addEventListener('click', () => {
             if (!adminUnlocked) return;
