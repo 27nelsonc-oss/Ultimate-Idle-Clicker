@@ -1,6 +1,14 @@
+### 2026-11-03 — Remove temporary Traveling Shop test purchase and correct relic odds (Halloween)
+- Removed the temporary Test Gem item, its Add to Cart handler, cart row/state, click deduction, and gem reward. The first shop slot is now an empty placeholder; Bob and Auto Clicker Relic purchases remain unchanged.
+- Corrected the relic spawn calculation so the listed rarity chances are the actual chances per Traveling Shop visit: Common 50%, Rare 25%, Epic 10%, Mythic 5%, Legendary 0.5%, and no relic offer 9.5%. The previous extra 50% spawn gate halved every listed per-visit chance; it did not reverse the Common/Rare ratio.
+- Updated the in-game Update Log and this changelog. No save schema or Supabase changes.
+- HTML commits: 4498aa8e3a7e758ce3900c4eed00704b7c1700e9 (shop logic/UI) and ef639966fd8a860ed3ffc4a0e9e9d67544252beb (in-game Update Log).
+- Verification: pending final re-fetch, syntax validation, and a deterministic count check of the rarity thresholds. No browser shop-spawn or checkout test performed.
+- Rollback: revert the two HTML commits above on Halloween only; revert this documentation entry separately if needed. Do not change main or game-development.
+
 ### 2026-11-03 — Auto Clicker Relics (Halloween)
 - Added five relic rarities: Common 50% (+10%, 20 gems), Rare 25% (+30%, 100 gems), Epic 10% (+100%, 250 gems), Mythic 5% (+250%, 500 gems), Legendary 0.5% (+500%, 1,000 gems).
-- Each Traveling Shop visit rolls a 50% chance for one relic offer; a separate rarity roll uses the exact odds. The remaining 9.5% yields no relic. Only one relic offer can appear per visit, but players may own one of each rarity; only duplicates of the same rarity are blocked.
+- Each Traveling Shop visit uses one rarity roll, so the listed chances are the actual per-visit odds: Common 50%, Rare 25%, Epic 10%, Mythic 5%, Legendary 0.5%, and no offer 9.5%. Only one relic offer can appear per visit; players may own one of each rarity.
 - Added a shop slot, gem checkout, and save handling. The equipped relic multiplies Auto Clicker production after existing Auto Clicker buffs in live CPS and offline progress; Gem Station production is unaffected.
 - Uses existing relic save fields; no database migration. Relics survive rebirth and are cleared by the existing Hard Reset behavior.
 - HTML commits: 8d250de, 04f863f, dd9b59e, 2d6aad2, 1d07765, 4b5f5cb, 322ebff, 6b65380, 8fe238e. Browser testing remains outstanding.
