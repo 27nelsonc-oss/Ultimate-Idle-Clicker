@@ -1,3 +1,13 @@
+### 2026-11-03 — Remove temporary Traveling Shop test purchase and correct relic odds (Halloween)
+- **Request/problem:** Remove the temporary test purchase and investigate why observed relic rarities seemed inconsistent with the listed odds.
+- **Root cause:** The rarity thresholds themselves were in the correct order, but an additional 50% spawn gate ran before the rarity roll. This halved the advertised per-visit odds for every rarity. It did not make Rare more likely than Common; Common still had twice Rare's conditional probability. The user may also see short-run random variation.
+- **Change made:** Removed the Test Gem item markup, its click handler, cart state/row, checkout quantity, click deduction, and gem reward. Preserved Bob and Auto Clicker Relic purchases. Replaced the extra spawn gate plus rarity roll with one per-visit roll: Common 0–50 (50%), Rare 50–75 (25%), Epic 75–85 (10%), Mythic 85–90 (5%), Legendary 90–90.5 (0.5%), and no relic 90.5–100 (9.5%).
+- **Files/functions touched:** Halloween HTML; in-game Update Log; CHANGELOG.md. No Supabase or save-schema changes.
+- **Preserved behavior / compatibility:** Bob and relic purchase IDs, gem prices, cart validation, ownership by exact rarity, equipment behavior, save persistence, and other shop timers remain unchanged.
+- **Tests run and results:** Pending final source re-fetch, JavaScript syntax validation, and deterministic threshold-count verification. No browser shop-spawn or checkout test performed.
+- **Commit SHA:** HTML 4498aa8e3a7e758ce3900c4eed00704b7c1700e9; in-game Update Log ef639966fd8a860ed3ffc4a0e9e9d67544252beb.
+- **Rollback instructions:** Revert those HTML commits on Halloween only. No database rollback is needed. Do not change main or game-development.
+
 ### 2026-11-03 — Fix Auto Clicker Relic ownership by rarity (Halloween)
 - Corrected the ownership helper and all Traveling Shop cart/render/checkout checks to compare the exact offered relic ID instead of checking whether the player owns any Auto Clicker Relic.
 - Players can now collect Common, Rare, Epic, Mythic, and Legendary independently, while duplicate copies of an already-owned rarity remain blocked. The existing one-relic-equipped-at-a-time behavior is unchanged.
