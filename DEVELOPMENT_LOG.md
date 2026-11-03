@@ -1,5 +1,27 @@
 # Ultimate Idle Clicker — Development and Rollback Log
 
+## 2026-11-03 — Random shop admin diagnostics
+
+**Request:** Add a way to force-spawn the local random shop and inspect every five-minute spawn roll, including failed and successful attempts.
+
+**Implementation:**
+- HTML file: `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`
+- Added a Random Shop Controls section near the top of the unlocked Admin Panel, with a Force Spawn Shop button, latest-attempt summary, and scrollable attempt history.
+- The force button checks the existing `adminUnlocked` flag. If the shop is already active, it leaves the current visit and inventory intact and reports that it is already active.
+- Each automatic five-minute roll is recorded as `SUCCESS` or `FAILED`, with local time and reason: random chance hit/missed or one-hour guarantee.
+- Admin-triggered spawns are recorded as `FORCED`.
+- History is held in memory only and capped at the latest 30 entries. Reloading clears diagnostic history, consistent with the shop's session-local timer.
+- No Supabase calls, game-save changes, or persistent storage were added.
+
+**Verification performed:** Re-fetched the committed HTML and checked the controls, admin-unlock guard, automatic success/failure logging, timestamps, history cap, absence of a shop storage dependency, and balanced script/style tags.
+
+**Not tested:** No actual browser test of admin login, force-spawn button, or five-minute automatic rolls. These should be tested in the downloaded standalone game.
+
+**Commit:** `b7d578d8723f9fd2d9c872138deda87176c24dc8`
+
+**Rollback:** Revert the HTML commit above on `game-development`; the original shop timer framework remains in its earlier commit.
+
+
 ## 2026-11-03 — Local random traveling shop framework
 
 **Request:** Add a rare per-player shop appearance system, with a five-minute chance check, a guaranteed appearance within one hour, a ten-minute active window, and no Supabase timer/shared state.
