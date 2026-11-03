@@ -1,3 +1,12 @@
+### 2026-11-03 — Auto Clicker Relics implementation (Halloween)
+- Implemented five rarity IDs and their requested bonuses/prices. One 50% relic spawn roll occurs per shop visit, then a second roll selects Common 0–50, Rare 50–75, Epic 75–85, Mythic 85–90, Legendary 90–90.5; 90.5–100 yields no offer.
+- Added the third Traveling Shop slot, cart support for gem-priced relics, balance validation, ownership guard, and save integration. One Auto Clicker Relic variant per player; it appears in the existing Relics menu and must be equipped.
+- Applied the equipped relic multiplier after all existing Auto Clicker multipliers in live CPS calculations and offline Auto Clicker progress. Gem Station output is not affected.
+- Reused existing ownedRelics/equippedRelic save properties; no Supabase schema change. Existing rebirth/Hard Reset behavior remains.
+- Source validation: extracted JavaScript parses successfully with new Function; checked all three regularCps expressions and confirmed relic multiplier is present in each, with Admin Abuse applied before it in live calculations. No browser gameplay, shop probability, or checkout test performed.
+- Relevant HTML commits: 8d250de, 04f863f, dd9b59e, 2d6aad2, 1d07765, 4b5f5cb, 322ebff. Changelog commit: 4de150c. In-game Update Log commit: 1d07765.
+- Rollback: revert the above HTML commits newest-first on Halloween only; revert the documentation commits separately if needed. No DB rollback. Do not alter main or game-development.
+
 ### 2026-11-03 — Bob unlimited title and rare Traveling Shop offer (Halloween branch)
 - **Requested behavior:** title named Bob; black fill with glowing white outline; unlimited claims; exact hint “bob REALY likes people”; offered in the Traveling Shop at 1/7,500 chance per shop visit; purchase price 2 clicks.
 - **HTML file:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`.
