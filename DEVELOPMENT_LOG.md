@@ -4,8 +4,8 @@
 - **Implementation:** Added fixed launcher and compact owned-relic menu. Current `RELIC_DEFINITIONS` is empty, so players see only the empty-state message. Added `ownedRelics` and `equippedRelic` to the game state, normalized older local/cloud saves, and added equip/unequip handling that enforces one active relic. Rebirth leaves both fields untouched; Hard Reset and server reset clear them.
 - **Scope:** No relic content, effects, buff math, or acquisition methods were added because none have been designed yet. Existing game bonuses and save format compatibility are preserved through additive fields.
 - **Verification:** Source checks passed for button/style/position, shop launcher offset, empty-state behavior, one-slot equip logic, local/cloud save normalization, rebirth preservation, full-reset clearing, and balanced style/script tags. Browser visual and interactive testing remains outstanding.
-- **HTML commits:** `d6c6ede233be2edf862a487ffc3c50354cd613c7` (implementation), `4e3ff184fc631cc9ff1f1e4f547a914e0f7332a7` (initialization ordering), and `IN_GAME_LOG_COMMIT`.
-- **CHANGELOG commit:** `CHANGELOG_COMMIT_SHA`.
+- **HTML commits:** `d6c6ede233be2edf862a487ffc3c50354cd613c7` (implementation), `4e3ff184fc631cc9ff1f1e4f547a914e0f7332a7` (initialization ordering), and `d68e44a100512732cb0e835be51364a242201aa7`.
+- **CHANGELOG commit:** `087b0b2ba84d0c51199d970f91184b7200489ac6`.
 - **Rollback:** Revert the listed HTML and documentation commits on `Halloween` only; do not change `main` or `game-development`.
 
 ### 2026-11-03 — Make the Traveling Shop full-screen with a cart (Halloween branch)
