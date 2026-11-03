@@ -763,6 +763,13 @@ body {
         </div>
 
         <div id="admin-panel" style="display: none; margin-top: 15px;">
+            <div id="admin-random-shop-tools" style="padding:10px; border:1px solid #d6a84f; border-radius:8px; margin-bottom:12px;">
+                <strong>🛒 Random Shop Controls</strong>
+                <div class="sub-stat" style="margin:6px 0;">Force the shop to appear and inspect every automatic spawn roll from this game session.</div>
+                <button type="button" id="admin-force-random-shop" class="btn-upgrade" style="background:#4a3515; border:1px solid #d6a84f;">Force Spawn Shop</button>
+                <div id="admin-random-shop-summary" class="sub-stat" style="margin-top:8px;">No spawn attempts yet this session.</div>
+                <div id="admin-random-shop-history" style="margin-top:8px; max-height:190px; overflow-y:auto; font-size:0.85rem; line-height:1.5;"></div>
+            </div>
             <div style="padding: 10px; border: 1px solid #00C7B1; border-radius: 8px; margin-bottom: 12px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
                 <strong>👑 Owner Player List Mode</strong>
                 <input id="owner-player-list-admin-mode" type="checkbox" style="width:20px; height:20px;">
@@ -3510,9 +3517,46 @@ body {
         let randomShopExpiresAt = 0;
         let randomShopInventory = null;
         let randomShopTimer = null;
+        let randomShopAttemptHistory = [];
+        let randomShopLastAttempt = null;
+
+        function updateRandomShopAdminStatus() {
+            const summary = document.getElementById('admin-random-shop-summary');
+            const history = document.getElementById('admin-random-shop-history');
+            if (!summary || !history) return;
+            if (!randomShopLastAttempt) {
+                summary.textContent = 'No spawn attempts yet this session.';
+                history.textContent = '';
+                return;
+            }
+            const last = randomShopLastAttempt;
+            summary.textContent = 'Last attempt: ' + last.timeLabel + ' — ' + last.result + ' (' + last.reason + ').';
+            history.textContent = '';
+            randomShopAttemptHistory.slice().reverse().forEach(attempt => {
+                const row = document.createElement('div');
+                row.style.padding = '3px 0';
+                row.style.borderBottom = '1px solid #333';
+                row.textContent = attempt.timeLabel + ' — ' + attempt.result + ' — ' + attempt.reason;
+                history.appendChild(row);
+            });
+        }
+
+        function recordRandomShopAttempt(result, reason, timestamp) {
+            const attemptTime = Number.isFinite(timestamp) ? timestamp : Date.now();
+            const entry = {
+                time: attemptTime,
+                timeLabel: new Date(attemptTime).toLocaleTimeString(),
+                result: result,
+                reason: reason
+            };
+            randomShopLastAttempt = entry;
+            randomShopAttemptHistory.push(entry);
+            if (randomShopAttemptHistory.length > 30) randomShopAttemptHistory.shift();
+            updateRandomShopAdminStatus();
+        }
 
         function spawnRandomShop() {
-            if (randomShopExpiresAt > Date.now()) return;
+            if (randomShopExpiresAt > Date.now()) return false;
             // Actual offers will be generated exactly once here after the shop contents are designed.
             randomShopInventory = Object.freeze([]);
             randomShopExpiresAt = Date.now() + RANDOM_SHOP_OPEN_MS;
@@ -3521,6 +3565,7 @@ body {
             document.getElementById('random-shop-panel').style.display = 'none';
             launcher.setAttribute('aria-expanded', 'false');
             updateRandomShopTimeLeft();
+            return true;
         }
         function updateRandomShopTimeLeft() {
             const launcher = document.getElementById('random-shop-launcher');
@@ -3550,7 +3595,13 @@ body {
                 const checkAt = randomShopNextCheckAt;
                 randomShopNextCheckAt += RANDOM_SHOP_CHECK_INTERVAL_MS;
                 const guaranteeReached = checkAt - randomShopCycleStartedAt >= RANDOM_SHOP_MAX_WAIT_MS;
-                if (guaranteeReached || Math.random() < RANDOM_SHOP_SPAWN_CHANCE) spawnRandomShop();
+                const rollSucceeded = guaranteeReached || Math.random() < RANDOM_SHOP_SPAWN_CHANCE;
+                recordRandomShopAttempt(
+                    rollSucceeded ? 'SUCCESS' : 'FAILED',
+                    guaranteeReached ? 'one-hour guarantee' : (rollSucceeded ? 'random chance hit' : 'random chance missed'),
+                    checkAt
+                );
+                if (rollSucceeded) spawnRandomShop();
             }
         }
         document.getElementById('random-shop-launcher').addEventListener('click', () => {
@@ -3563,6 +3614,18 @@ body {
             document.getElementById('random-shop-panel').style.display = 'none';
             document.getElementById('random-shop-launcher').setAttribute('aria-expanded', 'false');
         });
+        document.getElementById('admin-force-random-shop').addEventListener('click', () => {
+            if (!adminUnlocked) return;
+            if (randomShopExpiresAt > Date.now()) {
+                const summary = document.getElementById('admin-random-shop-summary');
+                summary.textContent = 'The shop is already active. It will remain available until its current timer expires.';
+                return;
+            }
+            if (spawnRandomShop()) {
+                recordRandomShopAttempt('FORCED', 'manually spawned by an admin', Date.now());
+            }
+        });
+        updateRandomShopAdminStatus();
         randomShopTimer = setInterval(checkRandomShopTimer, 1000);
 
         // Initialize session on boot
