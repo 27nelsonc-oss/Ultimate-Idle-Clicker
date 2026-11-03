@@ -551,6 +551,31 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
 .company-busy-overlay { position:fixed; inset:0; z-index:999999; display:none; align-items:center; justify-content:center; padding:20px; box-sizing:border-box; background:rgba(8,6,5,.76); }
 .company-busy-overlay > div { max-width:360px; padding:18px; border:1px solid #ff7518; border-radius:10px; background:#1b1714; color:#fff; text-align:center; box-shadow:0 8px 24px rgba(0,0,0,.55); }
 @media(max-width:600px) { .company-market-panel { width:100%; max-width:100%; } }
+
+/* Session-local Traveling Shop */
+#random-shop-launcher {
+    display:none; position:fixed; top:14px; left:14px; z-index:10020;
+    width:auto; min-width:150px; padding:9px 12px; border:1px solid #d6a84f;
+    border-radius:9px; background:#38250f; color:#ffe0a0; font-weight:bold;
+    cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.45);
+}
+#random-shop-panel {
+    display:none; position:fixed; top:66px; left:14px; z-index:10021;
+    width:min(320px,calc(100vw - 28px)); max-height:min(70vh,520px);
+    overflow-y:auto; box-sizing:border-box; padding:16px; border:1px solid #d6a84f;
+    border-radius:12px; background:#1e1e1e; color:#fff;
+    box-shadow:0 8px 24px rgba(0,0,0,.65); text-align:left;
+}
+#random-shop-panel h2 { margin:0; color:#f2c66d; font-size:1.25rem; }
+#random-shop-close {
+    float:right; width:auto; margin:0; padding:3px 9px; border:1px solid #777;
+    border-radius:6px; background:#333; color:white; cursor:pointer;
+}
+#random-shop-panel .random-shop-placeholder {
+    margin-top:12px; padding:12px; border:1px dashed #8b7448;
+    border-radius:8px; color:#d7d0c2; line-height:1.45;
+}
+
 </style>
 
 </head>
@@ -559,8 +584,9 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
 </div><div id="game-entry-announcements" aria-live="polite"><strong>📢 Announcements</strong><div id="game-entry-announcement-message"><div class="game-announcement-empty">No announcements right now. Check back for game news and events.</div></div><div id="game-entry-announcement-owner-tools" style="display:none;margin-top:16px;padding-top:12px;border-top:1px solid #76512f;"><label class="game-announcement-editor-label" for="admin-global-announcement">📌 Add a Long-Term Announcement</label><div class="game-announcement-editor-help">Post an important notice for players to refer back to. Each announcement stays until you remove it.</div><textarea id="admin-global-announcement" maxlength="500" rows="5" placeholder="Write your announcement here (maximum 500 characters)..." style="width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:1px solid #89623a;background:#100c09;color:white;resize:vertical;font:inherit;font-size:1.02rem;line-height:1.55;"></textarea><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:9px;"><button type="button" id="admin-publish-announcement" class="btn-upgrade">Add Announcement</button></div><div id="admin-announcement-status" class="sub-stat" role="status" style="margin-top:8px;font-size:.95rem;"></div></div></div><div id="game-entry-sidebar">
 <!-- EDITABLE UPDATE LOG: Change the heading and list items below when releasing a new update. -->
 <details id="game-update-log"><summary>Update Log</summary><div id="game-update-log-content">
-<strong>Latest update — October 29, 2026</strong>
+<strong>Latest update — November 3, 2026</strong>
 <ul>
+<li>Added the session-based Traveling Shop with a five-minute spawn check, a one-hour guarantee, and a ten-minute visit. Added owner/admin force-spawn and local attempt history controls.</li>
 <li>Added the Global Company Market above the Bank in the Halloween version. The company starts with player investments only and has no artificial starting capital.</li>
             <li>Added personal investment tracking: total clicks invested, current investment value, and overall profit/loss including earlier withdrawals.</li>
 <li>Added compact square minus/plus minimize buttons to Global Company and Market activity, matching the My Titles panel controls.</li>
@@ -621,6 +647,17 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
     </div>
 </div>
 <button type="button" id="mobile-click-button" class="btn-main" aria-label="Mobile click button">CLICK!</button>
+
+<button type="button" id="random-shop-launcher" aria-controls="random-shop-panel" aria-expanded="false">
+    🛒 Traveling Shop
+    <span id="random-shop-time-left" style="display:block;font-size:.75rem;font-weight:400;margin-top:2px;">10:00 remaining</span>
+</button>
+<section id="random-shop-panel" role="dialog" aria-label="Traveling Shop" aria-modal="false">
+    <button type="button" id="random-shop-close" aria-label="Close shop">×</button>
+    <h2>🛒 Traveling Shop</h2>
+    <div class="sub-stat" style="margin-top:6px;">This visit's stock is fixed until the shop leaves.</div>
+    <div class="random-shop-placeholder">The shop has arrived! Its item inventory will be added once the shop contents are designed.</div>
+</section>
 
     <!-- Main Game Panel -->
     <div class="panel main-panel">
@@ -939,6 +976,14 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
         </div>
 
         <div id="admin-panel" style="display: none; margin-top: 15px;">
+        <div id="admin-random-shop-tools" style="padding:10px;border:1px solid #d6a84f;border-radius:8px;margin-bottom:12px;">
+            <strong>🛒 Random Shop Controls</strong>
+            <div class="sub-stat" style="margin:6px 0;">Force the shop to appear and inspect every automatic spawn roll from this game session.</div>
+            <button type="button" id="admin-force-random-shop" class="btn-upgrade" style="background:#4a3515;border:1px solid #d6a84f;">Force Spawn Shop</button>
+            <div id="admin-random-shop-summary" class="sub-stat" style="margin-top:8px;">No spawn attempts yet this session.</div>
+            <div id="admin-random-shop-history" style="margin-top:8px;max-height:190px;overflow-y:auto;font-size:.85rem;line-height:1.5;"></div>
+        </div>
+
             <div style="padding: 10px; border: 1px solid #ff7518; border-radius: 8px; margin-bottom: 12px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
                 <strong>👑 Owner Player List Mode</strong>
                 <input id="owner-player-list-admin-mode" type="checkbox" style="width:20px; height:20px;">
@@ -5260,6 +5305,123 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
                 hardResetInProgress = false;
             }
         });
+
+        // --- LOCAL RANDOM SHOP (Halloween branch) ---
+        // Session-local only: timers and attempt history are never saved or sent to Supabase.
+        const RANDOM_SHOP_CHECK_INTERVAL_MS = 5 * 60 * 1000;
+        const RANDOM_SHOP_MAX_WAIT_MS = 60 * 60 * 1000;
+        const RANDOM_SHOP_OPEN_MS = 10 * 60 * 1000;
+        const RANDOM_SHOP_SPAWN_CHANCE = 0.05;
+        let randomShopCycleStartedAt = Date.now();
+        let randomShopNextCheckAt = randomShopCycleStartedAt + RANDOM_SHOP_CHECK_INTERVAL_MS;
+        let randomShopExpiresAt = 0;
+        let randomShopInventory = null;
+        let randomShopAttemptHistory = [];
+        let randomShopLastAttempt = null;
+
+        function updateRandomShopAdminStatus() {
+            const summary = document.getElementById('admin-random-shop-summary');
+            const history = document.getElementById('admin-random-shop-history');
+            if (!summary || !history) return;
+            if (!randomShopLastAttempt) {
+                summary.textContent = 'No spawn attempts yet this session.';
+                history.textContent = '';
+                return;
+            }
+            const last = randomShopLastAttempt;
+            summary.textContent = 'Last attempt: ' + last.timeLabel + ' — ' + last.result + ' (' + last.reason + ').';
+            history.textContent = '';
+            randomShopAttemptHistory.slice().reverse().forEach(attempt => {
+                const row = document.createElement('div');
+                row.style.padding = '3px 0';
+                row.style.borderBottom = '1px solid #333';
+                row.textContent = attempt.timeLabel + ' — ' + attempt.result + ' — ' + attempt.reason;
+                history.appendChild(row);
+            });
+        }
+
+        function recordRandomShopAttempt(result, reason, timestamp) {
+            const attemptTime = Number.isFinite(timestamp) ? timestamp : Date.now();
+            const entry = { time: attemptTime, timeLabel: new Date(attemptTime).toLocaleTimeString(), result, reason };
+            randomShopLastAttempt = entry;
+            randomShopAttemptHistory.push(entry);
+            if (randomShopAttemptHistory.length > 30) randomShopAttemptHistory.shift();
+            updateRandomShopAdminStatus();
+        }
+
+        function spawnRandomShop() {
+            if (randomShopExpiresAt > Date.now()) return false;
+            // Inventory is rolled once per visit; actual offers will be added when shop contents are designed.
+            randomShopInventory = Object.freeze([]);
+            randomShopExpiresAt = Date.now() + RANDOM_SHOP_OPEN_MS;
+            const launcher = document.getElementById('random-shop-launcher');
+            launcher.style.display = 'block';
+            document.getElementById('random-shop-panel').style.display = 'none';
+            launcher.setAttribute('aria-expanded', 'false');
+            updateRandomShopTimeLeft();
+            return true;
+        }
+
+        function updateRandomShopTimeLeft() {
+            const launcher = document.getElementById('random-shop-launcher');
+            if (!launcher || randomShopExpiresAt <= 0) return;
+            const totalSeconds = Math.ceil(Math.max(0, randomShopExpiresAt - Date.now()) / 1000);
+            document.getElementById('random-shop-time-left').textContent =
+                Math.floor(totalSeconds / 60) + ':' + String(totalSeconds % 60).padStart(2, '0') + ' remaining';
+        }
+
+        function hideRandomShop() {
+            randomShopExpiresAt = 0;
+            randomShopInventory = null;
+            document.getElementById('random-shop-launcher').style.display = 'none';
+            document.getElementById('random-shop-panel').style.display = 'none';
+            document.getElementById('random-shop-launcher').setAttribute('aria-expanded', 'false');
+            randomShopCycleStartedAt = Date.now();
+            randomShopNextCheckAt = randomShopCycleStartedAt + RANDOM_SHOP_CHECK_INTERVAL_MS;
+        }
+
+        function checkRandomShopTimer() {
+            const now = Date.now();
+            if (randomShopExpiresAt > 0) {
+                if (now >= randomShopExpiresAt) hideRandomShop();
+                else updateRandomShopTimeLeft();
+                return;
+            }
+            while (randomShopNextCheckAt <= now && randomShopExpiresAt === 0) {
+                const checkAt = randomShopNextCheckAt;
+                randomShopNextCheckAt += RANDOM_SHOP_CHECK_INTERVAL_MS;
+                const guaranteeReached = checkAt - randomShopCycleStartedAt >= RANDOM_SHOP_MAX_WAIT_MS;
+                const rollSucceeded = guaranteeReached || Math.random() < RANDOM_SHOP_SPAWN_CHANCE;
+                recordRandomShopAttempt(
+                    rollSucceeded ? 'SUCCESS' : 'FAILED',
+                    guaranteeReached ? 'one-hour guarantee' : (rollSucceeded ? 'random chance hit' : 'random chance missed'),
+                    checkAt
+                );
+                if (rollSucceeded) spawnRandomShop();
+            }
+        }
+
+        document.getElementById('random-shop-launcher').addEventListener('click', () => {
+            const panel = document.getElementById('random-shop-panel');
+            const isOpening = panel.style.display !== 'block';
+            panel.style.display = isOpening ? 'block' : 'none';
+            document.getElementById('random-shop-launcher').setAttribute('aria-expanded', String(isOpening));
+        });
+        document.getElementById('random-shop-close').addEventListener('click', () => {
+            document.getElementById('random-shop-panel').style.display = 'none';
+            document.getElementById('random-shop-launcher').setAttribute('aria-expanded', 'false');
+        });
+        document.getElementById('admin-force-random-shop').addEventListener('click', () => {
+            if (!adminUnlocked) return;
+            if (randomShopExpiresAt > Date.now()) {
+                document.getElementById('admin-random-shop-summary').textContent =
+                    'The shop is already active. It will remain available until its current timer expires.';
+                return;
+            }
+            if (spawnRandomShop()) recordRandomShopAttempt('FORCED', 'manually spawned by an admin', Date.now());
+        });
+        updateRandomShopAdminStatus();
+        setInterval(checkRandomShopTimer, 1000);
 
         // Initialize session on boot
         loadGame();
