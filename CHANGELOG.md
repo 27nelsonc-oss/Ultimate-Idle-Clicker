@@ -2,7 +2,7 @@
 - Replaced the small popup with a full-screen shop view containing six item slots and a responsive two-column layout.
 - Added a shopping cart on the right with item quantity, remove-one control, running total, and one checkout action. Checkout validates the complete total before deducting clicks and awarding gems.
 - Kept the temporary Test Gem offer at 10 clicks for 1 gem. The other five item slots currently display **Empty** and cannot be added. Cart state is session-only and is cleared when a new shop visit spawns; no save schema or Supabase changes.
-- HTML commits: `5dacd8e6a646c4ffd00148c8409058ab8cabd3f1` (shop) and `HTML_UPDATE_LOG_COMMIT` (in-game Update Log).
+- HTML commits: `5dacd8e6a646c4ffd00148c8409058ab8cabd3f1` (shop) and `1aa40a1706bb33ceef8f201be0b6addd301d4682` (in-game Update Log).
 - Verification: source-level checks only; no live browser layout or checkout test performed. Responsive CSS includes a stacked layout for narrow screens.
 - Rollback: revert the two HTML commits above on `Halloween` only. Do not change `main` or `game-development`.
 
