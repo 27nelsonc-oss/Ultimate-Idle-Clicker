@@ -4,7 +4,7 @@
 - **Files/functions touched:** Halloween HTML styles and `renderOwnedRelics()`; in-game Update Log; CHANGELOG.md. No Supabase or save-format changes.
 - **Compatibility:** Kept `ownedRelics`, `equippedRelic`, existing relic IDs, and the existing Auto Clicker multiplier calculation unchanged.
 - **Verification:** Re-fetched the edited HTML and compiled both inline JavaScript blocks successfully. Source checks confirmed the category accordion, owned-only filter, Common-to-Legendary order, all five colors, and equipped-color indicator. No browser visual, keyboard, mobile, or live equip/unequip test performed.
-- **Commits:** 566081825378e77e320ba548bdef73bf0eeff32b (menu), 566081825378e77e320ba548bdef73bf0eeff32b (in-game Update Log), 51b42e9edd33476ff5ca8521dfa86d0e7aa1c811 (CHANGELOG.md).
+- **Commits:** 84d14367f487415f97c9c43ab227a4021cd8c5b5 (menu), 566081825378e77e320ba548bdef73bf0eeff32b (in-game Update Log), 51b42e9edd33476ff5ca8521dfa86d0e7aa1c811 (CHANGELOG.md).
 - **Rollback:** Revert the two HTML commits and the documentation commit on Halloween only. Do not change main or game-development.
 
 ### 2026-11-03 — Remove temporary Traveling Shop test purchase and correct relic odds (Halloween)
