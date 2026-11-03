@@ -597,6 +597,29 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
     #random-shop-panel .random-shop-items { grid-template-columns:1fr; }
 }
 
+/* Relics: fixed launcher and owned-only equipment menu */
+#relics-launcher {
+    position:fixed; top:14px; left:14px; z-index:10019;
+    width:auto; min-width:150px; padding:10px 14px;
+    border:1px solid #bd8aff; border-radius:9px;
+    background:linear-gradient(135deg,#7135a8,#482078);
+    color:#fff; font-weight:bold; letter-spacing:.3px;
+    cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.45);
+}
+#relics-panel {
+    display:none; position:fixed; top:66px; left:14px; z-index:10022;
+    width:min(390px,calc(100vw - 28px)); max-height:min(70vh,560px);
+    overflow-y:auto; box-sizing:border-box; padding:16px;
+    border:1px solid #a875dc; border-radius:12px;
+    background:#21172b; color:#fff; box-shadow:0 8px 24px rgba(0,0,0,.65);
+    text-align:left;
+}
+#relics-panel h2 { margin:0; color:#d8b5ff; font-size:1.25rem; }
+#relics-panel .relics-empty { margin-top:14px; padding:14px; border:1px dashed #8963aa; border-radius:8px; color:#d9cce8; line-height:1.45; }
+#relics-panel .relic-owned-card { margin-top:10px; padding:12px; border:1px solid #765394; border-radius:8px; background:#30213d; }
+#relics-panel .relic-owned-card button { width:100%; margin-top:9px; }
+#relics-close { float:right; width:auto; margin:0; padding:3px 9px; border:1px solid #8963aa; border-radius:6px; background:#382849; color:white; cursor:pointer; }
+
 </style>
 
 </head>
@@ -698,6 +721,15 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
             </aside>
         </div>
     </div>
+</section>
+
+<button type="button" id="relics-launcher" aria-controls="relics-panel" aria-expanded="false">✦ Relics</button>
+<section id="relics-panel" role="dialog" aria-label="Relics" aria-modal="false">
+    <button type="button" id="relics-close" aria-label="Close relics">×</button>
+    <h2>✦ Relics</h2>
+    <div class="sub-stat" style="margin-top:6px;">Equip one relic at a time. Equipped relics provide their bonuses while active and remain yours through rebirths.</div>
+    <div id="relics-owned-list"></div>
+    <div id="relics-status" class="sub-stat" role="status" aria-live="polite" style="margin-top:9px;"></div>
 </section>
 
     <!-- Main Game Panel -->
@@ -2258,7 +2290,9 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
                 bankUnlocked: false,
                 bankEnabled: false,
                 bankBalance: 0,
-                bankLastInterestAt: Date.now()
+                bankLastInterestAt: Date.now(),
+                ownedRelics: [],
+                equippedRelic: null
             };
             localStorage.setItem('ultimateIdleClicker_cloud_reset_version', String(cloudResetVersion));
             updateUI();
@@ -2426,6 +2460,9 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
                 lastCloudSyncAt = data.updated_at || null;
                 if (data.save_data && typeof data.save_data === 'object') {
                     game = { ...game, ...data.save_data };
+                    if (!Array.isArray(game.ownedRelics)) game.ownedRelics = [];
+                    game.ownedRelics = [...new Set(game.ownedRelics.filter(id => typeof id === 'string' && id.trim()))];
+                    if (typeof game.equippedRelic !== 'string' || !game.ownedRelics.includes(game.equippedRelic)) game.equippedRelic = null;
                     if (!Number.isFinite(Number(game.clickOverdriveLevel))) game.clickOverdriveLevel = 0;
                     const offlineSeconds = applyOfflineProgress(game.lastActiveAt);
                     game.lastActiveAt = Date.now();
@@ -3743,7 +3780,9 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
             bankUnlocked: false,
             bankEnabled: false,
             bankBalance: 0,
-            bankLastInterestAt: Date.now()
+            bankLastInterestAt: Date.now(),
+            ownedRelics: [],
+            equippedRelic: null
         };
 
         // --- CONFIGURATION / BALANCING ---
@@ -3780,6 +3819,9 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
                 try {
                     const parsed = JSON.parse(saved);
                     game = { ...game, ...parsed };
+                    if (!Array.isArray(game.ownedRelics)) game.ownedRelics = [];
+                    game.ownedRelics = [...new Set(game.ownedRelics.filter(id => typeof id === 'string' && id.trim()))];
+                    if (typeof game.equippedRelic !== 'string' || !game.ownedRelics.includes(game.equippedRelic)) game.equippedRelic = null;
                 } catch (e) {
                     console.error("Error loading save file", e);
                 }
@@ -5311,7 +5353,9 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
                     bankUnlocked: false,
                     bankEnabled: false,
                     bankBalance: 0,
-                    bankLastInterestAt: Date.now()
+                    bankLastInterestAt: Date.now(),
+                    ownedRelics: [],
+                    equippedRelic: null
                 };
 
                 // Save the reset state locally immediately, then synchronize the cloud copy.
@@ -5346,6 +5390,68 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
                 hardResetInProgress = false;
             }
         });
+
+        // --- RELICS (Halloween branch) ---
+        // Add definitions here as relics are introduced. Only owned, defined relics are displayed.
+        const RELIC_DEFINITIONS = Object.freeze({});
+        function updateRelicsButtonPosition() {
+            const button = document.getElementById('relics-launcher');
+            if (button) button.style.top = randomShopExpiresAt > Date.now() ? '84px' : '14px';
+        }
+
+        function renderOwnedRelics() {
+            const list = document.getElementById('relics-owned-list');
+            const status = document.getElementById('relics-status');
+            if (!list || !status) return;
+            if (!Array.isArray(game.ownedRelics)) game.ownedRelics = [];
+            game.ownedRelics = [...new Set(game.ownedRelics.filter(id => typeof id === 'string' && Object.prototype.hasOwnProperty.call(RELIC_DEFINITIONS, id)))];
+            if (!game.ownedRelics.includes(game.equippedRelic)) game.equippedRelic = null;
+            list.replaceChildren();
+            if (game.ownedRelics.length === 0) {
+                const empty = document.createElement('div');
+                empty.className = 'relics-empty';
+                empty.textContent = "You don't own any relics yet. Relics you discover will appear here.";
+                list.appendChild(empty);
+                status.textContent = 'No relic equipped.';
+                return;
+            }
+            game.ownedRelics.forEach(id => {
+                const relic = RELIC_DEFINITIONS[id];
+                const card = document.createElement('div');
+                card.className = 'relic-owned-card';
+                const title = document.createElement('strong');
+                title.textContent = relic.name;
+                const description = document.createElement('div');
+                description.className = 'sub-stat';
+                description.textContent = relic.description;
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'btn-upgrade';
+                button.textContent = game.equippedRelic === id ? 'Unequip' : 'Equip';
+                button.addEventListener('click', () => {
+                    game.equippedRelic = game.equippedRelic === id ? null : id;
+                    saveGame();
+                    renderOwnedRelics();
+                });
+                card.append(title, description, button);
+                list.appendChild(card);
+            });
+            status.textContent = game.equippedRelic ? 'Equipped: ' + RELIC_DEFINITIONS[game.equippedRelic].name : 'No relic equipped.';
+        }
+
+        document.getElementById('relics-launcher').addEventListener('click', () => {
+            const panel = document.getElementById('relics-panel');
+            const opening = panel.style.display !== 'block';
+            panel.style.display = opening ? 'block' : 'none';
+            document.getElementById('relics-launcher').setAttribute('aria-expanded', String(opening));
+            if (opening) renderOwnedRelics();
+        });
+        document.getElementById('relics-close').addEventListener('click', () => {
+            document.getElementById('relics-panel').style.display = 'none';
+            document.getElementById('relics-launcher').setAttribute('aria-expanded', 'false');
+        });
+        updateRelicsButtonPosition();
+        renderOwnedRelics();
 
         // --- LOCAL RANDOM SHOP (Halloween branch) ---
         // Session-local only: timers and attempt history are never saved or sent to Supabase.
@@ -5400,6 +5506,7 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
             randomShopExpiresAt = Date.now() + RANDOM_SHOP_OPEN_MS;
             const launcher = document.getElementById('random-shop-launcher');
             launcher.style.display = 'block';
+            updateRelicsButtonPosition();
             document.getElementById('random-shop-panel').style.display = 'none';
             launcher.setAttribute('aria-expanded', 'false');
             updateRandomShopTimeLeft();
@@ -5419,6 +5526,7 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
             randomShopInventory = null;
             document.getElementById('random-shop-launcher').style.display = 'none';
             document.getElementById('random-shop-panel').style.display = 'none';
+            updateRelicsButtonPosition();
             document.getElementById('random-shop-launcher').setAttribute('aria-expanded', 'false');
             randomShopCycleStartedAt = Date.now();
             randomShopNextCheckAt = randomShopCycleStartedAt + RANDOM_SHOP_CHECK_INTERVAL_MS;
