@@ -656,7 +656,13 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
     <button type="button" id="random-shop-close" aria-label="Close shop">×</button>
     <h2>🛒 Traveling Shop</h2>
     <div class="sub-stat" style="margin-top:6px;">This visit's stock is fixed until the shop leaves.</div>
-    <div class="random-shop-placeholder">The shop has arrived! Its item inventory will be added once the shop contents are designed.</div>
+    <div class="random-shop-placeholder" style="margin-bottom:12px;">The shop has arrived! Try this temporary test offer while the shop is being built.</div>
+    <div style="padding:12px;border:1px solid #8b7448;border-radius:8px;background:#292116;">
+        <strong style="color:#f2c66d;">💎 Test Gem</strong>
+        <div class="sub-stat" style="margin:6px 0;">Cost: 10 clicks · Reward: 1 gem</div>
+        <button type="button" id="random-shop-test-purchase" class="btn-upgrade" style="width:100%;">Purchase for 10 Clicks</button>
+        <div id="random-shop-test-status" class="sub-stat" role="status" style="margin-top:7px;"></div>
+    </div>
 </section>
 
     <!-- Main Game Panel -->
@@ -5410,6 +5416,24 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
         document.getElementById('random-shop-close').addEventListener('click', () => {
             document.getElementById('random-shop-panel').style.display = 'none';
             document.getElementById('random-shop-launcher').setAttribute('aria-expanded', 'false');
+        });
+
+        // Temporary test offer: spends 10 clicks and grants exactly 1 gem.
+        document.getElementById('random-shop-test-purchase').addEventListener('click', () => {
+            const status = document.getElementById('random-shop-test-status');
+            if (randomShopExpiresAt <= Date.now()) {
+                status.textContent = 'This shop visit has ended.';
+                return;
+            }
+            const availableClicks = Number(game.clicks);
+            if (!Number.isFinite(availableClicks) || availableClicks < 10) {
+                status.textContent = 'You need at least 10 clicks to buy this.';
+                return;
+            }
+            game.clicks = availableClicks - 10;
+            game.gems = Math.max(0, Number(game.gems) || 0) + 1;
+            updateUI();
+            status.textContent = 'Purchase successful! You received 1 gem.';
         });
         document.getElementById('admin-force-random-shop').addEventListener('click', () => {
             if (!adminUnlocked) return;
