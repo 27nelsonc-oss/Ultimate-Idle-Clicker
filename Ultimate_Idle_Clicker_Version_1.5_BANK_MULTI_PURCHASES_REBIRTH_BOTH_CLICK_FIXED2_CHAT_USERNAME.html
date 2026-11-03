@@ -710,7 +710,7 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
             <div class="random-shop-items" aria-label="Shop items">
                 <div class="random-shop-item"><strong>💎 Test Gem</strong><div class="sub-stat">10 clicks · Gives 1 gem</div><button type="button" id="random-shop-add-test-gem" class="btn-upgrade">Add to Cart</button></div>
                 <div class="random-shop-item" id="random-shop-bob-slot"><strong>Empty</strong><div class="sub-stat">No item available</div><button type="button" class="btn-upgrade" disabled>Empty</button></div>
-                <div class="random-shop-item"><strong>Empty</strong><div class="sub-stat">No item available</div><button type="button" class="btn-upgrade" disabled>Empty</button></div>
+                <div class="random-shop-item" id="random-shop-relic-slot"><strong>Empty</strong><div class="sub-stat">No item available</div><button type="button" class="btn-upgrade" disabled>Empty</button></div>
                 <div class="random-shop-item"><strong>Empty</strong><div class="sub-stat">No item available</div><button type="button" class="btn-upgrade" disabled>Empty</button></div>
                 <div class="random-shop-item"><strong>Empty</strong><div class="sub-stat">No item available</div><button type="button" class="btn-upgrade" disabled>Empty</button></div>
                 <div class="random-shop-item"><strong>Empty</strong><div class="sub-stat">No item available</div><button type="button" class="btn-upgrade" disabled>Empty</button></div>
@@ -5481,7 +5481,7 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
         let randomShopNextCheckAt = randomShopCycleStartedAt + RANDOM_SHOP_CHECK_INTERVAL_MS;
         let randomShopExpiresAt = 0;
         let randomShopInventory = null;
-        let randomShopCart = { testGem: 0, bob: 0 };
+        let randomShopCart = { testGem: 0, bob: 0, autoClickerRelic: 0 };
         let randomShopAttemptHistory = [];
         let randomShopLastAttempt = null;
 
@@ -5520,10 +5520,20 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
 
         function spawnRandomShop() {
             if (randomShopExpiresAt > Date.now()) return false;
-            // Inventory is rolled once per visit; actual offers will be added when shop contents are designed.
-            randomShopInventory = Object.freeze(['testGem', Math.random() < (1 / 7500) ? 'bob' : null, null, null, null, null]);
-            randomShopCart = { testGem: 0, bob: 0 };
+            // Roll one Auto Clicker Relic offer per shop visit: 50% spawn chance, then rarity odds.
+            let autoClickerRelicOffer = null;
+            if (Math.random() < 0.50) {
+                const rarityRoll = Math.random() * 100;
+                if (rarityRoll < 50) autoClickerRelicOffer = 'auto_clicker_common';
+                else if (rarityRoll < 75) autoClickerRelicOffer = 'auto_clicker_rare';
+                else if (rarityRoll < 85) autoClickerRelicOffer = 'auto_clicker_epic';
+                else if (rarityRoll < 90) autoClickerRelicOffer = 'auto_clicker_mythic';
+                else if (rarityRoll < 90.5) autoClickerRelicOffer = 'auto_clicker_legendary';
+            }
+            randomShopInventory = Object.freeze(['testGem', Math.random() < (1 / 7500) ? 'bob' : null, autoClickerRelicOffer, null, null, null]);
+            randomShopCart = { testGem: 0, bob: 0, autoClickerRelic: 0 };
             renderRandomShopBobSlot();
+            renderRandomShopAutoClickerRelicSlot();
             renderRandomShopCart();
             randomShopExpiresAt = Date.now() + RANDOM_SHOP_OPEN_MS;
             const launcher = document.getElementById('random-shop-launcher');
