@@ -639,6 +639,7 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
 <li>Added five Auto Clicker Relic rarities to the Traveling Shop with per-visit chances: Common 50%, Rare 25%, Epic 10%, Mythic 5%, and Legendary 0.5% (the remaining 9.5% has no relic offer). Each relic costs gems and boosts Auto Clicker production after the other Auto Clicker buffs. Players can own one of each rarity; duplicates are blocked.</li>
 <li>Added an Auto Clicker Relic selector in the Relics menu. Its arrow expands to show only owned rarities from Common to Legendary; each rarity has its own color, and the main button uses the equipped rarity's color.</li>
 <li>Added a separate Clicker Relic collection with the same five rarity chances, gem prices, and bonus percentages as Auto Clicker Relics. Clicker Relics boost normal clicking; each type has independent ownership and equipment, so one of each type can be equipped at the same time.</li>
+<li>Added the Discount Relic collection with the same independent per-visit rarity chances (Common 50%, Rare 25%, Epic 10%, Mythic 5%, Legendary 0.5%; 9.5% no offer). It costs 25% more gems than the matching standard relic price (25, 125, 313, 625, and 1,250 gems) and discounts only the two click-priced upgrades in the main upgrade list by 5%, 15%, 30%, 40%, or 50%. It does not discount Gem Station or other gem purchases.</li>
 <li>Redesigned the Traveling Shop as a full-screen, six-slot shop with a shopping cart, item quantities, a running total, and one checkout button. The temporary test purchase has been removed; only real shop offers can be purchased.</li>
 <li>Added the session-based Traveling Shop with a five-minute spawn check, a one-hour guarantee, and a ten-minute visit. Added owner/admin force-spawn and local attempt history controls.</li>
 <li>Added the Global Company Market above the Bank in the Halloween version. The company starts with player investments only and has no artificial starting capital.</li>
@@ -5692,7 +5693,7 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
         function spawnRandomShop() {
             if (randomShopExpiresAt > Date.now()) return false;
             // One rarity roll per shop visit: the listed chances are the actual per-visit odds.
-            // The remaining 9.5% intentionally produces no Auto Clicker Relic offer.
+            // Each relic family rolls independently; the remaining 9.5% produces no offer for that family.
             let autoClickerRelicOffer = null;
             const rarityRoll = Math.random() * 100;
             if (rarityRoll < 50) autoClickerRelicOffer = 'auto_clicker_common';
