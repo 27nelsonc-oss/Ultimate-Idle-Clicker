@@ -1,3 +1,15 @@
+### 2026-11-03 — Bob unlimited title and rare Traveling Shop offer (Halloween branch)
+- **Requested behavior:** title named Bob; black fill with glowing white outline; unlimited claims; exact hint “bob REALY likes people”; offered in the Traveling Shop at 1/7,500 chance per shop visit; purchase price 2 clicks.
+- **HTML file:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`.
+- Added `bob-title` styling and Bob discovery card. Added Bob name/class handling for claim previews, owned-title cards, and chat badges. Bob disappears from the discovery list after ownership is detected.
+- Added Bob to the owner self-test selector and selected-player admin grant/remove selector.
+- Traveling Shop: the second slot is dynamically Bob or Empty based on one `Math.random() < (1 / 7500)` roll when each shop visit spawns. The offer is a single item, can be added once to the cart, and costs 2 clicks. Existing Test Gem remains 10 clicks and mixed carts calculate the combined total.
+- Checkout calls `claim_bob_title()` for signed-in users before charging. The RPC inserts one owned Bob row per player using the existing `(user_id,title_id)` key; there is no global claim row or global winner. If the player already owns Bob, the cart does not charge them for it.
+- **Supabase migration:** `20261103181401_add_unlimited_bob_shop_title`. Added `bob` to `game_player_titles_title_id_check` and `game_title_preferences_active_title_id_check`; added authenticated `claim_bob_title()`; extended `owner_test_game_title` and the three-argument `owner_manage_game_title` allowlists. Left `game_title_claims` unchanged because Bob is unlimited.
+- **Verification:** GitHub HTML re-fetched on `Halloween`; static checks passed for exact hint, styling, shop probability, 2-click pricing, claim RPC, title rendering, chat badge, admin selectors, and balanced style/script tags. Supabase constraint definitions were queried and confirmed to include Bob; migration is listed in Supabase migration history.
+- **Not tested:** live browser rendering, waiting for a natural 1/7,500 shop roll, purchase with real signed-in player, and cross-device title refresh.
+- **Rollback:** revert HTML commit `a0483e49abc4c67a9761b25c06d6fbd1649983fa`. Database rollback must be a separate migration and must not remove Bob constraints/function while any player owns or equips Bob. No changes to `main` or `game-development`.
+
 ### 2026-11-03 — Make the Relics launcher star-only (Halloween branch)
 - **Request:** Keep the Relics button, but display only the star shape `✦` rather than the word “Relics”.
 - **File:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`.
