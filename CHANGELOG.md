@@ -4,7 +4,7 @@
 - Added one-slot equipment behavior: selecting an owned relic equips it and replaces any currently equipped relic; selecting it again unequips it. The menu is data-driven so future relic definitions can be added.
 - Added `ownedRelics` and `equippedRelic` to the game save. Local/cloud save loading normalizes older saves. Rebirth does not clear these fields; Hard Reset and server reset do clear them.
 - No relics, effects, buffs, acquisition methods, or balance values were invented. No existing game bonuses were changed.
-- HTML commits: `d6c6ede233be2edf862a487ffc3c50354cd613c7` (menu/state) and `4e3ff184fc631cc9ff1f1e4f547a914e0f7332a7` (safe initialization order) and `IN_GAME_LOG_COMMIT`.
+- HTML commits: `d6c6ede233be2edf862a487ffc3c50354cd613c7` (menu/state) and `4e3ff184fc631cc9ff1f1e4f547a914e0f7332a7` (safe initialization order) and `d68e44a100512732cb0e835be51364a242201aa7`.
 - Verification: source-level checks passed for fixed launcher, purple styling, shop offset, empty state, one-equipped logic, save migration, rebirth preservation, hard-reset clearing, and balanced style/script tags. No live browser test or actual relic gameplay test was performed.
 - Rollback: revert the commits above on `Halloween` only. Do not change `main` or `game-development`.
 
