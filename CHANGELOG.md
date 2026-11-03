@@ -4,6 +4,16 @@ This file records user-visible behavior changes and meaningful project changes. 
 
 ## Unreleased
 
+### 2026-11-03 — Add the local random traveling shop framework
+- **Problem/request:** Add an individually timed shop that checks for an appearance every five minutes, is guaranteed to appear within one hour, stays available for ten minutes, and does not use Supabase for its timer or shared state.
+- **Change:** Added a fixed top-left Traveling Shop button and a toggleable placeholder shop panel. Each page session has its own timer: a 5% spawn chance at each five-minute check, forced appearance at the one-hour check, and a ten-minute active window. When the window expires, a fresh local cycle begins. Reloading or reopening the game starts a fresh timer and hides any previous shop. Closing only the shop panel leaves the button and its current visit intact. Inventory is held in a session-only variable and is initialized once per appearance; actual randomized offers are intentionally pending the user's shop-content design.
+- **Files:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`
+- **Verification:** Re-fetched the committed HTML from `game-development`; checked the button/panel IDs, local-only timer, 5% check, one-hour guarantee, ten-minute expiry, new-cycle reset, and balanced script/style tags. No Supabase calls, save fields, or local-storage keys were added.
+- **Not tested:** No real browser wait-through test was performed. The one-hour guarantee and ten-minute expiration still need an in-browser test; actual shop offers/purchases are not implemented yet.
+- **Commit:** `4163ca6a47b2539eb60240162de9f355d7a0eb46`
+- **Rollback:** Revert the HTML commit above on `game-development`; no other branch or database was changed.
+
+
 ### 2026-10-12 — Keep Cloud Save directly under the main game interface
 - **Problem/request:** Keep Cloud Save easy to reach as new panels and features are added, rather than letting it drift farther down the page.
 - **Change:** Moved the existing Cloud Save panel into the main game panel, immediately below the main interface and rebirth control. The Cloud Save contents and behavior were not changed.
