@@ -4049,7 +4049,7 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
             if (elapsedSeconds <= 0) return 0;
             const autoClickers = Math.max(0, Number(game.autoClickers) || 0);
             const multiplier = Math.max(1, Number(game.multiplier) || 1);
-            const regularCps = autoClickers * multiplier * getOverclockMultiplier() * getAutoAcceleratorMultiplier();
+            const regularCps = autoClickers * multiplier * getOverclockMultiplier() * getAutoAcceleratorMultiplier(); * getAutoClickerRelicMultiplier()
             const gemStationCps = getClickerStationCPS(Number(game.clickerStationLevel) || 0);
             const offlineClicks = (regularCps + gemStationCps) * elapsedSeconds * OFFLINE_PROGRESS_EFFICIENCY;
             if (offlineClicks > 0) addGeneratedClicks(offlineClicks);
@@ -4350,7 +4350,7 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
             
             const autoClickers = Math.max(0, Number(game.autoClickers) || 0);
             const multiplier = Math.max(1, Number(game.multiplier) || 1);
-            const regularCps = autoClickers * multiplier * getOverclockMultiplier() * getAutoAcceleratorMultiplier() * getAdminAbuseClickMultiplier();
+            const regularCps = autoClickers * multiplier * getOverclockMultiplier() * getAutoAcceleratorMultiplier() * getAdminAbuseClickMultiplier(); * getAutoClickerRelicMultiplier()
             const gemStationCps = getClickerStationCPS(Number(game.clickerStationLevel) || 0);
             const totalCps = Number.isFinite(regularCps + gemStationCps) ? regularCps + gemStationCps : 0;
             
@@ -4488,7 +4488,7 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
             if (hardResetInProgress || companyInvestmentInProgress) return;
             const autoClickers = Math.max(0, Number(game.autoClickers) || 0);
             const multiplier = Math.max(1, Number(game.multiplier) || 1);
-            const regularCps = autoClickers * multiplier * getOverclockMultiplier() * getAutoAcceleratorMultiplier() * getAdminAbuseClickMultiplier();
+            const regularCps = autoClickers * multiplier * getOverclockMultiplier() * getAutoAcceleratorMultiplier() * getAdminAbuseClickMultiplier(); * getAutoClickerRelicMultiplier()
             const gemStationCps = getClickerStationCPS(Number(game.clickerStationLevel) || 0);
             const totalCps = regularCps + gemStationCps;
             if (Number.isFinite(totalCps) && totalCps > 0) {
@@ -5400,7 +5400,21 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
 
         // --- RELICS (Halloween branch) ---
         // Add definitions here as relics are introduced. Only owned, defined relics are displayed.
-        const RELIC_DEFINITIONS = Object.freeze({});
+        const RELIC_DEFINITIONS = Object.freeze({
+            auto_clicker_common: { name: 'Common Auto Clicker Relic', rarity: 'Common', description: '+10% Auto Clicker production.', bonus: 0.10, gemCost: 20 },
+            auto_clicker_rare: { name: 'Rare Auto Clicker Relic', rarity: 'Rare', description: '+30% Auto Clicker production.', bonus: 0.30, gemCost: 100 },
+            auto_clicker_epic: { name: 'Epic Auto Clicker Relic', rarity: 'Epic', description: '+100% Auto Clicker production.', bonus: 1.00, gemCost: 250 },
+            auto_clicker_mythic: { name: 'Mythic Auto Clicker Relic', rarity: 'Mythic', description: '+250% Auto Clicker production.', bonus: 2.50, gemCost: 500 },
+            auto_clicker_legendary: { name: 'Legendary Auto Clicker Relic', rarity: 'Legendary', description: '+500% Auto Clicker production.', bonus: 5.00, gemCost: 1000 }
+        });
+        const AUTO_CLICKER_RELIC_IDS = Object.freeze(Object.keys(RELIC_DEFINITIONS));
+        function getAutoClickerRelicMultiplier() {
+            const relic = RELIC_DEFINITIONS[game.equippedRelic];
+            return relic && AUTO_CLICKER_RELIC_IDS.includes(game.equippedRelic) ? 1 + relic.bonus : 1;
+        }
+        function hasAutoClickerRelic() {
+            return Array.isArray(game.ownedRelics) && game.ownedRelics.some(id => AUTO_CLICKER_RELIC_IDS.includes(id));
+        }
         function updateRelicsButtonPosition() {
             const button = document.getElementById('relics-launcher');
             if (button) button.style.top = randomShopExpiresAt > Date.now() ? '84px' : '14px';
