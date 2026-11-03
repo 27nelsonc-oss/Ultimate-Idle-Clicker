@@ -4050,7 +4050,7 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
             if (elapsedSeconds <= 0) return 0;
             const autoClickers = Math.max(0, Number(game.autoClickers) || 0);
             const multiplier = Math.max(1, Number(game.multiplier) || 1);
-            const regularCps = autoClickers * multiplier * getOverclockMultiplier() * getAutoAcceleratorMultiplier(); * getAutoClickerRelicMultiplier()
+            const regularCps = autoClickers * multiplier * getOverclockMultiplier() * getAutoAcceleratorMultiplier() * getAutoClickerRelicMultiplier();
             const gemStationCps = getClickerStationCPS(Number(game.clickerStationLevel) || 0);
             const offlineClicks = (regularCps + gemStationCps) * elapsedSeconds * OFFLINE_PROGRESS_EFFICIENCY;
             if (offlineClicks > 0) addGeneratedClicks(offlineClicks);
