@@ -2,8 +2,8 @@
 - Corrected the ownership helper and all Traveling Shop cart/render/checkout checks to compare the exact offered relic ID instead of checking whether the player owns any Auto Clicker Relic.
 - Players can now collect Common, Rare, Epic, Mythic, and Legendary independently, while duplicate copies of an already-owned rarity remain blocked. The existing one-relic-equipped-at-a-time behavior is unchanged.
 - Updated the in-game Update Log and CHANGELOG wording to match the corrected collection rule.
-- HTML commit: 6b653801bc93dbf787386e851ce70e530fb6989e. No save-schema or Supabase changes.
-- Verification: re-fetch and syntax-check the updated HTML; confirm every shop ownership check passes the exact relic ID and the duplicate-rarity guard remains. No live browser purchase test performed.
+- HTML commits: 6b653801bc93dbf787386e851ce70e530fb6989e and 8fe238e5e054fab9fbca65d4f9afe0d5c5abddcc. No save-schema or Supabase changes.
+- Verification: re-fetched the final HTML, syntax-checked both inline scripts, and confirmed every shop ownership check passes the exact relic ID and the duplicate-rarity guard remains. No live browser purchase test performed.
 - Rollback: revert HTML commit 6b653801bc93dbf787386e851ce70e530fb6989e and this documentation update on Halloween only. Do not alter main or game-development.
 
 ### 2026-11-03 — Auto Clicker Relics implementation (Halloween)
