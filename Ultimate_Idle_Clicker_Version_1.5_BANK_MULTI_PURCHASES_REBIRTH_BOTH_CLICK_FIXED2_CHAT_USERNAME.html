@@ -485,9 +485,30 @@ body {
     .admin-panel-container { order: 6; }
 }
 
+
+/* Random shop — fixed to the viewport without moving the existing game layout. */
+#random-shop-launcher { position:fixed; top:14px; left:14px; z-index:10000; display:none; width:auto; min-width:132px; margin:0; padding:10px 14px; border:1px solid #d6a84f; border-radius:9px; background:#4a3515; color:#fff2cc; font-weight:700; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,0.45); }
+#random-shop-launcher:hover { background:#62471b; }
+#random-shop-panel { position:fixed; top:62px; left:14px; z-index:10000; display:none; width:min(320px,calc(100vw - 28px)); max-height:min(70vh,520px); overflow-y:auto; box-sizing:border-box; padding:16px; border:1px solid #d6a84f; border-radius:12px; background:#1e1e1e; color:#fff; box-shadow:0 8px 24px rgba(0,0,0,0.65); text-align:left; }
+#random-shop-panel h2 { margin:0; color:#f2c66d; font-size:1.25rem; }
+#random-shop-close { float:right; width:auto; margin:0; padding:3px 9px; border:1px solid #777; border-radius:6px; background:#333; color:white; cursor:pointer; }
+#random-shop-panel .random-shop-placeholder { margin-top:12px; padding:12px; border:1px dashed #8b7448; border-radius:8px; color:#d7d0c2; line-height:1.45; }
+
 </style>
 </head>
 <body>
+
+    <button type="button" id="random-shop-launcher" aria-controls="random-shop-panel" aria-expanded="false">
+        🛒 Traveling Shop
+        <span id="random-shop-time-left" style="display:block; font-size:0.75rem; font-weight:400; margin-top:2px;">10:00 remaining</span>
+    </button>
+    <section id="random-shop-panel" role="dialog" aria-label="Traveling Shop" aria-modal="false">
+        <button type="button" id="random-shop-close" aria-label="Close shop">×</button>
+        <h2>🛒 Traveling Shop</h2>
+        <div class="sub-stat" style="margin-top:6px;">This visit's stock is fixed until the shop leaves.</div>
+        <div class="random-shop-placeholder">The shop has arrived! Its item inventory will be added once the shop contents are designed.</div>
+    </section>
+
 
     <!-- Main Game Panel -->
     <div class="panel main-panel">
@@ -3476,6 +3497,73 @@ body {
                 hardResetInProgress = false;
             }
         });
+
+
+        // --- LOCAL RANDOM SHOP ---
+        // This timer is intentionally session-local: it is never saved or sent to Supabase.
+        const RANDOM_SHOP_CHECK_INTERVAL_MS = 5 * 60 * 1000;
+        const RANDOM_SHOP_MAX_WAIT_MS = 60 * 60 * 1000;
+        const RANDOM_SHOP_OPEN_MS = 10 * 60 * 1000;
+        const RANDOM_SHOP_SPAWN_CHANCE = 0.05; // 5% chance at each five-minute check.
+        let randomShopCycleStartedAt = Date.now();
+        let randomShopNextCheckAt = randomShopCycleStartedAt + RANDOM_SHOP_CHECK_INTERVAL_MS;
+        let randomShopExpiresAt = 0;
+        let randomShopInventory = null;
+        let randomShopTimer = null;
+
+        function spawnRandomShop() {
+            if (randomShopExpiresAt > Date.now()) return;
+            // Actual offers will be generated exactly once here after the shop contents are designed.
+            randomShopInventory = Object.freeze([]);
+            randomShopExpiresAt = Date.now() + RANDOM_SHOP_OPEN_MS;
+            const launcher = document.getElementById('random-shop-launcher');
+            launcher.style.display = 'block';
+            document.getElementById('random-shop-panel').style.display = 'none';
+            launcher.setAttribute('aria-expanded', 'false');
+            updateRandomShopTimeLeft();
+        }
+        function updateRandomShopTimeLeft() {
+            const launcher = document.getElementById('random-shop-launcher');
+            if (!launcher || randomShopExpiresAt <= 0) return;
+            const totalSeconds = Math.ceil(Math.max(0, randomShopExpiresAt - Date.now()) / 1000);
+            document.getElementById('random-shop-time-left').textContent =
+                Math.floor(totalSeconds / 60) + ':' + String(totalSeconds % 60).padStart(2, '0') + ' remaining';
+        }
+        function hideRandomShop() {
+            randomShopExpiresAt = 0;
+            randomShopInventory = null;
+            document.getElementById('random-shop-launcher').style.display = 'none';
+            document.getElementById('random-shop-panel').style.display = 'none';
+            document.getElementById('random-shop-launcher').setAttribute('aria-expanded', 'false');
+            randomShopCycleStartedAt = Date.now();
+            randomShopNextCheckAt = randomShopCycleStartedAt + RANDOM_SHOP_CHECK_INTERVAL_MS;
+        }
+        function checkRandomShopTimer() {
+            const now = Date.now();
+            if (randomShopExpiresAt > 0) {
+                if (now >= randomShopExpiresAt) hideRandomShop();
+                else updateRandomShopTimeLeft();
+                return;
+            }
+            // Catch up missed five-minute checks after a backgrounded/suspended tab.
+            while (randomShopNextCheckAt <= now && randomShopExpiresAt === 0) {
+                const checkAt = randomShopNextCheckAt;
+                randomShopNextCheckAt += RANDOM_SHOP_CHECK_INTERVAL_MS;
+                const guaranteeReached = checkAt - randomShopCycleStartedAt >= RANDOM_SHOP_MAX_WAIT_MS;
+                if (guaranteeReached || Math.random() < RANDOM_SHOP_SPAWN_CHANCE) spawnRandomShop();
+            }
+        }
+        document.getElementById('random-shop-launcher').addEventListener('click', () => {
+            const panel = document.getElementById('random-shop-panel');
+            const isOpening = panel.style.display !== 'block';
+            panel.style.display = isOpening ? 'block' : 'none';
+            document.getElementById('random-shop-launcher').setAttribute('aria-expanded', String(isOpening));
+        });
+        document.getElementById('random-shop-close').addEventListener('click', () => {
+            document.getElementById('random-shop-panel').style.display = 'none';
+            document.getElementById('random-shop-launcher').setAttribute('aria-expanded', 'false');
+        });
+        randomShopTimer = setInterval(checkRandomShopTimer, 1000);
 
         // Initialize session on boot
         loadGame();
