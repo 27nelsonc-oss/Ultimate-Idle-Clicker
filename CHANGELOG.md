@@ -1,3 +1,13 @@
+### 2026-11-03 — Add normal Clicker Relics (Halloween)
+- Added a separate Clicker Relic family with Common (+10%, 20 gems), Rare (+30%, 100 gems), Epic (+100%, 250 gems), Mythic (+250%, 500 gems), and Legendary (+500%, 1,000 gems).
+- Each rarity has the same per-shop-visit chance as its matching Auto Clicker Relic: 50%, 25%, 10%, 5%, and 0.5%; the remaining 9.5% produces no offer for that family. The two families roll independently and can both appear in one visit.
+- Clicker Relics multiply normal manual clicking after the existing click buffs. The same calculation is used by the main click button, mobile click button, and Silent Clicking through the shared manual-click function. Auto Clicker production and Gem Station output are unaffected.
+- Added a separate shop slot and cart entry, plus independent ownership/equipment fields (`ownedClickerRelics`, `equippedClickerRelic`). Players can equip one relic from each family simultaneously. Both families use the existing rarity colors and owned-only selector pattern.
+- Existing saves are normalized safely; relics survive rebirth and are cleared by Hard Reset. No Supabase schema changes.
+- HTML commits: `9235f024ca39291fa0722e70d7278233777af472` (definitions/equipment), `403e5d5244ee11e88fc56ba694450b45a20c1aa1` (shop/cart), `b2c622fa6f344556050b303eee1eb833fc23b68e` (save reset/normalization), `71d2c5bb56bd2bc88eaf0db6f8bb65131ad49eb3` (owned-only category display), `73c56a5ab126cc610e0ef0e799ad613bbda042e4` (in-game Update Log).
+- Verification: both inline JavaScript blocks passed syntax compilation; source checks confirmed separate relic definitions, multipliers, save fields, rarity rolls, cart purchase handling, and equipment UI. No live browser/shop purchase/equip interaction test performed.
+- Rollback: revert the five HTML commits above on Halloween only. No database rollback is needed.
+
 ### 2026-11-03 — Group Auto Clicker Relic equipment by rarity (Halloween)
 - Replaced the separate owned-relic cards with one **Auto Clicker Relic** category button. It appears when at least one Auto Clicker Relic rarity is owned.
 - Added a right-side arrow that expands/collapses the category. Expanded choices include only owned rarities, ordered Common, Rare, Epic, Mythic, Legendary.
