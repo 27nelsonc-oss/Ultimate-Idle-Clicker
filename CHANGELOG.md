@@ -4,6 +4,16 @@ This file records user-visible behavior changes and meaningful project changes. 
 
 ## Unreleased
 
+### 2026-11-03 — Add random shop admin testing controls
+- **Problem/request:** Let an admin force the local shop to appear and inspect each automatic five-minute spawn attempt, including failures and successes.
+- **Change:** Added a Random Shop Controls section inside the unlocked Admin Panel. The Force Spawn Shop button is guarded by the existing `adminUnlocked` state and does not replace a shop that is already active. Automatic five-minute rolls now record SUCCESS or FAILED, the local attempt time, and whether the result came from the one-hour guarantee, a successful random roll, or a missed roll. Manual spawns are recorded as FORCED. The panel shows the latest attempt and a reverse-chronological history capped at 30 entries. This diagnostic history is session-local and resets when the page reloads; it does not use Supabase or game saves.
+- **Files:** `Ultimate_Idle_Clicker_Version_1.5_BANK_MULTI_PURCHASES_REBIRTH_BOTH_CLICK_FIXED2_CHAT_USERNAME.html`
+- **Verification:** Re-fetched the committed HTML from `game-development`; checked the admin section/button, admin-unlock guard, success/failure logging, timestamps, 30-entry cap, local-only behavior, and balanced script/style tags.
+- **Not tested:** No browser/admin-login interaction test or real five-minute wait-through test was performed.
+- **Commit:** `b7d578d8723f9fd2d9c872138deda87176c24dc8`
+- **Rollback:** Revert the HTML commit above on `game-development`; the previous random shop framework remains in the prior commit.
+
+
 ### 2026-11-03 — Add the local random traveling shop framework
 - **Problem/request:** Add an individually timed shop that checks for an appearance every five minutes, is guaranteed to appear within one hour, stays available for ten minutes, and does not use Supabase for its timer or shared state.
 - **Change:** Added a fixed top-left Traveling Shop button and a toggleable placeholder shop panel. Each page session has its own timer: a 5% spawn chance at each five-minute check, forced appearance at the one-hour check, and a ten-minute active window. When the window expires, a fresh local cycle begins. Reloading or reopening the game starts a fresh timer and hides any previous shop. Closing only the shop panel leaves the button and its current visit intact. Inventory is held in a session-only variable and is initialized once per appearance; actual randomized offers are intentionally pending the user's shop-content design.
