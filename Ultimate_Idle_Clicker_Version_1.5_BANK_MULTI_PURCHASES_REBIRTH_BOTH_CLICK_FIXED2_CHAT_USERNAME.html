@@ -717,6 +717,7 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
                 <div class="random-shop-item" id="random-shop-clicker-relic-slot"><strong>Empty</strong><div class="sub-stat">No item available</div><button type="button" class="btn-upgrade" disabled>Empty</button></div>
                 <div class="random-shop-item" id="random-shop-bob-slot"><strong>Empty</strong><div class="sub-stat">No item available</div><button type="button" class="btn-upgrade" disabled>Empty</button></div>
                 <div class="random-shop-item" id="random-shop-relic-slot"><strong>Empty</strong><div class="sub-stat">No item available</div><button type="button" class="btn-upgrade" disabled>Empty</button></div>
+                <div class="random-shop-item" id="random-shop-discount-relic-slot"><strong>Empty</strong><div class="sub-stat">No item available</div><button type="button" class="btn-upgrade" disabled>Empty</button></div>
                 <div class="random-shop-item"><strong>Empty</strong><div class="sub-stat">No item available</div><button type="button" class="btn-upgrade" disabled>Empty</button></div>
                 <div class="random-shop-item"><strong>Empty</strong><div class="sub-stat">No item available</div><button type="button" class="btn-upgrade" disabled>Empty</button></div>
                 <div class="random-shop-item"><strong>Empty</strong><div class="sub-stat">No item available</div><button type="button" class="btn-upgrade" disabled>Empty</button></div>
@@ -2303,7 +2304,9 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
                 ownedRelics: [],
                 equippedRelic: null,
                 ownedClickerRelics: [],
-                equippedClickerRelic: null
+                equippedClickerRelic: null,
+                ownedDiscountRelics: [],
+                equippedDiscountRelic: null
             };
             localStorage.setItem('ultimateIdleClicker_cloud_reset_version', String(cloudResetVersion));
             updateUI();
@@ -2477,6 +2480,9 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
                     if (!Array.isArray(game.ownedClickerRelics)) game.ownedClickerRelics = [];
                     game.ownedClickerRelics = [...new Set(game.ownedClickerRelics.filter(id => typeof id === 'string' && id.trim()))];
                     if (typeof game.equippedClickerRelic !== 'string' || !game.ownedClickerRelics.includes(game.equippedClickerRelic)) game.equippedClickerRelic = null;
+                    if (!Array.isArray(game.ownedDiscountRelics)) game.ownedDiscountRelics = [];
+                    game.ownedDiscountRelics = [...new Set(game.ownedDiscountRelics.filter(id => typeof id === 'string' && id.trim()))];
+                    if (typeof game.equippedDiscountRelic !== 'string' || !game.ownedDiscountRelics.includes(game.equippedDiscountRelic)) game.equippedDiscountRelic = null;
                     if (!Number.isFinite(Number(game.clickOverdriveLevel))) game.clickOverdriveLevel = 0;
                     const offlineSeconds = applyOfflineProgress(game.lastActiveAt);
                     game.lastActiveAt = Date.now();
@@ -3802,7 +3808,9 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
             ownedRelics: [],
             equippedRelic: null,
             ownedClickerRelics: [],
-            equippedClickerRelic: null
+            equippedClickerRelic: null,
+            ownedDiscountRelics: [],
+            equippedDiscountRelic: null
         };
 
         // --- CONFIGURATION / BALANCING ---
@@ -3845,6 +3853,9 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
                     if (!Array.isArray(game.ownedClickerRelics)) game.ownedClickerRelics = [];
                     game.ownedClickerRelics = [...new Set(game.ownedClickerRelics.filter(id => typeof id === 'string' && id.trim()))];
                     if (typeof game.equippedClickerRelic !== 'string' || !game.ownedClickerRelics.includes(game.equippedClickerRelic)) game.equippedClickerRelic = null;
+                    if (!Array.isArray(game.ownedDiscountRelics)) game.ownedDiscountRelics = [];
+                    game.ownedDiscountRelics = [...new Set(game.ownedDiscountRelics.filter(id => typeof id === 'string' && id.trim()))];
+                    if (typeof game.equippedDiscountRelic !== 'string' || !game.ownedDiscountRelics.includes(game.equippedDiscountRelic)) game.equippedDiscountRelic = null;
                 } catch (e) {
                     console.error("Error loading save file", e);
                 }
@@ -3996,11 +4007,11 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
 
         // --- DYNAMIC COSTS ---
         function getUp1Cost() {
-            return Math.max(1, Math.floor(BASE_UP1_COST * Math.pow(1.6, game.totalUpgradesBought) * getUpgradePriceMultiplier() * getAdminAbuseUpgradePriceMultiplier()));
+            return Math.max(1, Math.floor(BASE_UP1_COST * Math.pow(1.6, game.totalUpgradesBought) * getUpgradePriceMultiplier() * getAdminAbuseUpgradePriceMultiplier() * getDiscountRelicPriceMultiplier()));
         }
 
         function getUp2Cost() {
-            return Math.max(1, Math.floor(BASE_UP2_COST * Math.pow(1.15, game.autoClickers) * getUpgradePriceMultiplier() * getAdminAbuseUpgradePriceMultiplier()));
+            return Math.max(1, Math.floor(BASE_UP2_COST * Math.pow(1.15, game.autoClickers) * getUpgradePriceMultiplier() * getAdminAbuseUpgradePriceMultiplier() * getDiscountRelicPriceMultiplier()));
         }
 
         function getUpgradePriceMultiplier() {
@@ -5380,7 +5391,9 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
                     ownedRelics: [],
                     equippedRelic: null,
                     ownedClickerRelics: [],
-                    equippedClickerRelic: null
+                    equippedClickerRelic: null,
+                    ownedDiscountRelics: [],
+                    equippedDiscountRelic: null
                 };
 
                 // Save the reset state locally immediately, then synchronize the cloud copy.
@@ -5432,8 +5445,16 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
             clicker_mythic: { name: 'Mythic Clicker Relic', rarity: 'Mythic', description: '+250% normal clicking.', bonus: 2.50, gemCost: 500 },
             clicker_legendary: { name: 'Legendary Clicker Relic', rarity: 'Legendary', description: '+500% normal clicking.', bonus: 5.00, gemCost: 1000 }
         });
+        const DISCOUNT_RELIC_DEFINITIONS = Object.freeze({
+            discount_common: { name: 'Common Discount Relic', rarity: 'Common', description: '5% off main clicker upgrades.', bonus: 0.05, gemCost: 25 },
+            discount_rare: { name: 'Rare Discount Relic', rarity: 'Rare', description: '15% off main clicker upgrades.', bonus: 0.15, gemCost: 125 },
+            discount_epic: { name: 'Epic Discount Relic', rarity: 'Epic', description: '30% off main clicker upgrades.', bonus: 0.30, gemCost: 313 },
+            discount_mythic: { name: 'Mythic Discount Relic', rarity: 'Mythic', description: '40% off main clicker upgrades.', bonus: 0.40, gemCost: 625 },
+            discount_legendary: { name: 'Legendary Discount Relic', rarity: 'Legendary', description: '50% off main clicker upgrades.', bonus: 0.50, gemCost: 1250 }
+        });
         const AUTO_CLICKER_RELIC_IDS = Object.freeze(Object.keys(RELIC_DEFINITIONS));
         const CLICKER_RELIC_IDS = Object.freeze(Object.keys(CLICKER_RELIC_DEFINITIONS));
+        const DISCOUNT_RELIC_IDS = Object.freeze(Object.keys(DISCOUNT_RELIC_DEFINITIONS));
         function getAutoClickerRelicMultiplier() {
             const relic = RELIC_DEFINITIONS[game.equippedRelic];
             return relic && AUTO_CLICKER_RELIC_IDS.includes(game.equippedRelic) ? 1 + relic.bonus : 1;
@@ -5445,6 +5466,13 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
         function hasClickerRelic(relicId) {
             return CLICKER_RELIC_IDS.includes(relicId) && Array.isArray(game.ownedClickerRelics) && game.ownedClickerRelics.includes(relicId);
         }
+        function getDiscountRelicPriceMultiplier() {
+            const relic = DISCOUNT_RELIC_DEFINITIONS[game.equippedDiscountRelic];
+            return relic && DISCOUNT_RELIC_IDS.includes(game.equippedDiscountRelic) ? 1 - relic.bonus : 1;
+        }
+        function hasDiscountRelic(relicId) {
+            return DISCOUNT_RELIC_IDS.includes(relicId) && Array.isArray(game.ownedDiscountRelics) && game.ownedDiscountRelics.includes(relicId);
+        }
         function hasAutoClickerRelic(relicId) {
             return AUTO_CLICKER_RELIC_IDS.includes(relicId) && Array.isArray(game.ownedRelics) && game.ownedRelics.includes(relicId);
         }
@@ -5455,6 +5483,7 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
 
         let autoClickerRelicOptionsExpanded = false;
         let clickerRelicOptionsExpanded = false;
+        let discountRelicOptionsExpanded = false;
         const RELIC_RARITY_STYLES = Object.freeze({
             Common: { background: '#777777', color: '#ffffff' },
             Rare: { background: '#238b45', color: '#ffffff' },
@@ -5468,12 +5497,15 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
             if (!list || !status) return;
             if (!Array.isArray(game.ownedRelics)) game.ownedRelics = [];
             if (!Array.isArray(game.ownedClickerRelics)) game.ownedClickerRelics = [];
+            if (!Array.isArray(game.ownedDiscountRelics)) game.ownedDiscountRelics = [];
             game.ownedRelics = [...new Set(game.ownedRelics.filter(id => typeof id === 'string' && Object.prototype.hasOwnProperty.call(RELIC_DEFINITIONS, id)))];
             game.ownedClickerRelics = [...new Set(game.ownedClickerRelics.filter(id => typeof id === 'string' && Object.prototype.hasOwnProperty.call(CLICKER_RELIC_DEFINITIONS, id)))];
+            game.ownedDiscountRelics = [...new Set(game.ownedDiscountRelics.filter(id => typeof id === 'string' && Object.prototype.hasOwnProperty.call(DISCOUNT_RELIC_DEFINITIONS, id)))];
             if (!game.ownedRelics.includes(game.equippedRelic)) game.equippedRelic = null;
             if (!game.ownedClickerRelics.includes(game.equippedClickerRelic)) game.equippedClickerRelic = null;
+            if (!game.ownedDiscountRelics.includes(game.equippedDiscountRelic)) game.equippedDiscountRelic = null;
             list.replaceChildren();
-            if (game.ownedRelics.length === 0 && game.ownedClickerRelics.length === 0) {
+            if (game.ownedRelics.length === 0 && game.ownedClickerRelics.length === 0 && game.ownedDiscountRelics.length === 0) {
                 const empty = document.createElement('div');
                 empty.className = 'relics-empty';
                 empty.textContent = "You don't own any relics yet. Relics you discover will appear here.";
@@ -5566,9 +5598,36 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
                 }
                 list.appendChild(category);
             }
+            if (game.ownedDiscountRelics.length) {
+                const category = document.createElement('div'); category.className = 'relic-category';
+                const toggle = document.createElement('button'); toggle.type = 'button'; toggle.className = 'relic-category-toggle';
+                toggle.setAttribute('aria-expanded', String(discountRelicOptionsExpanded));
+                const label = document.createElement('strong'); label.textContent = 'Discount Relic';
+                const arrow = document.createElement('span'); arrow.className = 'relic-category-arrow'; arrow.textContent = discountRelicOptionsExpanded ? '⌄' : '^';
+                toggle.append(label, arrow);
+                if (game.equippedDiscountRelic) { const style = RELIC_RARITY_STYLES[DISCOUNT_RELIC_DEFINITIONS[game.equippedDiscountRelic].rarity]; toggle.style.background = style.background; toggle.style.borderColor = style.background; toggle.style.color = style.color; }
+                toggle.addEventListener('click', () => { discountRelicOptionsExpanded = !discountRelicOptionsExpanded; renderOwnedRelics(); });
+                category.appendChild(toggle);
+                if (discountRelicOptionsExpanded) {
+                    const options = document.createElement('div'); options.className = 'relic-rarity-options';
+                    ['Common', 'Rare', 'Epic', 'Mythic', 'Legendary'].forEach(rarity => {
+                        const id = DISCOUNT_RELIC_IDS.find(key => DISCOUNT_RELIC_DEFINITIONS[key].rarity === rarity && game.ownedDiscountRelics.includes(key));
+                        if (!id) return;
+                        const style = RELIC_RARITY_STYLES[rarity];
+                        const option = document.createElement('button'); option.type = 'button'; option.className = 'relic-rarity-option';
+                        option.textContent = rarity + (game.equippedDiscountRelic === id ? ' — Equipped' : '');
+                        option.setAttribute('aria-pressed', String(game.equippedDiscountRelic === id)); option.style.background = style.background; option.style.color = style.color;
+                        option.addEventListener('click', () => { game.equippedDiscountRelic = game.equippedDiscountRelic === id ? null : id; saveGame(); renderOwnedRelics(); updateUI(); });
+                        options.appendChild(option);
+                    });
+                    category.appendChild(options);
+                }
+                list.appendChild(category);
+            }
             const equipped = [];
             if (game.equippedRelic) equipped.push(RELIC_DEFINITIONS[game.equippedRelic].rarity + ' Auto Clicker Relic');
             if (game.equippedClickerRelic) equipped.push(CLICKER_RELIC_DEFINITIONS[game.equippedClickerRelic].rarity + ' Clicker Relic');
+            if (game.equippedDiscountRelic) equipped.push(DISCOUNT_RELIC_DEFINITIONS[game.equippedDiscountRelic].rarity + ' Discount Relic');
             status.textContent = equipped.length ? 'Equipped: ' + equipped.join(' and ') + '.' : 'No relic equipped.';
         }
 
@@ -5593,7 +5652,7 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
         let randomShopNextCheckAt = randomShopCycleStartedAt + RANDOM_SHOP_CHECK_INTERVAL_MS;
         let randomShopExpiresAt = 0;
         let randomShopInventory = null;
-        let randomShopCart = { bob: 0, autoClickerRelic: 0 };
+        let randomShopCart = { bob: 0, autoClickerRelic: 0, clickerRelic: 0, discountRelic: 0 };
         let randomShopAttemptHistory = [];
         let randomShopLastAttempt = null;
 
@@ -5641,6 +5700,13 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
             else if (rarityRoll < 85) autoClickerRelicOffer = 'auto_clicker_epic';
             else if (rarityRoll < 90) autoClickerRelicOffer = 'auto_clicker_mythic';
             else if (rarityRoll < 90.5) autoClickerRelicOffer = 'auto_clicker_legendary';
+            const discountRoll = Math.random() * 100;
+            let discountRelicOffer = null;
+            if (discountRoll < 50) discountRelicOffer = 'discount_common';
+            else if (discountRoll < 75) discountRelicOffer = 'discount_rare';
+            else if (discountRoll < 85) discountRelicOffer = 'discount_epic';
+            else if (discountRoll < 90) discountRelicOffer = 'discount_mythic';
+            else if (discountRoll < 90.5) discountRelicOffer = 'discount_legendary';
             const clickerRoll = Math.random() * 100;
             let clickerRelicOffer = null;
             if (clickerRoll < 50) clickerRelicOffer = 'clicker_common';
@@ -5648,11 +5714,12 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
             else if (clickerRoll < 85) clickerRelicOffer = 'clicker_epic';
             else if (clickerRoll < 90) clickerRelicOffer = 'clicker_mythic';
             else if (clickerRoll < 90.5) clickerRelicOffer = 'clicker_legendary';
-            randomShopInventory = Object.freeze([clickerRelicOffer, Math.random() < (1 / 7500) ? 'bob' : null, autoClickerRelicOffer, null, null, null]);
-            randomShopCart = { bob: 0, autoClickerRelic: 0, clickerRelic: 0 };
+            randomShopInventory = Object.freeze([clickerRelicOffer, Math.random() < (1 / 7500) ? 'bob' : null, autoClickerRelicOffer, discountRelicOffer, null, null]);
+            randomShopCart = { bob: 0, autoClickerRelic: 0, clickerRelic: 0, discountRelic: 0 };
             renderRandomShopClickerRelicSlot();
             renderRandomShopBobSlot();
             renderRandomShopAutoClickerRelicSlot();
+            renderRandomShopDiscountRelicSlot();
             renderRandomShopCart();
             randomShopExpiresAt = Date.now() + RANDOM_SHOP_OPEN_MS;
             const launcher = document.getElementById('random-shop-launcher');
@@ -5770,6 +5837,34 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
             slot.append(title, description, button);
         }
 
+        function renderRandomShopDiscountRelicSlot() {
+            const slot = document.getElementById('random-shop-discount-relic-slot');
+            if (!slot) return;
+            slot.replaceChildren();
+            const relicId = randomShopInventory?.[3];
+            if (!relicId || !DISCOUNT_RELIC_DEFINITIONS[relicId]) {
+                const title = document.createElement('strong'); title.textContent = 'Empty';
+                const description = document.createElement('div'); description.className = 'sub-stat'; description.textContent = 'No item available';
+                const button = document.createElement('button'); button.type = 'button'; button.className = 'btn-upgrade'; button.disabled = true; button.textContent = 'Empty';
+                slot.append(title, description, button); return;
+            }
+            const relic = DISCOUNT_RELIC_DEFINITIONS[relicId];
+            const title = document.createElement('strong'); title.textContent = relic.name;
+            const description = document.createElement('div'); description.className = 'sub-stat';
+            description.textContent = relic.rarity + ' · ' + Math.round(relic.bonus * 100) + '% off main clicker upgrades · ' + relic.gemCost.toLocaleString() + ' gems';
+            const button = document.createElement('button'); button.type = 'button'; button.className = 'btn-upgrade';
+            const owned = hasDiscountRelic(relicId);
+            button.textContent = owned ? 'Discount Relic Owned' : randomShopCart.discountRelic ? 'In Cart' : 'Add to Cart';
+            button.disabled = owned || Boolean(randomShopCart.discountRelic);
+            button.addEventListener('click', () => {
+                if (randomShopExpiresAt <= Date.now() || hasDiscountRelic(relicId) || randomShopCart.discountRelic) return;
+                randomShopCart.discountRelic = 1;
+                document.getElementById('random-shop-cart-status').textContent = '';
+                renderRandomShopDiscountRelicSlot(); renderRandomShopCart();
+            });
+            slot.append(title, description, button);
+        }
+
         function renderRandomShopAutoClickerRelicSlot() {
             const slot = document.getElementById('random-shop-relic-slot');
             if (!slot) return;
@@ -5812,10 +5907,13 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
             const clickerRelicId = randomShopInventory?.[0];
             const clickerRelicQuantity = hasClickerRelic(clickerRelicId) || !clickerRelicId || !CLICKER_RELIC_DEFINITIONS[clickerRelicId] ? 0 : Math.min(1, Math.max(0, Math.floor(Number(randomShopCart.clickerRelic) || 0)));
             randomShopCart.clickerRelic = clickerRelicQuantity;
+            const discountRelicId = randomShopInventory?.[3];
+            const discountRelicQuantity = hasDiscountRelic(discountRelicId) || !discountRelicId || !DISCOUNT_RELIC_DEFINITIONS[discountRelicId] ? 0 : Math.min(1, Math.max(0, Math.floor(Number(randomShopCart.discountRelic) || 0)));
+            randomShopCart.discountRelic = discountRelicQuantity;
             const clickTotal = bobQuantity * 2;
-            const gemTotal = (relicQuantity ? RELIC_DEFINITIONS[relicId].gemCost : 0) + (clickerRelicQuantity ? CLICKER_RELIC_DEFINITIONS[clickerRelicId].gemCost : 0);
+            const gemTotal = (relicQuantity ? RELIC_DEFINITIONS[relicId].gemCost : 0) + (clickerRelicQuantity ? CLICKER_RELIC_DEFINITIONS[clickerRelicId].gemCost : 0) + (discountRelicQuantity ? DISCOUNT_RELIC_DEFINITIONS[discountRelicId].gemCost : 0);
             list.textContent = '';
-            if (!bobQuantity && !relicQuantity && !clickerRelicQuantity) {
+            if (!bobQuantity && !relicQuantity && !clickerRelicQuantity && !discountRelicQuantity) {
                 const empty = document.createElement('div'); empty.className = 'sub-stat'; empty.textContent = 'Your cart is empty.'; list.appendChild(empty);
             } else {
                 const addCartRow = (label, costText, removeLabel, onRemove) => {
@@ -5827,9 +5925,10 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
                 if (bobQuantity) addCartRow('Bob', '2 clicks', 'Remove Bob', () => { randomShopCart.bob = 0; renderRandomShopBobSlot(); renderRandomShopCart(); });
                 if (relicQuantity) addCartRow(RELIC_DEFINITIONS[relicId].name, RELIC_DEFINITIONS[relicId].gemCost.toLocaleString() + ' gems', 'Remove Auto Clicker Relic', () => { randomShopCart.autoClickerRelic = 0; renderRandomShopAutoClickerRelicSlot(); renderRandomShopCart(); });
                 if (clickerRelicQuantity) addCartRow(CLICKER_RELIC_DEFINITIONS[clickerRelicId].name, CLICKER_RELIC_DEFINITIONS[clickerRelicId].gemCost.toLocaleString() + ' gems', 'Remove Clicker Relic', () => { randomShopCart.clickerRelic = 0; renderRandomShopClickerRelicSlot(); renderRandomShopCart(); });
+                if (discountRelicQuantity) addCartRow(DISCOUNT_RELIC_DEFINITIONS[discountRelicId].name, DISCOUNT_RELIC_DEFINITIONS[discountRelicId].gemCost.toLocaleString() + ' gems', 'Remove Discount Relic', () => { randomShopCart.discountRelic = 0; renderRandomShopDiscountRelicSlot(); renderRandomShopCart(); });
             }
             totalLabel.textContent = clickTotal.toLocaleString() + ' clicks' + (gemTotal ? ' + ' + gemTotal.toLocaleString() + ' gems' : '');
-            checkout.disabled = !bobQuantity && !relicQuantity && !clickerRelicQuantity;
+            checkout.disabled = !bobQuantity && !relicQuantity && !clickerRelicQuantity && !discountRelicQuantity;
         }
 
         document.getElementById('random-shop-checkout').addEventListener('click', async () => {
@@ -5840,10 +5939,12 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
             const relicQuantity = hasAutoClickerRelic(relicId) || !relicId || !RELIC_DEFINITIONS[relicId] ? 0 : Math.min(1, Math.max(0, Math.floor(Number(randomShopCart.autoClickerRelic) || 0)));
             const clickerRelicId = randomShopInventory?.[0];
             const clickerRelicQuantity = hasClickerRelic(clickerRelicId) || !clickerRelicId || !CLICKER_RELIC_DEFINITIONS[clickerRelicId] ? 0 : Math.min(1, Math.max(0, Math.floor(Number(randomShopCart.clickerRelic) || 0)));
+            const discountRelicId = randomShopInventory?.[3];
+            const discountRelicQuantity = hasDiscountRelic(discountRelicId) || !discountRelicId || !DISCOUNT_RELIC_DEFINITIONS[discountRelicId] ? 0 : Math.min(1, Math.max(0, Math.floor(Number(randomShopCart.discountRelic) || 0)));
             const clickTotal = bobQuantity * 2;
-            const gemTotal = (relicQuantity ? RELIC_DEFINITIONS[relicId].gemCost : 0) + (clickerRelicQuantity ? CLICKER_RELIC_DEFINITIONS[clickerRelicId].gemCost : 0);
+            const gemTotal = (relicQuantity ? RELIC_DEFINITIONS[relicId].gemCost : 0) + (clickerRelicQuantity ? CLICKER_RELIC_DEFINITIONS[clickerRelicId].gemCost : 0) + (discountRelicQuantity ? DISCOUNT_RELIC_DEFINITIONS[discountRelicId].gemCost : 0);
             const availableClicks = Number(game.clicks), availableGems = Number(game.gems);
-            if ((!bobQuantity && !relicQuantity && !clickerRelicQuantity) || !Number.isSafeInteger(clickTotal) || !Number.isSafeInteger(gemTotal)) { status.textContent = 'Your cart is empty or contains an invalid quantity.'; return; }
+            if ((!bobQuantity && !relicQuantity && !clickerRelicQuantity && !discountRelicQuantity) || !Number.isSafeInteger(clickTotal) || !Number.isSafeInteger(gemTotal)) { status.textContent = 'Your cart is empty or contains an invalid quantity.'; return; }
             if (!Number.isFinite(availableClicks) || availableClicks < clickTotal) { status.textContent = 'You need ' + clickTotal.toLocaleString() + ' clicks to purchase this cart.'; return; }
             if (!Number.isFinite(availableGems) || availableGems < gemTotal) { status.textContent = 'You need ' + gemTotal.toLocaleString() + ' gems to purchase this cart.'; return; }
             let bobPurchased = false;
@@ -5859,20 +5960,23 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
                 randomShopCart.autoClickerRelic = 0; renderRandomShopAutoClickerRelicSlot(); renderRandomShopCart(); return;
             }
             if (clickerRelicQuantity > 0 && hasClickerRelic(clickerRelicId)) { status.textContent = 'You already own this Clicker Relic rarity.'; randomShopCart.clickerRelic = 0; renderRandomShopClickerRelicSlot(); renderRandomShopCart(); return; }
+            if (discountRelicQuantity > 0 && hasDiscountRelic(discountRelicId)) { status.textContent = 'You already own this Discount Relic rarity.'; randomShopCart.discountRelic = 0; renderRandomShopDiscountRelicSlot(); renderRandomShopCart(); return; }
             game.clicks = availableClicks - (bobQuantity * 2);
             game.gems = Math.max(0, availableGems - gemTotal);
             if (relicQuantity > 0) game.ownedRelics = [...new Set([...(Array.isArray(game.ownedRelics) ? game.ownedRelics : []), relicId])];
             if (clickerRelicQuantity > 0) game.ownedClickerRelics = [...new Set([...(Array.isArray(game.ownedClickerRelics) ? game.ownedClickerRelics : []), clickerRelicId])];
-            randomShopCart.bob = 0; randomShopCart.autoClickerRelic = 0; randomShopCart.clickerRelic = 0;
-            updateUI(); renderRandomShopClickerRelicSlot(); renderRandomShopBobSlot(); renderRandomShopAutoClickerRelicSlot(); renderRandomShopCart();
+            if (discountRelicQuantity > 0) game.ownedDiscountRelics = [...new Set([...(Array.isArray(game.ownedDiscountRelics) ? game.ownedDiscountRelics : []), discountRelicId])];
+            randomShopCart.bob = 0; randomShopCart.autoClickerRelic = 0; randomShopCart.clickerRelic = 0; randomShopCart.discountRelic = 0;
+            updateUI(); renderRandomShopClickerRelicSlot(); renderRandomShopBobSlot(); renderRandomShopAutoClickerRelicSlot(); renderRandomShopDiscountRelicSlot(); renderRandomShopCart();
             if (bobPurchased) { await refreshTitlePanel(); await refreshChatTitleBadges(); }
             const purchased = [];
             if (bobPurchased) purchased.push('Bob');
             if (relicQuantity) purchased.push(RELIC_DEFINITIONS[relicId].name);
             if (clickerRelicQuantity) purchased.push(CLICKER_RELIC_DEFINITIONS[clickerRelicId].name);
+            if (discountRelicQuantity) purchased.push(DISCOUNT_RELIC_DEFINITIONS[discountRelicId].name);
             status.textContent = purchased.length ? 'Purchase successful! ' + purchased.join(', ') + ' added.' : 'You already owned every item in that cart; no charge was made.';
             await saveGame();
-            if (relicQuantity || clickerRelicQuantity) renderOwnedRelics();
+            if (relicQuantity || clickerRelicQuantity || discountRelicQuantity) renderOwnedRelics();
         });
         document.getElementById('admin-force-random-shop').addEventListener('click', () => {
             if (!adminUnlocked) return;
