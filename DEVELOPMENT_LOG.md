@@ -1,3 +1,12 @@
+### 2026-11-04 — Minimal Supabase Egress optimization (Halloween)
+- **Request:** Reduce Supabase Egress usage using only low-risk changes; do not remove features or risk player saves.
+- **Observed usage:** Supabase organization usage showed Egress at 8.586 GB / 5 GB (172%). Other listed quotas were below their limits.
+- **Inspection:** The Global Company market was requesting a snapshot every 10 seconds; the public Admin approval checker was polling every 3 seconds. Cloud autosave, player presence, and chat/DM Realtime are important online systems and were intentionally left untouched in this pass.
+- **Changes:** Changed the Company market background snapshot interval to 30 seconds. Existing immediate/manual refreshes and market action behavior remain. Changed public Admin approval polling to 10 seconds; this can add at most a few seconds of approval UI latency but does not remove the feature. Added an in-game Update Log entry.
+- **Compatibility/data:** No save format, Supabase schema, database rows, authentication, chat, cloud save, or player presence changes.
+- **Verification:** Re-fetched the edited HTML and confirmed the two interval changes, retained user-triggered market refresh path, retained Admin request/approval handlers, and Update Log entry. JavaScript syntax validation is recorded after the final re-fetch. No live browser gameplay or measured post-change Egress test performed.
+- **Rollback:** Revert HTML commit `96397456a276aa27c2f0f7e423ef4d30244232cc` on Halloween. Revert this documentation entry if needed. No database rollback is needed. Do not change main or game-development.
+
 ### 2026-11-03 — Add Discount Relics (Halloween)
 - **Request:** Add a Discount Relic family using the existing rarity chances, with each relic costing 25% more gems than the corresponding standard Auto Clicker/Clicker Relic, and discounting only click-priced upgrades in the main upgrade list.
 - **Rarities/prices:** Common 50% chance, 5% discount, 25 gems; Rare 25%, 15%, 125 gems; Epic 10%, 30%, 313 gems; Mythic 5%, 40%, 625 gems; Legendary 0.5%, 50%, 1,250 gems. The remaining 9.5% yields no offer. Prices are rounded up to whole gems.
