@@ -635,6 +635,7 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
 <details id="game-update-log"><summary>Update Log</summary><div id="game-update-log-content">
 <strong>Latest update — November 3, 2026</strong>
 <ul>
+<li>Reduced background Supabase traffic by refreshing the Global Company market every 30 seconds instead of every 10 seconds and checking public Admin approval requests every 10 seconds instead of every 3 seconds. Features remain available and user-triggered market refreshes are unchanged.</li>
 <li>Added Bob, an unlimited-claim title that can rarely appear in the Traveling Shop for 2 clicks, with a black name and glowing white outline.</li>
 <li>Added five Auto Clicker Relic rarities to the Traveling Shop with per-visit chances: Common 50%, Rare 25%, Epic 10%, Mythic 5%, and Legendary 0.5% (the remaining 9.5% has no relic offer). Each relic costs gems and boosts Auto Clicker production after the other Auto Clicker buffs. Players can own one of each rarity; duplicates are blocked.</li>
 <li>Added an Auto Clicker Relic selector in the Relics menu. Its arrow expands to show only owned rarities from Common to Legendary; each rarity has its own color, and the main button uses the equipped rarity's color.</li>
@@ -3346,7 +3347,9 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
         function initializeCompanyMarket() {
             if (companyMarketTimer !== null) clearInterval(companyMarketTimer);
             refreshCompanyMarket();
-            companyMarketTimer = setInterval(refreshCompanyMarket, 10000);
+            // Market snapshots are also refreshed immediately after relevant user actions.
+            // A 30-second background refresh reduces repeated data transfer while keeping the market live.
+            companyMarketTimer = setInterval(refreshCompanyMarket, 30000);
         }
 
         async function cancelCompanyInvestment(transactionId) {
@@ -4693,7 +4696,8 @@ body.static-chat-enabled.chat-panel-minimized #mobile-click-button.enabled{botto
             }
         });
 
-        setInterval(checkPublicAdminRequests, 3000);
+        // Keep public admin approvals responsive without polling the function every 3 seconds.
+        setInterval(checkPublicAdminRequests, 10000);
 
         document.getElementById('admin-password').addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
