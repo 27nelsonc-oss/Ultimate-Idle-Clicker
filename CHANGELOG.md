@@ -1,3 +1,11 @@
+### 2026-11-04 — Reduce background Supabase traffic (Halloween)
+- Increased the Global Company market's background snapshot interval from 10 seconds to 30 seconds. Existing user-triggered refreshes and market actions remain available.
+- Increased public Admin approval-request polling from 3 seconds to 10 seconds. Public Admin access and owner approval are unchanged; requests may take a few extra seconds to appear or update.
+- Deliberately left cloud autosave, player-presence heartbeats, chat/DM Realtime, and all other online features unchanged to minimize regression risk.
+- No database/schema changes and no player data changes.
+- Verification: source-level checks and JavaScript syntax validation performed after the final re-fetch. No live gameplay or measured Egress-after-change test performed.
+- Rollback: revert HTML commit `96397456a276aa27c2f0f7e423ef4d30244232cc` on Halloween. Revert this documentation entry if needed. Do not change main or game-development.
+
 ### 2026-11-03 — Add Discount Relics (Halloween)
 - Added a separate Discount Relic family with Common (5% off, 25 gems), Rare (15% off, 125 gems), Epic (30% off, 313 gems), Mythic (40% off, 625 gems), and Legendary (50% off, 1,250 gems). Each price is 25% above the corresponding standard relic price, rounded up to a whole gem.
 - Each Traveling Shop visit makes an independent Discount Relic rarity roll using the same actual per-visit chances as the other relic families: Common 50%, Rare 25%, Epic 10%, Mythic 5%, Legendary 0.5%, and no offer 9.5%. Discount Relics can appear alongside the other relic families.
